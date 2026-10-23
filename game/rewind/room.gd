@@ -9,10 +9,14 @@ const KidScene := preload("res://rewind/kid.gd")
 const EchoScene := preload("res://rewind/echo.gd")
 
 var title := ""
+## Rooms wider than the screen scroll with the kid.
+var width := WIDTH
 var tape_budget := 20.0
 var timeline_length := 30.0
 var start_x := 16.0
 var free_first_rewind := false
+## Glitch (E) unlocks once the kid passes this x; 0 means it is available from the start.
+var glitch_from_x := 0.0
 var objects: Array[TapeObject] = []
 
 ## Set by the game before build(): how often the player failed here and in total.
@@ -61,9 +65,13 @@ func retry_hint() -> String:
 	return ""
 
 
-## Where the echo points after a failure, if no object caused it (tape ran out, kid blocked).
-func idle_hint_target(_run: RoomRun) -> float:
-	return WIDTH - 24.0
+## Where the echo points after a failure, if no object caused it (tape ran out, kid blocked):
+## the next thing blocking the kid, or the way out.
+func idle_hint_target(run: RoomRun) -> float:
+	for o in objects:
+		if o.blocks(run) and o.position.x > run.kid_x:
+			return o.position.x
+	return width - 24.0
 
 
 func show_run(run: RoomRun) -> void:

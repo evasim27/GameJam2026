@@ -1,8 +1,9 @@
 extends Room
-## The Last House: the foyer. The tutorial for Play, Pause and Rewind.
-## The first pumpkin always catches the kid on the first play (a planned lesson). Rewinding the
-## house about 1.5-2 s makes it bite too early. The second pumpkin is faster, has no marked window
-## and holds the Maja 1989 candy between its teeth.
+## The Last House: the foyer, and the whole tutorial. Two screens long, one lesson each:
+## Play/Pause; the first pumpkin always catches the kid on the first play (a planned lesson) and
+## teaches Rewind (the first one is free); the second pumpkin has no marked window and holds the
+## Maja 1989 candy; the clock door only opened early in the recording, so the house has to be
+## wound back a long way (SHIFT is faster); the damaged wall teaches Glitch, and can't kill.
 
 const WALL := preload("res://assets/rewind/wall.png")
 const WAINSCOT := preload("res://assets/rewind/wainscot.png")
@@ -10,30 +11,42 @@ const FLOOR_TEX := preload("res://assets/rewind/floor.png")
 const CLOCK := preload("res://assets/noble_interior/clock_tall.png")
 const TABLE := preload("res://assets/noble_interior/table_side.png")
 const CABINET := preload("res://assets/noble_interior/cabinet_tall.png")
+const ARMCHAIR := preload("res://assets/noble_interior/armchair_tall.png")
+const WARDROBE := preload("res://assets/noble_interior/wardrobe_small.png")
 
 const WARM := Color(0.8, 0.72, 0.88)
+const CLOCK_DOOR_X := 330.0
+const WALL_X := 470.0
+const EXIT_X := 600.0
 
 
 func build() -> void:
 	title = "THE LAST HOUSE"
-	tape_budget = 18.0
-	timeline_length = 24.0
+	width = 640.0
+	tape_budget = 42.0
+	timeline_length = 30.0
 	free_first_rewind = true
+	glitch_from_x = 390.0
 
-	add_tiled(WALL, Rect2(0, 0, WIDTH, 104), Color(0.42, 0.3, 0.46))  # faded wallpaper
-	add_tiled(WAINSCOT, Rect2(0, 104, WIDTH, 32), Color(0.62, 0.45, 0.45))
-	add_tiled(FLOOR_TEX, Rect2(0, FLOOR, WIDTH, 44), Color(0.8, 0.66, 0.72))
+	add_tiled(WALL, Rect2(0, 0, width, 104), Color(0.42, 0.3, 0.46))  # faded wallpaper
+	add_tiled(WAINSCOT, Rect2(0, 104, width, 32), Color(0.62, 0.45, 0.45))
+	add_tiled(FLOOR_TEX, Rect2(0, FLOOR, width, 44), Color(0.8, 0.66, 0.72))
 	add_drawing(_entrance_door, Vector2(0, FLOOR))
 	add_drawing(_coat_rack, Vector2(44, FLOOR))
-	add_furniture(CLOCK, 140, WARM)
 	add_furniture(TABLE, 168, WARM)
 	add_furniture(CABINET, 262, WARM)
+	add_furniture(CLOCK, 306, WARM)
+	add_furniture(ARMCHAIR, 392, WARM)
+	add_furniture(WARDROBE, 540, WARM)
 	add_drawing(_candle, Vector2(160, FLOOR - 21))
 	add_drawing(_candle, Vector2(176, FLOOR - 21))
 	add_drawing(_candle, Vector2(258, FLOOR - 31))
-	add_text("31/10", Vector2(178, 28), Color(0.95, 0.95, 0.95))
+	add_drawing(_candle, Vector2(536, FLOOR - 29))
+	add_text("31/10", Vector2(150, 92), Color(0.95, 0.95, 0.95))
 
+	# Play, Pause, Rewind.
 	add_object(_pumpkin(4.0, 2.8, 4.0, true, 1.0, Color.WHITE), 100)
+	# Reading a hazard without timeline marks, and a candy.
 	add_object(_pumpkin(2.2, 0.0, 1.0, false, 1.5, Color(1.0, 0.82, 0.62)), 210)
 	var maja := Candy.new()
 	maja.candy_name = "Maja 1989"
@@ -42,11 +55,33 @@ func build() -> void:
 	maja.to = 1.6
 	maja.lift = 9.0
 	add_object(maja, 218)
-	add_object(Door.new(), 296)
+	# Winding the house back a long way, and scrubbing.
+	var clock_door := ClockDoor.new()
+	clock_door.open_from = 5.0
+	clock_door.open_to = 8.0
+	add_object(clock_door, CLOCK_DOOR_X)
+	# Glitch. If the kid gets there first it just waits at the wall.
+	add_object(FalseWall.new(), WALL_X)
+	var tear := GlitchSpot.new()
+	tear.glitch_id = "wall"
+	tear.area = Rect2(-4, -48, 28, 48)
+	tear.period = 4.0
+	tear.from = 2.0
+	tear.to = 3.0
+	tear.kid_min = glitch_from_x
+	add_object(tear, WALL_X)
+	add_object(Door.new(), EXIT_X)
 
 
-func idle_hint_target(_run: RoomRun) -> float:
-	return 304.0
+func trigger_hints() -> Array:
+	return [
+		{"x": 40.0, "text": "Še enkrat D = PAUSE. PAUSE ne porablja traku.", "button": "pause", "keys": ["D"], "hold": false, "done": "pause"},
+		{"x": 140.0, "text": "Ta buča nima oznake na časovnici. Glej, kdaj se začne tresti."},
+		{"x": 196.0, "text": "Roza okno = sladkarija. Vrne 2 s traku."},
+		{"x": 280.0, "text": "Vrata so odprta le 0:05-0:08. SHIFT + A previja hitreje.", "button": "rew", "keys": ["SHIFT", "A"], "done": "fast_rewind"},
+		{"x": 345.0, "text": "FF premakne hišo naprej, a le po že videnem posnetku.", "button": "ff", "keys": ["F"], "done": "scrub"},
+		{"x": 390.0, "text": "Ko se slika trga (cian), pritisni E. Glitch stane 3 s.", "button": "track", "keys": ["E"], "hold": false, "done": "glitch"},
+	]
 
 
 func _pumpkin(period: float, from: float, to: float, marks: bool, size: float, tint: Color) -> Pumpkin:

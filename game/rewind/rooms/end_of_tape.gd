@@ -11,6 +11,7 @@ const KID := preload("res://assets/rewind/kid.png")
 const FONT := preload("res://assets/fonts/VT323-Regular.ttf")
 
 const VCR_X := 112.0
+const CRT_X := 176.0
 const WALL_X := 272.0
 const EXIT_X := 300.0
 const NAMES := ["Maja", "Luka", "Tina", "Ana", "Jaka", "Eva"]
@@ -21,12 +22,12 @@ func build() -> void:
 	tape_budget = 22.0
 	timeline_length = 24.0
 
-	add_tiled(WALL, Rect2(0, 0, WIDTH, FLOOR), Color(0.1, 0.09, 0.14))
-	add_tiled(FLOOR_TEX, Rect2(0, FLOOR, WIDTH, 44), Color(0.3, 0.27, 0.34))
+	add_tiled(WALL, Rect2(0, 0, width, FLOOR), Color(0.1, 0.09, 0.14))
+	add_tiled(FLOOR_TEX, Rect2(0, FLOOR, width, 44), Color(0.3, 0.27, 0.34))
 	add_drawing(_shelves, Vector2(14, FLOOR))
-	add_drawing(_label, Vector2(204, 40))
+	add_drawing(_label, Vector2(206, 76))
 	add_drawing(_daylight, Vector2(EXIT_X, FLOOR))
-	add_drawing(_crt, Vector2(176, FLOOR))
+	add_drawing(_crt, Vector2(CRT_X, FLOOR))
 	add_drawing(_vcr, Vector2(VCR_X, FLOOR))
 
 	var exit := Door.new()
@@ -50,7 +51,7 @@ func build() -> void:
 
 	var eater := TapeEater.new()
 	eater.trigger_x = 150.0
-	eater.tv = Vector2(176 - VCR_X, -40)
+	eater.tv = Vector2(CRT_X - VCR_X, -40)
 	eater.hint_x = VCR_X
 	add_object(eater, VCR_X, FLOOR - 6)
 
