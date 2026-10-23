@@ -1,13 +1,15 @@
 class_name TapeObject
 extends Node2D
-## Anything on the tape. Its state must depend only on tape time `t`,
-## so scrubbing back and forth always shows the same picture.
+## Anything recorded on the tape. Its state must depend only on the RoomRun (both clocks
+## and the glitches), so scrubbing back and forth always shows the same picture.
 
-const DUNGEON := preload("res://assets/kenney_tiny_dungeon/tilemap_packed.png")
+## Shown by the echo after a failure caused by this object.
+@export var hint_x := NAN
+var room: Room
 
 
 ## The kid can't walk through `position.x` while this is true.
-func blocks(_t: float) -> bool:
+func blocks(_run: RoomRun) -> bool:
 	return false
 
 
@@ -20,31 +22,49 @@ func is_deadly(_t: float) -> bool:
 	return false
 
 
-## Called every frame with the current tape time to update visuals.
-func show_time(_t: float) -> void:
-	pass
+func kills(run: RoomRun) -> bool:
+	var w := zone_width()
+	return w > 0.0 and run.kid_x >= position.x and run.kid_x <= position.x + w and is_deadly(run.room_time)
 
 
-## How much this object distorts the screen at time t: {tracking, noise}.
-func screen_effect(_t: float) -> Dictionary:
-	return {}
-
-
-## Coloured windows to draw on the HUD timeline: [{from, to, color}].
-func timeline_marks(_tape_length: float) -> Array:
-	return []
-
-
-static func in_windows(t: float, windows: Array[Vector2]) -> bool:
-	for w in windows:
-		if t >= w.x and t < w.y:
-			return true
+func is_exit(_run: RoomRun) -> bool:
 	return false
 
 
-static func make_tile_sprite(col: int, row: int) -> Sprite2D:
-	var s := Sprite2D.new()
-	s.texture = DUNGEON
-	s.region_enabled = true
-	s.region_rect = Rect2(col * 16, row * 16, 16, 16)
-	return s
+## Called for every bit of tape movement. `mode` is "play", "rewind" or "scrub".
+func advance(_run: RoomRun, _mode: String, _dt: float) -> void:
+	pass
+
+
+## Called every frame to update visuals.
+func show_time(_run: RoomRun) -> void:
+	pass
+
+
+## How much this object distorts the screen right now: {tracking, noise}.
+func screen_effect(_run: RoomRun) -> Dictionary:
+	return {}
+
+
+## Coloured windows on the HUD timeline, in room time: [{from, to, color, row}].
+func timeline_marks(_length: float) -> Array:
+	return []
+
+
+## Where the echo points after this object ended an attempt.
+func hint_target(_run: RoomRun) -> float:
+	return position.x + zone_width() / 2.0 if is_nan(hint_x) else hint_x
+
+
+static func periodic(t: float, period: float, from: float, to: float) -> bool:
+	var phase := fposmod(t, period)
+	return phase >= from and phase < to
+
+
+static func periodic_marks(length: float, period: float, from: float, to: float, color: Color, row := 0) -> Array:
+	var marks := []
+	var start := 0.0
+	while start < length:
+		marks.append({"from": start + from, "to": minf(start + to, length), "color": color, "row": row})
+		start += period
+	return marks
