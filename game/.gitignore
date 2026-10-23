@@ -1,0 +1,6 @@
+/winter_escape_compiled/
+# Godot
+.godot/
+/android/
+*.import.tmp
+export_presets.cfg

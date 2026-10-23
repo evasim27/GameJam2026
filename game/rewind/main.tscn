@@ -1,0 +1,135 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://rewind/main.gd" id="1_main"]
+[ext_resource type="Texture2D" path="res://assets/rewind/wall.png" id="2_wall"]
+[ext_resource type="Texture2D" path="res://assets/rewind/floor.png" id="3_floor"]
+[ext_resource type="Texture2D" path="res://assets/kenney_tiny_dungeon/tilemap_packed.png" id="4_dungeon"]
+[ext_resource type="Script" path="res://rewind/objects/clock_door.gd" id="5_door"]
+[ext_resource type="Script" path="res://rewind/objects/pumpkin.gd" id="6_pumpkin"]
+[ext_resource type="Script" path="res://rewind/objects/glitch_wall.gd" id="7_glitch"]
+[ext_resource type="Script" path="res://rewind/objects/ghost_bridge.gd" id="8_bridge"]
+[ext_resource type="Script" path="res://rewind/objects/bat.gd" id="9_bat"]
+[ext_resource type="Script" path="res://rewind/objects/floating_ghost.gd" id="10_ghost"]
+[ext_resource type="Script" path="res://rewind/kid.gd" id="11_kid"]
+[ext_resource type="Script" path="res://rewind/hud.gd" id="12_hud"]
+[ext_resource type="Shader" path="res://rewind/vhs.gdshader" id="13_vhs"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vhs"]
+shader = ExtResource("13_vhs")
+shader_parameter/noise_amount = 0.04
+shader_parameter/aberration = 1.0
+shader_parameter/tracking = 0.0
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="Level" type="Node2D" parent="."]
+scale = Vector2(2, 2)
+
+[node name="Wall" type="TextureRect" parent="Level"]
+modulate = Color(0.22, 0.17, 0.32, 1)
+texture_repeat = 2
+offset_right = 320.0
+offset_bottom = 136.0
+texture = ExtResource("2_wall")
+stretch_mode = 1
+
+[node name="Floor" type="TextureRect" parent="Level"]
+modulate = Color(0.55, 0.5, 0.7, 1)
+texture_repeat = 2
+offset_top = 136.0
+offset_right = 320.0
+offset_bottom = 180.0
+texture = ExtResource("3_floor")
+stretch_mode = 1
+
+[node name="Tombstone1" type="Sprite2D" parent="Level"]
+modulate = Color(0.55, 0.5, 0.7, 1)
+position = Vector2(110, 128)
+texture = ExtResource("4_dungeon")
+region_enabled = true
+region_rect = Rect2(64, 80, 16, 16)
+
+[node name="Tombstone2" type="Sprite2D" parent="Level"]
+modulate = Color(0.55, 0.5, 0.7, 1)
+position = Vector2(268, 128)
+texture = ExtResource("4_dungeon")
+region_enabled = true
+region_rect = Rect2(80, 80, 16, 16)
+
+[node name="Objects" type="Node2D" parent="Level"]
+
+[node name="Ghost1" type="Node2D" parent="Level/Objects"]
+position = Vector2(70, 60)
+script = ExtResource("10_ghost")
+
+[node name="Ghost2" type="Node2D" parent="Level/Objects"]
+position = Vector2(200, 40)
+script = ExtResource("10_ghost")
+phase = 2.0
+
+[node name="ClockDoor" type="Node2D" parent="Level/Objects"]
+position = Vector2(50, 136)
+script = ExtResource("5_door")
+open_at = 6.0
+
+[node name="Pumpkin" type="Node2D" parent="Level/Objects"]
+position = Vector2(82, 136)
+script = ExtResource("6_pumpkin")
+
+[node name="GlitchWall" type="Node2D" parent="Level/Objects"]
+position = Vector2(128, 136)
+script = ExtResource("7_glitch")
+glitch_windows = Array[Vector2]([Vector2(14, 14.8), Vector2(34, 34.8)])
+
+[node name="GhostBridge" type="Node2D" parent="Level/Objects"]
+position = Vector2(160, 136)
+script = ExtResource("8_bridge")
+static_windows = Array[Vector2]([Vector2(12, 15.5), Vector2(40, 43)])
+
+[node name="ClockDoor2" type="Node2D" parent="Level/Objects"]
+position = Vector2(208, 136)
+script = ExtResource("5_door")
+open_at = 24.0
+
+[node name="Bat" type="Node2D" parent="Level/Objects"]
+position = Vector2(222, 136)
+script = ExtResource("9_bat")
+
+[node name="Kid" type="Node2D" parent="Level"]
+position = Vector2(14, 128)
+script = ExtResource("11_kid")
+
+[node name="Sprite2D" type="Sprite2D" parent="Level/Kid"]
+texture = ExtResource("4_dungeon")
+region_enabled = true
+region_rect = Rect2(16, 112, 16, 16)
+
+[node name="Goal" type="Node2D" parent="Level"]
+position = Vector2(296, 136)
+
+[node name="Door" type="Sprite2D" parent="Level/Goal"]
+position = Vector2(8, -8)
+texture = ExtResource("4_dungeon")
+region_enabled = true
+region_rect = Rect2(160, 48, 16, 16)
+
+[node name="VHS" type="CanvasLayer" parent="."]
+
+[node name="Screen" type="ColorRect" parent="VHS"]
+material = SubResource("ShaderMaterial_vhs")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="OSD" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("12_hud")
