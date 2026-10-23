@@ -4,6 +4,7 @@ extends Node2D
 
 const Intro := preload("res://rewind/intro.gd")
 const Ending := preload("res://rewind/ending.gd")
+const KidNode := preload("res://rewind/kid.gd")
 const ROOMS := [
 	preload("res://rewind/rooms/foyer.gd"),
 	preload("res://rewind/rooms/stairs.gd"),
@@ -11,15 +12,15 @@ const ROOMS := [
 ]
 ## Echo subtitles, in order of total failures. Each is said at most once per game.
 const LINES := [
-	"Spet si me previl nazaj.",
-	"Tukaj sem že bil. Večkrat.",
-	"Hiša ne pozabi. Samo snema.",
-	"Kjer se slika trga, ne vidi.",
-	"Kdo drži daljinca?",
-	"Zdaj vidi tudi tebe.",
+	"You rewound me again.",
+	"I've been here before. Many times.",
+	"The house doesn't forget. It just records.",
+	"Where the picture tears, it can't see.",
+	"Who's holding the remote?",
+	"Now it sees you too.",
 ]
-const LINE_TAPE := "Zmanjkalo me je."
-const LINE_EATER := "Trak je lačen."
+const LINE_TAPE := "I ran out."
+const LINE_EATER := "The tape is hungry."
 ## The date stamp keeps 31/10 but the year moves on with every failure: this has happened before.
 const YEARS := [1989, 1994, 2003, 2009, 2016, 2026]
 ## Rooms are seen up close and the camera follows the kid; the intro and ending use the full view.
@@ -29,6 +30,8 @@ const FULL_ZOOM := 2.0
 const LOOK_AHEAD := 0.4
 const CAMERA_SPEED := 6.0
 const MARK_AHEAD := 200.0
+## Failing this many times in one room after the foyer sends the tape back to the foyer.
+const MAX_ROOM_FAILS := 6
 const REWIND_SPEED := 1.0
 const SCRUB_SPEED := 4.0
 
@@ -44,7 +47,7 @@ var total_fails := 0
 var candies: Array[String] = []
 var tape_used := 0.0
 var _used_lines := {}
-var _echoes := {}  # room index -> {x, y, target, line}
+var _echoes := {}  # room index -> [{x, y, target, line, bridge}], oldest first
 var _seen_hints := {}
 var _playing := false  # PLAY/PAUSE is one toggle; rewinding or FF drops back to pause
 var _rewind_unlocked := false
@@ -54,6 +57,7 @@ var _echo_spoke := false
 var _last_mode := ""
 var _fx_burst := 0.0
 var _intro: Node2D
+var _ending: Node2D
 var _cam := Vector2.ZERO
 
 @onready var world: Node2D = $World
@@ -79,16 +83,13 @@ func _enter_room(i: int, first_time: bool) -> void:
 	if room:
 		room.queue_free()
 	room = ROOMS[i].new()
-	room.setup(room_fails[i], total_fails)
+	room.setup(room_fails[i], total_fails, _echoes.get(i, []))
 	world.add_child(room)
 	run = RoomRun.new(room)
 	world.scale = Vector2(ROOM_ZOOM, ROOM_ZOOM)
 	_cam = _camera_target()
 	run.free_rewind = room.free_first_rewind and not _free_rewind_used
 	_echo_spoke = false
-	if _echoes.has(i):
-		var e: Dictionary = _echoes[i]
-		room.echo.setup(e.x, e.y, e.target, e.line)
 
 	hud.clear_texts()
 	hud.wrap = 0.0
@@ -111,6 +112,8 @@ func _enter_room(i: int, first_time: bool) -> void:
 			hud.prompt("play", ["D"], false, "play")
 	_glitch_unlocked = _glitch_unlocked or room.glitch_from_x <= 0.0
 	var retry := room.retry_hint()
+	if retry == "" and i > 0 and room_fails[i] >= MAX_ROOM_FAILS / 2:
+		retry = "%d more failures here and the tape goes back to the start." % (MAX_ROOM_FAILS - room_fails[i])
 	if retry != "":
 		hud.hint(retry)
 	_update_controls()
@@ -125,7 +128,7 @@ func _update_controls() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if state == State.ENDING and event.is_action_pressed("restart"):
+	if state == State.ENDING and _ending.results_visible() and event.is_action_pressed("restart"):
 		get_tree().reload_current_scene()
 		return
 	if state != State.ROOM:
@@ -201,7 +204,7 @@ func _on_pause() -> void:
 
 func _unlock_rewind() -> void:
 	_rewind_unlocked = true
-	hud.hint("Previj hišo. Otrok ostane tukaj.")
+	hud.hint("Rewind the house. The kid stays put.")
 	hud.prompt("rew", ["A"], true, "rewind")
 	_update_controls()
 
@@ -213,8 +216,9 @@ func _check_hints() -> void:
 			hud.hint(h.text)
 			if h.has("keys"):
 				hud.prompt(h.button, h.keys, h.get("hold", true), h.done)
+	for e in room.echoes:
+		e.notice(run.kid_x)
 	if room.echo.visible:
-		room.echo.notice(run.kid_x)
 		if not _echo_spoke and absf(run.kid_x - room.echo.position.x) < 28.0:
 			_echo_spoke = true
 			if room.echo.line != "":
@@ -291,34 +295,59 @@ func _fail() -> void:
 	if not _rewind_unlocked and total_fails >= 2:
 		_unlock_rewind()
 
+	var reset: bool = room_index > 0 and room_fails[room_index] >= MAX_ROOM_FAILS
 	var line := ""
 	var target := room.idle_hint_target(run)
+	var echo_pos := Vector2(run.kid_x, run.kid_y())
+	var in_hole := run.cause is Hole
 	if run.out_of_tape:
-		hud.message = "KONEC TRAKU"
-		hud.sub_message = "trak za to sobo je porabljen"
+		hud.message = "END OF TAPE"
+		hud.sub_message = "the tape for this room is used up"
 		line = LINE_TAPE
 	elif run.cause is TapeEater:
-		hud.message = "TRAK JE POJEDEN"
-		hud.sub_message = "požiralec je dosegel glavo predvajanja"
+		hud.message = "TAPE EATEN"
+		hud.sub_message = "the eater reached the playhead"
 		line = LINE_EATER
 		target = run.cause.hint_target(run)
 		create_tween().tween_property(hud, "wrap", 1.0, 0.8)
 	else:
-		hud.message = "IZGUBLJEN SIGNAL"
-		hud.sub_message = "posnetek se vrača na začetek sobe"
+		hud.message = "SIGNAL LOST"
+		hud.sub_message = "the recording returns to the start of the room"
 		target = run.cause.hint_target(run)
+	if in_hole:
+		# The kid drops into the free slot; its echo stays there, head level with the floor.
+		var hole: Hole = run.cause
+		echo_pos = Vector2(hole.slot_center(hole.filled()), room.floor_y(run.kid_x) - KidNode.FEET_OFFSET - 3.0)
+		target = room.width - 24.0
+		create_tween().tween_property(room.kid, "position", echo_pos, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	if reset:
+		hud.message = "REWIND TO START"
+		hud.sub_message = "%d failures in one room: the tape goes back to the house" % MAX_ROOM_FAILS
 	if line == "" or _used_lines.has(line):
 		line = LINES[mini(total_fails - 1, LINES.size() - 1)]
 	if _used_lines.has(line):
 		line = ""
 	_used_lines[line] = true
-	# A newer echo replaces the old one in the same room.
-	_echoes[room_index] = {"x": run.kid_x, "y": run.kid_y(), "target": target, "line": line}
+	# Echoes pile up: every failure in a room leaves one that stays until the room is cleared.
+	if not _echoes.has(room_index):
+		_echoes[room_index] = []
+	_echoes[room_index].append({"x": echo_pos.x, "y": echo_pos.y, "target": target, "line": line, "bridge": in_hole})
 
 	vhs.set_shader_parameter("noise_amount", 0.85)
 	vhs.set_shader_parameter("tracking", 1.0)
 	await get_tree().create_timer(1.6).timeout
-	_enter_room(room_index, false)
+	if reset:
+		_rewind_to_start()
+	else:
+		_enter_room(room_index, false)
+
+
+## Too many failures in one room: everything after the intro is recorded over, from the foyer.
+func _rewind_to_start() -> void:
+	room_fails = [0, 0, 0]
+	_echoes = {}
+	candies.clear()
+	_enter_room(0, true)
 
 
 func _leave_room() -> void:
@@ -327,6 +356,7 @@ func _leave_room() -> void:
 	tape_used += run.tape_used
 	for candy_name in run.taken:
 		candies.append(candy_name)
+	_echoes.erase(room_index)
 	room.kid.leave()
 	await get_tree().create_timer(1.2).timeout
 	if room_index + 1 < ROOMS.size():
@@ -346,6 +376,6 @@ func _end() -> void:
 	vhs.set_shader_parameter("noise_amount", 0.05)
 	# Attempts: one per room plus every failure except the planned tutorial one.
 	var attempts := ROOMS.size() + maxi(total_fails - 1, 0)
-	var ending := Ending.new()
-	ending.setup(candies, total_fails, attempts, tape_used)
-	world.add_child(ending)
+	_ending = Ending.new()
+	_ending.setup(candies, total_fails, attempts, tape_used)
+	world.add_child(_ending)

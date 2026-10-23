@@ -1,41 +1,62 @@
 extends Room
-## Static below the stairs. A shadow slides across the foot of the stairs on a rhythm, then a
+## Static below the stairs. First a long hallway with a hole in the floor two kids wide: nothing
+## on the tape gets across, so the kid falls in twice and both echoes stay standing in it, heads
+## level with the floor, until the kid walks over them. Then the stairs: a shadow slides across the foot of the stairs on a rhythm, then a
 ## short safe stretch by a small TV full of static. Glitching while the kid is at the TV and the
 ## frame tears shifts the wardrobe and shows a hidden door under the stairs. Ignore it and the kid
 ## goes up the stairs into the long shadow. Luka 1994 waits behind the door if it opened early.
 
-const WALL := preload("res://assets/rewind/wall.png")
-const WAINSCOT := preload("res://assets/rewind/wainscot.png")
-const FLOOR_TEX := preload("res://assets/rewind/floor.png")
+const WALL := preload("res://assets/rewind/cinematic/wall.png")
+const WAINSCOT := preload("res://assets/rewind/cinematic/wainscot.png")
+const FLOOR_TEX := preload("res://assets/rewind/cinematic/floor.png")
 const WARDROBE := preload("res://assets/noble_interior/wardrobe_small.png")
+const DOOR_ART := preload("res://rewind/door_art.gd")
 
-const STAIRS_FROM := 236.0
-const TV_X := 150.0
-const DOOR_X := 200.0
+## The hallway with the hole; everything under the stairs starts after it.
+const HALL := 240.0
+const HOLE_X := 120.0
+const STAIRS_FROM := HALL + 236.0
+const TV_X := HALL + 150.0
+const DOOR_X := HALL + 200.0
 
 var _tv_noise := 0.0
 
 
 func build() -> void:
 	title = "STATIC BELOW THE STAIRS"
-	tape_budget = 16.0
-	timeline_length = 20.0
+	width = HALL + WIDTH
+	tape_budget = 26.0
+	timeline_length = 30.0
 
-	add_tiled(WALL, Rect2(0, 0, WIDTH, 104), Color(0.24, 0.22, 0.36))
-	add_tiled(WAINSCOT, Rect2(0, 104, WIDTH, 32), Color(0.42, 0.34, 0.4))
-	add_tiled(FLOOR_TEX, Rect2(0, FLOOR, WIDTH, 44), Color(0.72, 0.6, 0.7))
-	add_drawing(_photos, Vector2(14, 40))
-	add_drawing(_back_stairs)
-	add_drawing(_crates, Vector2(236, FLOOR))
-	add_drawing(_cobwebs)
+	add_tiled(WALL, Rect2(0, 0, width, 104), Color(0.42, 0.44, 0.56))
+	add_tiled(WAINSCOT, Rect2(0, 104, width, 32), Color(0.58, 0.6, 0.72), 32.0)
+	add_tiled(FLOOR_TEX, Rect2(0, FLOOR, width, 44), Color(0.68, 0.7, 0.8))
+	add_drawing(_photos, Vector2(14, 84))
+	add_drawing(_back_stairs, Vector2(HALL, 0))
+	# The hallway: a couple of sconces and a crooked portrait looking down at the hole.
+	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(64, 96))
+	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(208, 96))
+	var watcher := add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(HOLE_X + 20, 86), 1)
+	watcher.rotation = 0.05
+	add_wall_decor(WallDecor.Kind.SCRATCHES, Vector2(HOLE_X + 46, 100))
+	var portrait := add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(HALL + 112, 88), 2)
+	portrait.rotation = -0.09
+	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(HALL + 70, 96))
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(2, 73), 1)
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(width - 2, 48), 0, true)
+	add_wall_decor(WallDecor.Kind.SCRATCHES, Vector2(HALL + 178, 98))
+	add_drawing(_crates, Vector2(HALL + 236, FLOOR))
+	add_drawing(_cobwebs, Vector2(HALL, 0))
 	add_drawing(_warm_spill)
+
+	add_object(Hole.new(), HOLE_X)
 
 	var foot := Shadow.new()
 	foot.width = 24.0
 	foot.period = 3.2
 	foot.from = 2.0
 	foot.to = 3.0
-	add_object(foot, 72)
+	add_object(foot, HALL + 72)
 
 	var tear := GlitchSpot.new()
 	tear.glitch_id = "door"
@@ -43,18 +64,19 @@ func build() -> void:
 	tear.period = 3.0
 	tear.from = 1.6
 	tear.to = 2.4
-	tear.kid_min = 120.0
-	tear.kid_max = 196.0
+	tear.kid_min = HALL + 120.0
+	tear.kid_max = HALL + 196.0
 	add_object(tear, DOOR_X)
 
 	var luka := Candy.new()
 	luka.candy_name = "Luka 1994"
 	luka.needs_glitch = "door"
-	luka.glitch_before_x = 160.0
+	luka.glitch_before_x = HALL + 160.0
 	luka.lift = 8.0
 	add_object(luka, DOOR_X - 2.0)
 
 	var door := Door.new()
+	door.visual_size = Vector2(30, 54)
 	door.needs_glitch = "door"
 	door.cover = WARDROBE
 	door.cover_slide = Vector2(26, 0)
@@ -67,7 +89,7 @@ func build() -> void:
 	top.width = 30.0
 	top.height = 60.0
 	top.hint_x = TV_X
-	add_object(top, 290, floor_y(290))
+	add_object(top, HALL + 290, floor_y(HALL + 290))
 	add_drawing(_tv, Vector2(TV_X, FLOOR))
 
 
@@ -76,11 +98,22 @@ func floor_y(x: float) -> float:
 
 
 func trigger_hints() -> Array:
-	return [{"x": 120.0, "text": "Slika je poškodovana — poskusi tukaj.", "button": "track", "keys": ["E"], "hold": false, "done": "glitch"}]
+	return [
+		{"x": HOLE_X - 50.0, "text": "The floor is gone here. Nothing on the tape gets you across."},
+		{"x": HALL + 120.0, "text": "The picture is damaged here. Try it.", "button": "track", "keys": ["E"], "hold": false, "done": "glitch"},
+	]
 
 
 func retry_hint() -> String:
-	return "Vrata so tam, kjer slika preskakuje." if fails >= 2 else ""
+	var bridged := 0
+	for g in ghosts:
+		if g.get("bridge", false):
+			bridged += 1
+	if bridged == 1:
+		return "Your echo is still down there. Walk on it."
+	if bridged >= 2 and fails - bridged == 0:
+		return "Two echoes fill the hole. Walk over them."
+	return "The door is where the picture skips." if fails - bridged >= 2 else ""
 
 
 func idle_hint_target(run: RoomRun) -> float:
@@ -113,7 +146,7 @@ func _back_stairs(d: Node2D) -> void:
 func _front_stairs(d: Node2D) -> void:
 	var x := STAIRS_FROM
 	var wood := Color(0.42, 0.26, 0.18)
-	while x < WIDTH:
+	while x < width:
 		var y := floor_y(x + 6.0)
 		d.draw_rect(Rect2(x, y, 6, FLOOR + 44 - y), Color(0.22, 0.13, 0.1))
 		d.draw_rect(Rect2(x, y, 6, 2), wood)
@@ -168,6 +201,6 @@ func _tv(d: Node2D) -> void:
 			var n := float((noise_seed * 73 + x * 31 + y * 17 + x * y * 7) % 11) / 10.0
 			d.draw_rect(Rect2(screen.position + Vector2(x, y), Vector2.ONE), Color(0.3 + n * 0.5, 0.8 + n * 0.2, 1.0, 1.0))
 	if fails > 0 and fmod(d.t, 2.0) < 0.15:
-		d.draw_rect(Rect2(screen.position + Vector2(4, 2), Vector2(6, 9)), Color(0.05, 0.1, 0.15), false, 1.0)
+		DOOR_ART.draw_door(d, Rect2(screen.position + Vector2(4, 1), Vector2(6, 10)), true, Color.TRANSPARENT, Color(0.4, 0.65, 0.75))
 	for i in 4:
 		d.draw_circle(Vector2(0, -20), 16.0 - i * 3.0, Color(0.4, 1.0, 1.0, 0.03))

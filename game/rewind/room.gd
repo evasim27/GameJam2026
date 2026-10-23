@@ -7,6 +7,7 @@ const WIDTH := 320.0
 const FLOOR := 136.0
 const KidScene := preload("res://rewind/kid.gd")
 const EchoScene := preload("res://rewind/echo.gd")
+const WallDecor := preload("res://rewind/wall_decor.gd")
 
 var title := ""
 ## Rooms wider than the screen scroll with the kid.
@@ -22,24 +23,40 @@ var objects: Array[TapeObject] = []
 ## Set by the game before build(): how often the player failed here and in total.
 var fails := 0
 var total_fails := 0
+## Echoes of every earlier failure in this room, oldest first: [{x, y, target, line, bridge}].
+## They stay for as long as the player keeps failing here; `bridge` ones stand in a Hole.
+var ghosts: Array = []
 
 var kid: Node2D
+## The newest echo: the one that points the way and speaks. Hidden if there is none.
 var echo: Node2D
+var echoes: Array[Node2D] = []
 var _deco: Node2D
 var _obj: Node2D
 
 
-func setup(room_fails: int, all_fails: int) -> void:
+func setup(room_fails: int, all_fails: int, room_ghosts: Array = []) -> void:
 	fails = room_fails
 	total_fails = all_fails
+	ghosts = room_ghosts
 	_deco = Node2D.new()
 	add_child(_deco)
 	_obj = Node2D.new()
 	add_child(_obj)
 	build()
-	echo = EchoScene.new()
-	echo.visible = false
-	add_child(echo)
+	for i in ghosts.size():
+		var g: Dictionary = ghosts[i]
+		var e := EchoScene.new()
+		var newest := i == ghosts.size() - 1
+		e.setup(g.x, g.y, g.target, g.line if newest else "", g.get("bridge", false), not newest)
+		add_child(e)
+		echoes.append(e)
+	if echoes.is_empty():
+		echo = EchoScene.new()
+		echo.visible = false
+		add_child(echo)
+	else:
+		echo = echoes[-1]
 	kid = KidScene.new()
 	add_child(kid)
 	for o in objects:
@@ -81,6 +98,16 @@ func show_run(run: RoomRun) -> void:
 
 # --- building helpers -------------------------------------------------------
 
+func add_wall_decor(kind: int, pos: Vector2, variant := 0, mirrored := false) -> Node2D:
+	var decor := WallDecor.new()
+	decor.kind = kind
+	decor.variant = variant
+	decor.position = pos
+	if mirrored:
+		decor.scale.x = -1.0
+	_deco.add_child(decor)
+	return decor
+
 func add_object(o: TapeObject, x: float, y := FLOOR) -> TapeObject:
 	o.position = Vector2(x, y)
 	o.room = self
@@ -89,15 +116,16 @@ func add_object(o: TapeObject, x: float, y := FLOOR) -> TapeObject:
 	return o
 
 
-## Tiles a 32x32 house texture over `rect` at half scale (16 level px per tile).
-func add_tiled(tex: Texture2D, rect: Rect2, tint: Color) -> TextureRect:
+## Keeps cinematic material repeats readable, independent of source resolution.
+func add_tiled(tex: Texture2D, rect: Rect2, tint: Color, tile_size := 64.0) -> TextureRect:
 	var r := TextureRect.new()
+	var tile_scale := tile_size / float(tex.get_width())
 	r.texture = tex
 	r.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	r.stretch_mode = TextureRect.STRETCH_TILE
 	r.position = rect.position
-	r.size = rect.size * 2.0
-	r.scale = Vector2(0.5, 0.5)
+	r.size = rect.size / tile_scale
+	r.scale = Vector2(tile_scale, tile_scale)
 	r.modulate = tint
 	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_deco.add_child(r)

@@ -1,115 +1,145 @@
 extends Node2D
-## The kid runs out onto the porch at first light, finds a blank tape among the candy and looks
-## straight into the camera (with the echoes of failed attempts behind it, if any). Then the
-## viewer's empty armchair, the VCR ejecting the tape, and the results.
+## Seven ending shots. Results stay on screen until the player rewinds to the start.
+## Art stays independent of run data: candy, echoes and the final label are drawn at runtime.
 
 const FONT := preload("res://assets/fonts/VT323-Regular.ttf")
-const FLOOR_TEX := preload("res://assets/rewind/floor.png")
-const ARMCHAIR := preload("res://assets/noble_interior/armchair_tall.png")
-const ECHO := preload("res://assets/rewind/echo.png")
-const CANDY := preload("res://assets/rewind/candy.png")
-const KidNode := preload("res://rewind/kid.gd")
-const ALL_CANDY := ["Maja 1989", "Luka 1994", "Tina 2003"]
+const FADE_IN := 0.4
+const CHARS_PER_SECOND := 28.0
+const LINE_PAUSE := 0.7
+const SHOTS := [
+	{"duration": 6.5, "image": "res://assets/ending/01_waking_home.png",
+		"lines": ["November 1st. Morning in the kid's own home.", "The kid wakes in bed. Halloween is over."]},
+	{"duration": 5.5, "image": "res://assets/ending/02_candy_bag_home.png",
+		"lines": ["The kid checks last night's candy bag.", "Something else has come home, too."]},
+	{"duration": 5.5, "image": "res://assets/ending/03_blank_tape_home.png",
+		"lines": ["A blank videotape. No warning. No name."]},
+	{"duration": 6.5, "image": "res://assets/ending/04_camera_gaze_home_v2.png",
+		"lines": ["For a moment, the kid looks straight at you."]},
+	{"duration": 5.5, "image": "res://assets/ending/05_empty_armchair.png",
+		"lines": ["Elsewhere, the viewer's chair is empty."]},
+	{"duration": 5.0, "image": "res://assets/ending/06_ejected_tape.png",
+		"lines": ["The VCR ejects the tape.", "The recording has ended."]},
+	{"duration": 0.0, "image": "res://assets/ending/07_results.png",
+		"lines": []},
+]
 
 var _candies: Array[String] = []
 var _fails := 0
 var _attempts := 0
 var _tape := 0.0
+var _shot := 0
 var _t := 0.0
-var _kid: Node2D
+var _images: Array[Texture2D] = []
+var _echo_texture: Texture2D
+var _echo_region := Rect2()
 
 
 func setup(candies: Array[String], fails: int, attempts: int, tape_used: float) -> void:
-	_candies = candies
-	_fails = fails
-	_attempts = attempts
-	_tape = tape_used
+	_candies.assign(candies)
+	_fails = maxi(fails, 0)
+	_attempts = maxi(attempts, 0)
+	_tape = maxf(tape_used, 0.0)
 
 
 func _ready() -> void:
-	_kid = KidNode.new()
-	add_child(_kid)
+	_echo_texture = load("res://assets/ending/pajama_echo.png") as Texture2D
+	_echo_region = Rect2(_echo_texture.get_image().get_used_rect())
+	for shot in SHOTS:
+		_images.append(load(shot.image) as Texture2D)
+
+
+func results_visible() -> bool:
+	return _shot == SHOTS.size() - 1
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if results_visible() or not (event is InputEventKey and event.pressed and not event.echo):
+		return
+	if event.keycode == KEY_ESCAPE:
+		_shot = SHOTS.size() - 1
+		_t = 0.0
+	else:
+		_next_shot()
+	get_viewport().set_input_as_handled()
+	queue_redraw()
+
+
+func _next_shot() -> void:
+	_shot = mini(_shot + 1, SHOTS.size() - 1)
+	_t = 0.0
 
 
 func _process(delta: float) -> void:
 	_t += delta
-	_kid.visible = _t < 8.0
-	var x := 40.0 + minf(_t, 2.5) * 40.0
-	_kid.place(x, 150.0)
-	if _t >= 2.5:
-		_kid.stand()
-	if _t >= 5.0:
-		_kid.look_at_camera()
+	if not results_visible() and _t >= SHOTS[_shot].duration:
+		_next_shot()
 	queue_redraw()
 
 
 func _draw() -> void:
-	if _t < 8.0:
-		_draw_porch()
-	elif _t < 12.0:
-		_draw_empty_room(_t - 8.0)
-	else:
+	if _images.is_empty():
+		return
+	draw_texture_rect(_images[_shot], Rect2(0, 0, 320, 180), false)
+	if _shot == 1:
+		_draw_candy_count()
+	if _shot == 3 and _fails > 0:
+		_draw_echoes()
+	if results_visible():
 		_draw_results()
+	else:
+		var lines: Array = SHOTS[_shot].lines.duplicate()
+		if _shot == 3 and _fails > 0:
+			lines.append("Behind the kid, earlier attempts linger.")
+		_draw_story(lines)
+		_text("any key: next   ESC: results", Vector2(4, 176), 12, Color(0.7, 0.7, 0.8))
+		_text("%d / 7" % (_shot + 1), Vector2(290, 176), 12, Color(0.7, 0.7, 0.8))
+	if _t < FADE_IN:
+		draw_rect(Rect2(0, 0, 320, 180), Color(0, 0, 0, 1.0 - _t / FADE_IN))
 
 
-func _draw_porch() -> void:
-	for i in 18:
-		var c := Color(0.35, 0.4, 0.6).lerp(Color(0.95, 0.75, 0.65), i / 17.0)
-		draw_rect(Rect2(0, i * 9, 320, 9), c)
-	draw_rect(Rect2(0, 20, 30, 130), Color(0.2, 0.13, 0.15))
-	draw_set_transform(Vector2(0, 150), 0.0, Vector2(0.5, 0.5))
-	draw_texture_rect(FLOOR_TEX, Rect2(0, 0, 640, 60), true, Color(0.8, 0.7, 0.7))
-	draw_set_transform(Vector2.ZERO)
-	# Echoes of every failed attempt, standing behind.
+func _draw_candy_count() -> void:
+	# Never paint uncollected candy into a fixed illustration.
+	draw_rect(Rect2(8, 139, 115, 24), Color(0.02, 0.02, 0.04, 0.85))
+	_text("CANDY  %d/3" % mini(_candies.size(), 3), Vector2(14, 154), 14, Color(1, 0.9, 0.7))
+	for i in mini(_candies.size(), 3):
+		draw_texture_rect_region(Candy.SPRITE, Rect2(Vector2(86 + i * 11, 146), Candy.ICON_SIZE), Candy.sprite_region(_candies[i]))
+
+
+func _draw_echoes() -> void:
+	var appear := clampf((_t - 0.8) / 1.2, 0.0, 1.0)
 	for i in mini(_fails, 6):
-		var ex := 70.0 + i * 16.0
-		draw_texture_rect_region(ECHO, Rect2(ex, 126, 16, 24), Rect2(16, 0, 16, 24), Color(1, 1, 1, 0.35))
-	if _t > 3.0:
-		var y := 112.0
-		for c in _candies:
-			draw_texture(CANDY, Vector2(140 + _candies.find(c) * 12, y))
-		# A blank tape among the candy.
-		draw_rect(Rect2(170, y - 2, 18, 11), Color(0.08, 0.08, 0.09))
-		draw_rect(Rect2(172, y, 14, 4), Color(0.9, 0.88, 0.8))
-
-
-func _draw_empty_room(s: float) -> void:
-	draw_rect(Rect2(0, 0, 320, 180), Color(0.03, 0.03, 0.06))
-	draw_set_transform(Vector2(40, 72), 0.0, Vector2(1.4, 1.4))
-	draw_texture(ARMCHAIR, Vector2.ZERO, Color(0.2, 0.18, 0.26))
-	draw_set_transform(Vector2.ZERO)
-	_text("(prazen)", Vector2(66, 172), 10, Color(0.4, 0.4, 0.5))
-	draw_rect(Rect2(180, 66, 60, 46), Color(0.12, 0.12, 0.13))
-	var n := int(s * 24.0)
-	for y in range(0, 36, 2):
-		for x in range(0, 50, 2):
-			var v := float((n * 71 + x * 13 + y * 29 + x * y) % 13) / 12.0
-			draw_rect(Rect2(185 + x, 70 + y, 2, 2), Color(0.3 + v * 0.6, 0.7 + v * 0.3, 0.9))
-	draw_rect(Rect2(176, 112, 68, 30), Color(0.1, 0.07, 0.05))
-	draw_rect(Rect2(186, 118, 40, 6), Color(0.06, 0.06, 0.07))
-	# The VCR spits the tape out.
-	var out := clampf((s - 1.5) / 0.6, 0.0, 1.0) * 12.0
-	draw_rect(Rect2(190, 124 + out - 6, 32, 8), Color(0.08, 0.08, 0.09))
+		var x := 18.0 + i * 14.0
+		var alpha := appear * (0.22 + sin(_t * 2.0 + i) * 0.06)
+		var height := 48.0
+		var width := height * _echo_region.size.x / maxf(_echo_region.size.y, 1.0)
+		draw_texture_rect_region(_echo_texture, Rect2(x, 80 + i % 2 * 5, width, height),
+			_echo_region, Color(0.65, 0.95, 1.0, alpha))
 
 
 func _draw_results() -> void:
-	draw_rect(Rect2(0, 0, 320, 180), Color(0.02, 0.02, 0.04))
-	_text("KONEC TRAKU", Vector2(110, 30), 24, Color(0.93, 0.95, 1.0))
-	_text("SLADKARIJE  %d/3" % _candies.size(), Vector2(100, 56), 16, Color(0.9, 0.9, 1.0))
-	_text("POSKUSI     %d" % _attempts, Vector2(100, 68), 16, Color(0.9, 0.9, 1.0))
-	_text("PORABLJEN TRAK  %.1f s" % _tape, Vector2(100, 80), 16, Color(0.9, 0.9, 1.0))
-	# The tape's label. With all three candies, its last word becomes readable.
-	var label := Rect2(90, 96, 140, 50)
-	draw_rect(label.grow(3), Color(0.08, 0.08, 0.09))
-	draw_rect(label, Color(0.85, 0.82, 0.72))
-	for i in ALL_CANDY.size():
-		var name_s: String = ALL_CANDY[i].split(" ")[0]
-		var p := label.position + Vector2(8 + i * 44, 14)
-		_text(name_s, p, 14, Color(0.15, 0.1, 0.1))
-		draw_line(p + Vector2(-1, -3), p + Vector2(24, -3), Color(0.1, 0.05, 0.05), 1.0)
-	var last := "Gledalec" if _candies.size() == 3 else "G#l%d@?c"
-	_text(last, label.position + Vector2(48, 36), 18, Color(0.1, 0.05, 0.05))
-	_text("R — previj na začetek", Vector2(108, 168), 12, Color(0.6, 0.6, 0.72))
+	draw_rect(Rect2(162, 12, 150, 78), Color(0.02, 0.02, 0.04, 0.9))
+	_text("END OF TAPE", Vector2(172, 32), 23, Color(0.93, 0.95, 1.0))
+	_text("CANDY      %d/3" % mini(_candies.size(), 3), Vector2(172, 49), 15, Color(0.9, 0.9, 1.0))
+	_text("ATTEMPTS   %d" % _attempts, Vector2(172, 64), 15, Color(0.9, 0.9, 1.0))
+	_text("TAPE USED  %.1f s" % _tape, Vector2(172, 79), 15, Color(0.9, 0.9, 1.0))
+	# Runtime label: the reward changes only the label, never unlocks another level.
+	var label := "Gledalec" if _candies.size() == 3 else "G#e%?l#c"
+	var width := FONT.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 28).x / 2.0
+	_text(label, Vector2(160 - width / 2.0, 141), 14, Color(0.1, 0.06, 0.05))
+	draw_rect(Rect2(0, 163, 320, 17), Color(0.02, 0.02, 0.04, 0.85))
+	_text("R — rewind to start", Vector2(108, 175), 12, Color(0.75, 0.75, 0.85))
+
+
+func _draw_story(lines: Array) -> void:
+	draw_rect(Rect2(0, 4, 320, 10 + lines.size() * 11), Color(0, 0, 0, 0.65))
+	var start := 0.4
+	for i in lines.size():
+		var line: String = lines[i]
+		var shown := clampi(int((_t - start) * CHARS_PER_SECOND), 0, line.length())
+		if shown > 0:
+			var width := FONT.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x / 2.0
+			_text(line.left(shown), Vector2((320.0 - width) / 2.0, 16 + i * 11), 12, Color(0.93, 0.95, 1.0))
+		start += line.length() / CHARS_PER_SECOND + LINE_PAUSE
 
 
 func _text(text: String, pos: Vector2, size: int, color: Color) -> void:

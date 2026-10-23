@@ -114,7 +114,7 @@ func _draw() -> void:
 
 	if mode != "PAUSE" or fmod(_blink, 1.0) < 0.6:
 		draw_string(font, Vector2(16, 30), _mode_label(), HORIZONTAL_ALIGNMENT_LEFT, -1, 28, OSD)
-	draw_string(font, Vector2(16, 52), "SLADKARIJE %d/3" % candies, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, DIM)
+	draw_string(font, Vector2(16, 52), "CANDY %d/3" % candies, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, DIM)
 	draw_string(font, Vector2(w - 240, 30), "SP " + _timecode(room_time), HORIZONTAL_ALIGNMENT_LEFT, -1, 28, OSD)
 	draw_string(font, Vector2(w - 240, 52), date, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, OSD)
 
@@ -251,7 +251,7 @@ func _draw_prompt(font: Font) -> void:
 		widths.append(kw)
 		total += kw
 	total += GAP * (_prompt_keys.size() - 1)
-	var caption := "DRŽI" if _prompt_hold else "PRITISNI"
+	var caption := "HOLD" if _prompt_hold else "PRESS"
 	var cap_w := font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
 	var top := tip.y - 30.0 - H - 12.0
 	var x := clampf(tip.x - total / 2.0, 12.0, size.x - total - cap_w - 30.0)
