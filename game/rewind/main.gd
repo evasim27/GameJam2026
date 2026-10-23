@@ -22,6 +22,13 @@ const LINE_TAPE := "Zmanjkalo me je."
 const LINE_EATER := "Trak je lačen."
 ## The date stamp keeps 31/10 but the year moves on with every failure: this has happened before.
 const YEARS := [1989, 1994, 2003, 2009, 2016, 2026]
+## Rooms are seen up close and the camera follows the kid; the intro and ending use the full view.
+const ROOM_ZOOM := 3.0
+const FULL_ZOOM := 2.0
+## How far from the left edge of the view the kid stays, so there is room to see what's coming.
+const LOOK_AHEAD := 0.4
+const CAMERA_SPEED := 6.0
+const MARK_AHEAD := 200.0
 const REWIND_SPEED := 1.0
 const SCRUB_SPEED := 4.0
 
@@ -39,12 +46,15 @@ var tape_used := 0.0
 var _used_lines := {}
 var _echoes := {}  # room index -> {x, y, target, line}
 var _seen_hints := {}
+var _playing := false  # PLAY/PAUSE is one toggle; rewinding or FF drops back to pause
 var _rewind_unlocked := false
+var _glitch_unlocked := false
 var _free_rewind_used := false
 var _echo_spoke := false
 var _last_mode := ""
 var _fx_burst := 0.0
 var _intro: Node2D
+var _cam := Vector2.ZERO
 
 @onready var world: Node2D = $World
 @onready var hud: Control = $HUD/OSD
@@ -72,6 +82,8 @@ func _enter_room(i: int, first_time: bool) -> void:
 	room.setup(room_fails[i], total_fails)
 	world.add_child(room)
 	run = RoomRun.new(room)
+	world.scale = Vector2(ROOM_ZOOM, ROOM_ZOOM)
+	_cam = _camera_target()
 	run.free_rewind = room.free_first_rewind and not _free_rewind_used
 	_echo_spoke = false
 	if _echoes.has(i):
@@ -84,28 +96,32 @@ func _enter_room(i: int, first_time: bool) -> void:
 	hud.tape_budget = room.tape_budget
 	hud.marks = []
 	for o in room.objects:
-		hud.marks.append_array(o.timeline_marks(room.timeline_length))
+		# A mark shows up on the timeline once the kid is about a screen away from its object,
+		# and disappears once the kid is past it.
+		for m in o.timeline_marks(room.timeline_length):
+			m["from_x"] = o.position.x - MARK_AHEAD
+			m["until_x"] = o.position.x + o.zone_width()
+			hud.marks.append(m)
 	# Short windows last, so they stay visible on top of long ones.
 	hud.marks.sort_custom(func(a, b): return a.to - a.from > b.to - b.from)
 	if first_time:
 		hud.message = room.title
-		hud.sub_message = "drži D za PLAY, spusti za PAUSE" if i == 0 else ""
+		hud.sub_message = "D = PLAY / PAUSE" if i == 0 else ""
+		if i == 0:
+			hud.prompt("play", ["D"], false, "play")
+	_glitch_unlocked = _glitch_unlocked or room.glitch_from_x <= 0.0
 	var retry := room.retry_hint()
 	if retry != "":
 		hud.hint(retry)
 	_update_controls()
+	_playing = false
 	state = State.ROOM
 	_show()
 
 
+## Lights up the VCR panel buttons the player has learned so far.
 func _update_controls() -> void:
-	var c := "D/→ PLAY"
-	if _rewind_unlocked:
-		c += "   A/← PREVIJ   SHIFT HITRO"
-	if room_index >= 1:
-		c += "   E GLITCH"
-	c += "   R ZNOVA"
-	hud.controls = c
+	hud.unlocked = {"rew": _rewind_unlocked, "ff": _rewind_unlocked, "track": _glitch_unlocked}
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -114,7 +130,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if state != State.ROOM:
 		return
-	if event.is_action_pressed("tape_glitch") and room_index >= 1:
+	if event.is_action_pressed("tape_play") and not event.is_echo():
+		_playing = not _playing
+		hud.flash("play" if _playing else "pause")
+	elif event.is_action_pressed("tape_glitch") and _glitch_unlocked:
 		_glitch()
 	elif event.is_action_pressed("restart"):
 		_enter_room(room_index, false)
@@ -125,6 +144,9 @@ func _process(delta: float) -> void:
 	hud.candies = candies.size()
 	if state == State.ROOM:
 		_tick(delta)
+	if room:
+		_cam = _cam.lerp(_camera_target(), minf(CAMERA_SPEED * delta, 1.0))
+		world.position = (-_cam * ROOM_ZOOM).round()
 	_fx_burst = maxf(_fx_burst - delta, 0.0)
 	if state == State.ROOM or state == State.LEAVING:
 		_update_screen_fx()
@@ -136,18 +158,21 @@ func _tick(delta: float) -> void:
 	var ev := ""
 	var had := run.taken.size()
 	if Input.is_action_pressed("tape_rewind") and _rewind_unlocked:
+		_playing = false
 		mode = "SCRUB-" if fast else "REW"
 		ev = run.rewind(delta * (SCRUB_SPEED if fast else REWIND_SPEED))
 		if run.free_rewind:
 			_free_rewind_used = true
-	elif Input.is_action_pressed("tape_play"):
-		if fast and run.room_time < run.seen_time:
-			mode = "SCRUB+"
-			ev = run.scrub(delta * SCRUB_SPEED)
-		else:
-			mode = "PLAY"
-			ev = run.play(delta)
+	elif Input.is_action_pressed("tape_ff") and _rewind_unlocked and run.room_time < run.seen_time:
+		_playing = false
+		mode = "SCRUB+"
+		ev = run.scrub(delta * SCRUB_SPEED)
+	elif _playing:
+		mode = "PLAY"
+		ev = run.play(delta)
 	hud.mode = mode
+	if _prompt_done(mode):
+		hud.clear_prompt()
 	if mode != "PAUSE" and hud.message != "" and state == State.ROOM:
 		hud.message = ""
 		hud.sub_message = ""
@@ -158,6 +183,9 @@ func _tick(delta: float) -> void:
 	if run.taken.size() > had:
 		hud.say("+%ds  %s" % [int(RoomRun.CANDY_BONUS), run.taken.keys()[-1].to_upper()])
 	_show()
+	if not _glitch_unlocked and run.kid_x >= room.glitch_from_x:
+		_glitch_unlocked = true
+		_update_controls()
 	_check_hints()
 	if ev == "fail":
 		_fail()
@@ -173,7 +201,8 @@ func _on_pause() -> void:
 
 func _unlock_rewind() -> void:
 	_rewind_unlocked = true
-	hud.hint("Previj hišo. Otrok ostane tukaj.   [A / ←]")
+	hud.hint("Previj hišo. Otrok ostane tukaj.")
+	hud.prompt("rew", ["A"], true, "rewind")
 	_update_controls()
 
 
@@ -181,7 +210,9 @@ func _check_hints() -> void:
 	for h in room.trigger_hints():
 		if run.kid_x >= h.x and not _seen_hints.has(h.text):
 			_seen_hints[h.text] = true
-			hud.hint(h.text + "   [E]")
+			hud.hint(h.text)
+			if h.has("keys"):
+				hud.prompt(h.button, h.keys, h.get("hold", true), h.done)
 	if room.echo.visible:
 		room.echo.notice(run.kid_x)
 		if not _echo_spoke and absf(run.kid_x - room.echo.position.x) < 28.0:
@@ -190,10 +221,23 @@ func _check_hints() -> void:
 				hud.say(room.echo.line)
 
 
+## Whether the player just did what the key prompt on screen asks for.
+func _prompt_done(mode: String) -> bool:
+	match hud.prompt_done:
+		"play": return mode == "PLAY"
+		"pause": return mode == "PAUSE" and _last_mode == "PLAY"
+		"rewind": return mode == "REW" or mode == "SCRUB-"
+		"fast_rewind": return mode == "SCRUB-"
+		"scrub": return mode == "SCRUB+"
+	return false
+
+
 func _glitch() -> void:
 	var id := run.glitch()
 	if id == "":
 		return
+	if hud.prompt_done == "glitch":
+		hud.clear_prompt()
 	_fx_burst = 0.35
 	_show()
 	if run.tape <= RoomRun.EPS:
@@ -206,9 +250,18 @@ func _show() -> void:
 	room.kid.place(run.kid_x, run.kid_y())
 	hud.room_time = run.room_time
 	hud.kid_time = run.kid_time
+	hud.kid_x = run.kid_x
 	hud.seen_time = run.seen_time
 	hud.tape = run.tape
 	hud.eater = run.eater
+
+
+## Top-left corner of the view, in room pixels, keeping the kid in sight and the view inside the room.
+func _camera_target() -> Vector2:
+	var view := get_viewport_rect().size / ROOM_ZOOM
+	var x := clampf(run.kid_x - view.x * LOOK_AHEAD, 0.0, maxf(room.width - view.x, 0.0))
+	var y := clampf(run.kid_y() - view.y * 0.62, 0.0, maxf(180.0 - view.y, 0.0))
+	return Vector2(x, y)
 
 
 func _update_screen_fx() -> void:
@@ -286,6 +339,8 @@ func _end() -> void:
 	state = State.ENDING
 	room.queue_free()
 	room = null
+	world.position = Vector2.ZERO
+	world.scale = Vector2(FULL_ZOOM, FULL_ZOOM)
 	hud.visible = false
 	vhs.set_shader_parameter("tracking", 0.0)
 	vhs.set_shader_parameter("noise_amount", 0.05)

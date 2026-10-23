@@ -1,14 +1,42 @@
 extends Node2D
-## Opening, about 20 s, skippable with any key:
+## Opening: four shots with the story typed out on top. Any key goes to the next shot, Esc skips.
 ## (1) a tape clicks into a VCR in the dark, (2) the viewer's room with the "NE PREDVAJAJ" cover,
 ## (3) an autumn street with the last lit house, (4) the kid takes a candy, the door shuts, PLAY.
+##
+## To replace a shot's picture, drop a 320x180 (or any 16:9) PNG at `image`; until then the
+## placeholder drawing below is used.
 
 signal finished
 
 const FONT := preload("res://assets/fonts/VT323-Regular.ttf")
 const ARMCHAIR := preload("res://assets/noble_interior/armchair_tall.png")
 const KidNode := preload("res://rewind/kid.gd")
-const SHOTS := [3.0, 5.5, 5.0, 6.5]
+const CHARS_PER_SECOND := 28.0
+const LINE_PAUSE := 0.7
+const SHOTS := [
+	{
+		"duration": 6.5,
+		"image": "res://assets/intro/shot_1.png",
+		"lines": ["31. oktober, pozno zvečer.", "Nekdo v temni sobi vstavi kaseto v videorekorder."],
+	},
+	{
+		"duration": 7.5,
+		"image": "res://assets/intro/shot_2.png",
+		"lines": ["Na ovitku je z roko napisano: NE PREDVAJAJ.", "Posnetek se vseeno začne."],
+	},
+	{
+		"duration": 9.0,
+		"image": "res://assets/intro/shot_3.png",
+		"lines": ["Jesenska ulica. Vse hiše so že temne,", "razen zadnje. Otrok v doma narejenem kostumu", "hoče samo še eno sladkarijo."],
+	},
+	{
+		"duration": 9.5,
+		"image": "res://assets/intro/shot_4.png",
+		"lines": ["Otrok vzame sladkarijo in stopi noter.", "Vrata se za njim zaprejo. Hiša ga je ujela na trak.", "Otroka ne moreš voditi. Lahko pa upravljaš trak."],
+	},
+]
+
+var _images := {}
 
 var _t := 0.0
 var _kid: Node2D
@@ -16,25 +44,36 @@ var _done := false
 
 
 func _ready() -> void:
+	for i in SHOTS.size():
+		var path: String = SHOTS[i].image
+		if ResourceLoader.exists(path):
+			_images[i] = load(path)
 	_kid = KidNode.new()
 	_kid.visible = false
 	add_child(_kid)
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
+	if not (event is InputEventKey and event.pressed and not event.echo):
+		return
+	if event.keycode == KEY_ESCAPE:
 		_finish()
+	else:
+		_t = _shot_start(_shot() + 1)
+		if _t >= _shot_start(SHOTS.size()):
+			_finish()
 
 
 func _process(delta: float) -> void:
 	_t += delta
 	var shot := _shot()
-	_kid.visible = shot == 3
+	_kid.visible = shot == 3 and not _images.has(3)
 	if shot == 3:
 		var s := _t - _shot_start(3)
 		# Walks up, takes the candy, walks in.
-		var x := 120.0 + minf(s, 2.0) * 24.0 + maxf(s - 3.5, 0.0) * 24.0
+		var x := minf(120.0 + minf(s, 2.0) * 24.0 + maxf(s - 3.5, 0.0) * 24.0, 220.0)
 		_kid.place(x, 150.0)
+		_kid.visible = _kid.visible and s < 5.2  # inside before the door shuts
 		if s >= 2.0 and s < 3.5:
 			_kid.stand()
 	if _t >= _shot_start(SHOTS.size()):
@@ -58,18 +97,36 @@ func _shot() -> int:
 func _shot_start(i: int) -> float:
 	var s := 0.0
 	for k in i:
-		s += SHOTS[k]
+		s += SHOTS[k].duration
 	return s
 
 
 func _draw() -> void:
-	var s := _t - _shot_start(_shot())
-	match _shot():
-		0: _draw_click(s)
-		1: _draw_viewer_room(s)
-		2: _draw_street(s)
-		3: _draw_porch(s)
-	_text("pritisni katerokoli tipko za preskok", Vector2(4, 176), 12, Color(0.5, 0.5, 0.6, 0.6))
+	var shot := _shot()
+	var s := _t - _shot_start(shot)
+	if _images.has(shot):
+		draw_texture_rect(_images[shot], Rect2(0, 0, 320, 180), false)
+	else:
+		match shot:
+			0: _draw_click(s)
+			1: _draw_viewer_room(s)
+			2: _draw_street(s)
+			3: _draw_porch(s)
+	_draw_story(SHOTS[shot].lines, s)
+	_text("tipka: naprej   ESC: preskoči", Vector2(4, 176), 12, Color(0.5, 0.5, 0.6, 0.6))
+
+
+## The narration, typed out line by line in a band at the top.
+func _draw_story(lines: Array, s: float) -> void:
+	draw_rect(Rect2(0, 4, 320, 10 + lines.size() * 11), Color(0, 0, 0, 0.6))
+	var start := 0.4
+	for i in lines.size():
+		var line: String = lines[i]
+		var shown := clampi(int((s - start) * CHARS_PER_SECOND), 0, line.length())
+		if shown > 0:
+			var w := FONT.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x / 2.0
+			_text(line.left(shown), Vector2((320.0 - w) / 2.0, 16 + i * 11), 12, Color(0.93, 0.95, 1.0))
+		start += line.length() / CHARS_PER_SECOND + LINE_PAUSE
 
 
 func _draw_click(s: float) -> void:
@@ -105,7 +162,7 @@ func _draw_street(s: float) -> void:
 	for i in 18:
 		var c := Color(0.05, 0.05, 0.16).lerp(Color(0.25, 0.12, 0.3), i / 17.0)
 		draw_rect(Rect2(0, i * 7, 320, 7), c)
-	draw_circle(Vector2(260, 30), 10.0, Color(0.95, 0.9, 0.8))
+	draw_circle(Vector2(262, 64), 10.0, Color(0.95, 0.9, 0.8))
 	draw_rect(Rect2(0, 126, 320, 54), Color(0.08, 0.06, 0.1))
 	var pan := s * 6.0
 	for i in 6:
@@ -140,7 +197,7 @@ func _draw_porch(s: float) -> void:
 		draw_rect(Rect2(204, 124, 10, 4), Color(0.85, 0.75, 0.65))
 		draw_rect(Rect2(196, 124, 7, 4), Color(1.0, 0.5, 0.75))
 	if s > 5.6:
-		_text("PLAY ▶", Vector2(8, 16), 24, Color(0.93, 0.95, 1.0))
+		_text("PLAY ▶", Vector2(8, 166), 24, Color(0.93, 0.95, 1.0))
 
 
 func _static(r: Rect2, s: float) -> void:

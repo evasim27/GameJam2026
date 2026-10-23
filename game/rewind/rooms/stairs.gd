@@ -76,7 +76,7 @@ func floor_y(x: float) -> float:
 
 
 func trigger_hints() -> Array:
-	return [{"x": 120.0, "text": "Slika je poškodovana — poskusi tukaj."}]
+	return [{"x": 120.0, "text": "Slika je poškodovana — poskusi tukaj.", "button": "track", "keys": ["E"], "hold": false, "done": "glitch"}]
 
 
 func retry_hint() -> String:

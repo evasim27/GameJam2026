@@ -12,9 +12,12 @@ const END := "res://rewind/rooms/end_of_tape.gd"
 # Actions: ["play", s] ["rewind", s] ["scrub", s] ["to_x", x] ["glitch_when_possible"]
 const PLANS := [
 	[FOYER, "first play is the planned lesson", [["play", 30.0]], "fail:Pumpkin", ""],
-	[FOYER, "rewind the house past both pumpkins", [["to_x", 80.0], ["rewind", 1.75], ["to_x", 180.0], ["rewind", 0.5], ["play", 30.0]], "win", ""],
-	[FOYER, "precise pass picks up Maja", [["to_x", 80.0], ["rewind", 1.75], ["to_x", 180.0], ["rewind", 0.8], ["play", 30.0]], "win", "Maja 1989"],
 	[FOYER, "no adjustment at the second pumpkin", [["to_x", 80.0], ["rewind", 1.75], ["play", 30.0]], "fail:Pumpkin", ""],
+	[FOYER, "past the pumpkins, clock door stays shut", [["to_x", 80.0], ["rewind", 1.75], ["to_x", 180.0], ["rewind", 0.5], ["play", 60.0]], "fail:tape", ""],
+	[FOYER, "wind back to the clock, glitch the wall", [["to_x", 80.0], ["rewind", 1.75], ["to_x", 180.0], ["rewind", 0.5], ["to_x", 320.0], ["rewind", 4.0], ["glitch_when_possible"], ["play", 60.0]], "win", ""],
+	[FOYER, "full tutorial with Maja", [["to_x", 80.0], ["rewind", 1.75], ["to_x", 180.0], ["rewind", 0.8], ["to_x", 320.0], ["rewind", 4.0], ["glitch_when_possible"], ["play", 60.0]], "win", "Maja 1989"],
+	[FOYER, "scrub forward past the window again", [["to_x", 80.0], ["rewind", 1.75], ["to_x", 180.0], ["rewind", 0.5], ["to_x", 320.0], ["rewind", 7.0], ["scrub", 1.5], ["glitch_when_possible"], ["play", 60.0]], "win", ""],
+	[FOYER, "waiting at the wall for the next tear", [["to_x", 80.0], ["rewind", 1.75], ["to_x", 180.0], ["rewind", 0.5], ["to_x", 320.0], ["rewind", 4.0], ["to_x", 460.0], ["glitch_when_possible"], ["play", 60.0]], "win", ""],
 	[STAIRS, "shadow at the foot of the stairs", [["play", 30.0]], "fail:Shadow", ""],
 	[STAIRS, "ignore the tear, go up the stairs", [["to_x", 60.0], ["rewind", 1.6], ["play", 30.0]], "fail:Shadow", ""],
 	[STAIRS, "glitch late, no candy", [["to_x", 60.0], ["rewind", 1.6], ["glitch_when_possible"], ["play", 30.0]], "win", ""],
