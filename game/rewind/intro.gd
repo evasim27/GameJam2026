@@ -1,5 +1,5 @@
 extends Node2D
-## Opening: the story typed out on top of each shot. Any key goes to the next shot, Esc skips.
+## Opening: the story typed out on top of each shot. Space advances; Esc skips.
 ## (1) the kid walks up the street to the last lit house, (2) knocks, the door opens, it goes in,
 ## (3-7) the house_entry cutscene stills: the hall, the TV glow, the "DO NOT PLAY" tape, the VCR,
 ## pulled into the TV, PLAY.
@@ -12,6 +12,10 @@ const FONT := preload("res://assets/fonts/VT323-Regular.ttf")
 const EXTERIOR := preload("res://assets/exterior/exterior_background.png")
 const EXTERIOR_OPEN := preload("res://assets/exterior/exterior_background_open.png")
 const WALK_SHEET := preload("res://assets/exterior/player_walk_6f.png")
+const WIND_SHADER := preload("res://rewind/exterior_wind.gdshader")
+const WIND_SOUND := preload("res://assets/audio/wind_loop.ogg")
+const DOOR_SOUND := preload("res://assets/audio/door_creak.wav")
+const TV_SOUND := preload("res://assets/audio/static.mp3")
 const WALK_FRAME := Vector2(40, 56)
 const WALK_FPS := 9.0
 ## Exterior art is 480x270; the intro is 320x180.
@@ -68,9 +72,27 @@ var _images := {}
 
 var _t := 0.0
 var _done := false
+var _backdrop: Sprite2D
+var _wind_audio: AudioStreamPlayer
+var _door_audio: AudioStreamPlayer
+var _tv_audio: AudioStreamPlayer
+var _door_heard := false
 
 
 func _ready() -> void:
+	_backdrop = Sprite2D.new()
+	_backdrop.centered = false
+	_backdrop.texture = EXTERIOR
+	_backdrop.scale = Vector2.ONE * EXTERIOR_SCALE
+	_backdrop.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_backdrop.show_behind_parent = true
+	var wind_material := ShaderMaterial.new()
+	wind_material.shader = WIND_SHADER
+	_backdrop.material = wind_material
+	add_child(_backdrop)
+	_wind_audio = _make_sound(WIND_SOUND, -27.0, true)
+	_door_audio = _make_sound(DOOR_SOUND, -9.0)
+	_tv_audio = _make_sound(TV_SOUND, -22.0, true)
 	for i in SHOTS.size():
 		var path: String = SHOTS[i].image
 		if path != "" and ResourceLoader.exists(path):
@@ -82,7 +104,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.keycode == KEY_ESCAPE:
 		_finish()
-	else:
+	elif event.keycode == KEY_SPACE:
 		_t = _shot_start(_shot() + 1)
 		if _t >= _shot_start(SHOTS.size()):
 			_finish()
@@ -90,6 +112,22 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	_t += delta
+	var exterior := _t < _shot_start(2)
+	_backdrop.visible = exterior
+	if exterior:
+		_backdrop.texture = EXTERIOR_OPEN if _t >= DOOR_OPENS else EXTERIOR
+		if _t >= DOOR_OPENS and not _door_heard:
+			_door_heard = true
+			_door_audio.play()
+	elif _wind_audio.playing:
+		_wind_audio.stop()
+	if not exterior and _door_audio.playing:
+		_door_audio.stop()
+	var at_tv := _t >= _shot_start(3) and _t < _shot_start(6)
+	if at_tv and not _tv_audio.playing:
+		_tv_audio.play()
+	elif not at_tv and _tv_audio.playing:
+		_tv_audio.stop()
 	if _t >= _shot_start(SHOTS.size()):
 		_finish()
 	queue_redraw()
@@ -129,7 +167,7 @@ func _draw() -> void:
 	if shot == SHOTS.size() - 1 and s > 6.0:
 		_text("PLAY ▶", Vector2(8, 166), 24, Color(0.93, 0.95, 1.0))
 	_draw_story(SHOTS[shot].lines, s)
-	_text("any key: next   ESC: skip", Vector2(4, 176), 12, Color(0.5, 0.5, 0.6, 0.6))
+	_text("SPACE: next   ESC: skip", Vector2(4, 176), 12, Color(0.5, 0.5, 0.6, 0.6))
 
 
 ## The narration, typed out line by line in a band at the top.
@@ -170,9 +208,9 @@ func _draw_exterior(e: float) -> void:
 	var frame := int(e * WALK_FPS) % 6 if walking else 0
 
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(EXTERIOR_SCALE, EXTERIOR_SCALE))
-	draw_texture(EXTERIOR_OPEN if e >= DOOR_OPENS else EXTERIOR, Vector2.ZERO)
 	if e < INSIDE_AT:
 		draw_texture_rect_region(WALK_SHEET, Rect2(pos - WALK_FRAME / 2.0, WALK_FRAME), Rect2(Vector2(frame * WALK_FRAME.x, 0), WALK_FRAME))
+	_draw_leaves(e)
 	draw_set_transform(Vector2.ZERO)
 
 	var line := ""
@@ -182,6 +220,31 @@ func _draw_exterior(e: float) -> void:
 		line = "*knock knock*"
 	if line != "":
 		_text(line, Vector2(325, 127) * EXTERIOR_SCALE, 10, Color(1.0, 0.92, 0.72))
+
+
+func _draw_leaves(t: float) -> void:
+	var anchors := [Vector2(23, 77), Vector2(53, 55), Vector2(82, 92), Vector2(106, 111), Vector2(455, 84), Vector2(469, 124), Vector2(36, 143)]
+	for i in anchors.size():
+		var phase := fposmod(t * (10.0 + i * 1.8) + i * 13.0, 72.0)
+		var p: Vector2 = anchors[i] + Vector2(phase - 25.0 + sin(t * 1.2 + i) * 3.0, phase * 0.55 + sin(t * 2.0 + i) * 2.0)
+		if p.y > 215.0 or p.x < 0.0 or p.x > 480.0:
+			continue
+		var color := Color(0.35, 0.19, 0.12, 0.8) if i % 2 == 0 else Color(0.48, 0.24, 0.11, 0.85)
+		draw_colored_polygon(PackedVector2Array([p, p + Vector2(3, 1), p + Vector2(1, 3)]), color)
+
+
+func _make_sound(stream: AudioStream, volume: float, looping := false) -> AudioStreamPlayer:
+	var player := AudioStreamPlayer.new()
+	player.stream = stream.duplicate() if looping else stream
+	if looping:
+		if player.stream is AudioStreamOggVorbis:
+			(player.stream as AudioStreamOggVorbis).loop = true
+		elif player.stream is AudioStreamMP3:
+			(player.stream as AudioStreamMP3).loop = true
+	player.volume_db = volume
+	player.autoplay = stream == WIND_SOUND
+	add_child(player)
+	return player
 
 
 ## Crisp text: draw at 2x size, then scale the canvas by half.

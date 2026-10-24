@@ -10,6 +10,7 @@ const VIOLET := Color(0.78, 0.61, 1.0)
 const AMBER := Color(1.0, 0.75, 0.3)
 const RED := Color(0.75, 0.12, 0.12)
 const LED := Color(0.45, 1.0, 0.45)
+const BLOOD_FONT := preload("res://assets/fonts/Nosifer-Regular.ttf")
 
 const PANEL_H := 54.0
 const BUTTON := Vector2(70, 18)
@@ -142,8 +143,13 @@ func _draw() -> void:
 	if wrap > 0.0:
 		_draw_wrap()
 	if message != "":
-		draw_string(font, Vector2(0, 148), message, HORIZONTAL_ALIGNMENT_CENTER, w, 48, OSD)
-		draw_string(font, Vector2(0, 174), sub_message, HORIZONTAL_ALIGNMENT_CENTER, w, 20, DIM)
+		if message == "SIGNAL LOST":
+			var shake := Vector2(sin(_blink * 29.0) * 1.5, cos(_blink * 23.0) * 0.5)
+			draw_string(BLOOD_FONT, Vector2(2, 153) + shake, message, HORIZONTAL_ALIGNMENT_CENTER, w, 42, Color(0.12, 0.01, 0.02))
+			draw_string(BLOOD_FONT, Vector2(0, 150) + shake, message, HORIZONTAL_ALIGNMENT_CENTER, w, 42, Color(0.78, 0.06, 0.09))
+		else:
+			draw_string(font, Vector2(0, 148), message, HORIZONTAL_ALIGNMENT_CENTER, w, 48, OSD)
+		draw_string(font, Vector2(0, 182), sub_message, HORIZONTAL_ALIGNMENT_CENTER, w, 20, DIM)
 
 
 func _draw_rewind_cue(font: Font) -> void:

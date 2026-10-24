@@ -31,6 +31,10 @@ const SFX := {
 	"candy": preload("res://assets/audio/candy.wav"),
 	"echo": preload("res://assets/audio/echo.wav"),
 	"static": preload("res://assets/audio/static.mp3"),
+	"pumpkin_warning": preload("res://assets/audio/pumpkin_rattle.wav"),
+	"bat_warning": preload("res://assets/audio/bat_warning.ogg"),
+	"shadow_warning": preload("res://assets/audio/shadow_warning.ogg"),
+	"eater_warning": preload("res://assets/audio/eater_warning.ogg"),
 }
 ## The date stamp keeps 31/10 but the year moves on with every failure: this has happened before.
 const YEARS := [1989, 1994, 2003, 2009, 2016, 2026]
@@ -71,6 +75,7 @@ var _intro: Node2D
 var _ending: Node2D
 var _cam := Vector2.ZERO
 var _sound_players := {}
+var _warning_state := {}
 
 @onready var world: Node2D = $World
 @onready var hud: Control = $HUD/OSD
@@ -106,6 +111,7 @@ func _on_intro_finished() -> void:
 func _enter_room(i: int, first_time: bool) -> void:
 	_stop_sound("rewind")
 	_stop_sound("static")
+	_warning_state.clear()
 	room_index = i
 	if room:
 		room.queue_free()
@@ -223,6 +229,7 @@ func _tick(delta: float) -> void:
 		hud.say("%s'S MEMORY SAVED  +%ds" % [run.taken.keys()[-1].split(" ")[0].to_upper(), int(RoomRun.CANDY_BONUS)])
 		_sound("candy")
 	_show()
+	_update_warning_sounds(mode)
 	if not _glitch_unlocked and run.kid_x >= room.glitch_from_x:
 		_glitch_unlocked = true
 		_update_controls()
@@ -297,6 +304,43 @@ func _show() -> void:
 	hud.tape = run.tape
 	hud.eater = run.eater
 	hud.memory_found = run.taken.has(MEMORY_IDS[room_index])
+
+
+## Play an audible cue only as a hazard enters its warning state.
+func _update_warning_sounds(mode: String) -> void:
+	if mode != "PLAY":
+		return
+	for o in room.objects:
+		var cue := ""
+		var warn := false
+		var distance := o.position.x - run.kid_x
+		if o is Pumpkin:
+			var pumpkin := o as Pumpkin
+			var until_bite := fposmod(pumpkin.bite_from - run.room_time, pumpkin.period)
+			warn = not pumpkin.is_deadly(run.room_time) and until_bite < Pumpkin.WARN_TIME and distance > -8.0 and distance < 80.0
+			cue = "pumpkin_warning"
+		elif o is Bat:
+			var bat := o as Bat
+			for b in bat.bats_at(run.room_time, bat._since_glitch(run)):
+				var ahead := o.position.x + b.x - run.kid_x
+				if ahead > 2.0 and ahead < 55.0 and b.y > -52.0:
+					warn = true
+					break
+			cue = "bat_warning"
+		elif o is Shadow:
+			var shadow := o as Shadow
+			var phase := fposmod(run.room_time, shadow.period)
+			warn = (shadow.always or (phase >= shadow.from - 0.4 and phase < shadow.from)) and distance > -12.0 and distance < 80.0
+			cue = "shadow_warning"
+		elif o is TapeEater:
+			warn = (o as TapeEater).active(run) and run.eater > 0.58
+			cue = "eater_warning"
+		if cue == "":
+			continue
+		var key := str(o.get_instance_id())
+		if warn and not _warning_state.get(key, false):
+			_sound(cue)
+		_warning_state[key] = warn
 
 
 ## Top-left corner of the view, in room pixels, keeping the kid in sight and the view inside the room.
