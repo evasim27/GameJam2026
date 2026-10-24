@@ -21,6 +21,17 @@ const LINES := [
 ]
 const LINE_TAPE := "I ran out."
 const LINE_EATER := "The tape is hungry."
+const MEMORY_NAMES := ["MAJA", "LUKA", "TINA"]
+const MEMORY_IDS := ["Maja 1989", "Luka 1994", "Tina 2003"]
+const SFX := {
+	"play": preload("res://assets/audio/play.ogg"),
+	"pause": preload("res://assets/audio/pause.ogg"),
+	"rewind": preload("res://assets/audio/rewind.ogg"),
+	"glitch": preload("res://assets/audio/glitch.ogg"),
+	"candy": preload("res://assets/audio/candy.wav"),
+	"echo": preload("res://assets/audio/echo.wav"),
+	"static": preload("res://assets/audio/static.mp3"),
+}
 ## The date stamp keeps 31/10 but the year moves on with every failure: this has happened before.
 const YEARS := [1989, 1994, 2003, 2009, 2016, 2026]
 ## Rooms are seen up close and the camera follows the kid; the intro and ending use the full view.
@@ -59,6 +70,7 @@ var _fx_burst := 0.0
 var _intro: Node2D
 var _ending: Node2D
 var _cam := Vector2.ZERO
+var _sound_players := {}
 
 @onready var world: Node2D = $World
 @onready var hud: Control = $HUD/OSD
@@ -66,6 +78,15 @@ var _cam := Vector2.ZERO
 
 
 func _ready() -> void:
+	for id in SFX:
+		var player := AudioStreamPlayer.new()
+		player.stream = SFX[id].duplicate() if id == "rewind" else SFX[id]
+		if id == "rewind":
+			var rewind_stream := player.stream as AudioStreamOggVorbis
+			rewind_stream.loop = true
+		player.volume_db = -20.0 if id == "rewind" or id == "static" else -12.0
+		add_child(player)
+		_sound_players[id] = player
 	hud.visible = false
 	_intro = Intro.new()
 	_intro.finished.connect(_on_intro_finished)
@@ -79,6 +100,8 @@ func _on_intro_finished() -> void:
 
 
 func _enter_room(i: int, first_time: bool) -> void:
+	_stop_sound("rewind")
+	_stop_sound("static")
 	room_index = i
 	if room:
 		room.queue_free()
@@ -95,6 +118,8 @@ func _enter_room(i: int, first_time: bool) -> void:
 	hud.wrap = 0.0
 	hud.timeline_length = room.timeline_length
 	hud.tape_budget = room.tape_budget
+	hud.memory_name = MEMORY_NAMES[i]
+	hud.memory_found = false
 	hud.marks = []
 	for o in room.objects:
 		# A mark shows up on the timeline once the kid is about a screen away from its object,
@@ -107,7 +132,7 @@ func _enter_room(i: int, first_time: bool) -> void:
 	hud.marks.sort_custom(func(a, b): return a.to - a.from > b.to - b.from)
 	if first_time:
 		hud.message = room.title
-		hud.sub_message = "D = PLAY / PAUSE" if i == 0 else ""
+		hud.sub_message = "D = PLAY / PAUSE   ·   FIND MAJA'S MEMORY" if i == 0 else "FIND %s'S MEMORY" % MEMORY_NAMES[i]
 		if i == 0:
 			hud.prompt("play", ["D"], false, "play")
 	_glitch_unlocked = _glitch_unlocked or room.glitch_from_x <= 0.0
@@ -136,6 +161,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("tape_play") and not event.is_echo():
 		_playing = not _playing
 		hud.flash("play" if _playing else "pause")
+		_sound("play" if _playing else "pause")
 	elif event.is_action_pressed("tape_glitch") and _glitch_unlocked:
 		_glitch()
 	elif event.is_action_pressed("restart"):
@@ -144,7 +170,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	hud.date = "31/10/%d" % YEARS[mini(total_fails, YEARS.size() - 1)]
-	hud.candies = candies.size()
+	hud.candies = candies.size() + (run.taken.size() if state == State.ROOM else 0)
 	if state == State.ROOM:
 		_tick(delta)
 	if room:
@@ -181,10 +207,17 @@ func _tick(delta: float) -> void:
 		hud.sub_message = ""
 	if mode == "PAUSE" and _last_mode != "PAUSE":
 		_on_pause()
+	var rewinding := mode == "REW" or mode == "SCRUB-"
+	var rewind_player: AudioStreamPlayer = _sound_players["rewind"]
+	if rewinding and not rewind_player.playing:
+		rewind_player.play()
+	elif not rewinding and rewind_player.playing:
+		rewind_player.stop()
 	_last_mode = mode
 
 	if run.taken.size() > had:
-		hud.say("+%ds  %s" % [int(RoomRun.CANDY_BONUS), run.taken.keys()[-1].to_upper()])
+		hud.say("%s'S MEMORY SAVED  +%ds" % [run.taken.keys()[-1].split(" ")[0].to_upper(), int(RoomRun.CANDY_BONUS)])
+		_sound("candy")
 	_show()
 	if not _glitch_unlocked and run.kid_x >= room.glitch_from_x:
 		_glitch_unlocked = true
@@ -243,6 +276,7 @@ func _glitch() -> void:
 	if hud.prompt_done == "glitch":
 		hud.clear_prompt()
 	_fx_burst = 0.35
+	_sound("glitch")
 	_show()
 	if run.tape <= RoomRun.EPS:
 		run.out_of_tape = true
@@ -258,6 +292,7 @@ func _show() -> void:
 	hud.seen_time = run.seen_time
 	hud.tape = run.tape
 	hud.eater = run.eater
+	hud.memory_found = run.taken.has(MEMORY_IDS[room_index])
 
 
 ## Top-left corner of the view, in room pixels, keeping the kid in sight and the view inside the room.
@@ -283,10 +318,14 @@ func _update_screen_fx() -> void:
 		noise = 0.5
 	vhs.set_shader_parameter("tracking", tracking)
 	vhs.set_shader_parameter("noise_amount", noise)
+	vhs.set_shader_parameter("rewind_amount", 1.0 if hud.mode == "REW" or hud.mode == "SCRUB-" else 0.0)
 
 
 func _fail() -> void:
 	state = State.FAILING
+	_stop_sound("rewind")
+	_sound("echo")
+	_sound("static")
 	hud.mode = "STOP"
 	room.kid.fail()
 	total_fails += 1
@@ -352,6 +391,7 @@ func _rewind_to_start() -> void:
 
 func _leave_room() -> void:
 	state = State.LEAVING
+	_stop_sound("rewind")
 	hud.mode = "STOP"
 	tape_used += run.tape_used
 	for candy_name in run.taken:
@@ -374,8 +414,22 @@ func _end() -> void:
 	hud.visible = false
 	vhs.set_shader_parameter("tracking", 0.0)
 	vhs.set_shader_parameter("noise_amount", 0.05)
+	vhs.set_shader_parameter("rewind_amount", 0.0)
 	# Attempts: one per room plus every failure except the planned tutorial one.
 	var attempts := ROOMS.size() + maxi(total_fails - 1, 0)
 	_ending = Ending.new()
 	_ending.setup(candies, total_fails, attempts, tape_used)
 	world.add_child(_ending)
+
+
+func _sound(id: String) -> void:
+	var player: AudioStreamPlayer = _sound_players.get(id)
+	if player:
+		player.stop()
+		player.play()
+
+
+func _stop_sound(id: String) -> void:
+	var player: AudioStreamPlayer = _sound_players.get(id)
+	if player:
+		player.stop()

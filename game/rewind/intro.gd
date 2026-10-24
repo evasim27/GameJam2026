@@ -45,7 +45,7 @@ const SHOTS := [
 	{
 		"duration": 5.0,
 		"image": "res://assets/intro/house_02_screen_lit_room.png",
-		"lines": ["A blue TV glow spills from the living room."],
+		"lines": ["A blue TV glow spills from the living room.", "Three names whisper: Maja, Luka, Tina."],
 	},
 	{
 		"duration": 6.5,
@@ -60,7 +60,7 @@ const SHOTS := [
 	{
 		"duration": 8.5,
 		"image": "res://assets/intro/house_05_pulled_into_tv.png",
-		"lines": ["The screen pulls the kid in. Caught on tape.", "You can't control the kid.", "But you can control the tape."],
+		"lines": ["The screen pulls the kid in. Caught on tape.", "You can't control the kid. Control the tape.", "Find three candy memories. Free the voices."],
 	},
 ]
 

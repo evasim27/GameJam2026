@@ -6,6 +6,7 @@ extends Control
 const OSD := Color(0.93, 0.95, 1.0)
 const DIM := Color(0.6, 0.6, 0.72)
 const CYAN := Color(0.5, 1.0, 1.0)
+const VIOLET := Color(0.78, 0.61, 1.0)
 const AMBER := Color(1.0, 0.75, 0.3)
 const RED := Color(0.75, 0.12, 0.12)
 const LED := Color(0.45, 1.0, 0.45)
@@ -34,6 +35,8 @@ var tape_budget := 1.0
 var eater := 0.0
 var date := "31/10/1989"
 var candies := 0
+var memory_name := ""
+var memory_found := false
 ## Buttons the player hasn't learned yet are dark and unlabelled.
 var unlocked := {"rew": false, "ff": false, "track": false}
 ## Timeline marks: {from, to, color, row, from_x, until_x}. Shown while the kid is between the two.
@@ -113,8 +116,9 @@ func _draw() -> void:
 	var w := size.x
 
 	if mode != "PAUSE" or fmod(_blink, 1.0) < 0.6:
-		draw_string(font, Vector2(16, 30), _mode_label(), HORIZONTAL_ALIGNMENT_LEFT, -1, 28, OSD)
-	draw_string(font, Vector2(16, 52), "CANDY %d/3" % candies, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, DIM)
+		draw_string(font, Vector2(16, 30), _mode_label(), HORIZONTAL_ALIGNMENT_LEFT, -1, 28, VIOLET if mode == "REW" or mode == "SCRUB-" else OSD)
+	draw_string(font, Vector2(16, 52), "MEMORIES %d/3" % candies, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, DIM)
+	draw_string(font, Vector2(16, 72), "%s  %s" % [memory_name, "SAVED" if memory_found else "MISSING"], HORIZONTAL_ALIGNMENT_LEFT, -1, 17, CYAN if memory_found else AMBER)
 	draw_string(font, Vector2(w - 240, 30), "SP " + _timecode(room_time), HORIZONTAL_ALIGNMENT_LEFT, -1, 28, OSD)
 	draw_string(font, Vector2(w - 240, 52), date, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, OSD)
 
@@ -126,6 +130,8 @@ func _draw() -> void:
 	draw_string(font, Vector2(w - 72, 69), "%.1fs" % maxf(tape, 0.0), HORIZONTAL_ALIGNMENT_LEFT, -1, 18, DIM)
 
 	_draw_timeline()
+	if mode == "REW" or mode == "SCRUB-":
+		_draw_rewind_cue(font)
 	_draw_panel(font)
 	if _prompt_button != "":
 		_draw_prompt(font)
@@ -138,6 +144,15 @@ func _draw() -> void:
 	if message != "":
 		draw_string(font, Vector2(0, 148), message, HORIZONTAL_ALIGNMENT_CENTER, w, 48, OSD)
 		draw_string(font, Vector2(0, 174), sub_message, HORIZONTAL_ALIGNMENT_CENTER, w, 20, DIM)
+
+
+func _draw_rewind_cue(font: Font) -> void:
+	var w := size.x
+	draw_rect(Rect2(6, 6, w - 12, size.y - PANEL_H - 12), VIOLET, false, 2.0)
+	var band := Rect2(w / 2.0 - 154, 190, 308, 27)
+	draw_rect(band, Color(0.08, 0.04, 0.17, 0.83))
+	draw_rect(band, VIOLET, false, 1.0)
+	draw_string(font, Vector2(0, 209), "HOUSE REWINDS  ◀◀   KID STAYS", HORIZONTAL_ALIGNMENT_CENTER, w, 20, OSD)
 
 
 func _draw_timeline() -> void:

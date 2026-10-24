@@ -8,6 +8,7 @@ uniform sampler2D screen_tex : hint_screen_texture, filter_nearest;
 uniform float noise_amount = 0.04;
 uniform float aberration = 1.0;
 uniform float tracking = 0.0;
+uniform float rewind_amount = 0.0;
 
 uniform bool crt_curve_enabled = true;
 // Horri-Fi curve: larger values are flatter.
@@ -81,6 +82,9 @@ void fragment() {
 	col *= (1.0 - scan_strength) + scan_strength * sin(uv.y * 360.0 * 3.14159);
 	float n = rand(floor(uv * vec2(320.0, 180.0)) + fract(t * 7.0) * 100.0);
 	col = mix(col, vec3(n), clamp(noise_amount + band * 0.4, 0.0, 1.0));
+	// Rewinding changes the recorded house while the kid holds position. A violet cast
+	// distinguishes that state from ordinary PLAY and the cyan tracking glitches.
+	col = mix(col, col * vec3(0.78, 0.72, 1.1) + vec3(0.02, 0.0, 0.045), rewind_amount * 0.38);
 
 	vec2 v = uv * (1.0 - uv);
 	col *= clamp(pow(v.x * v.y * vignette.x * 10.0, vignette.y), 0.0, 1.0);

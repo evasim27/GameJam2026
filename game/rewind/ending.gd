@@ -88,6 +88,10 @@ func _draw() -> void:
 		_draw_results()
 	else:
 		var lines: Array = SHOTS[_shot].lines.duplicate()
+		if _shot == 1:
+			lines[1] = "Three memories made it out." if _candies.size() == 3 else "Some names are still trapped on the tape."
+		if _shot == 5:
+			lines[1] = "The voices are free." if _candies.size() == 3 else "The missing voices remain inside."
 		if _shot == 3 and _fails > 0:
 			lines.append("Behind the kid, earlier attempts linger.")
 		_draw_story(lines)
@@ -100,7 +104,7 @@ func _draw() -> void:
 func _draw_candy_count() -> void:
 	# Never paint uncollected candy into a fixed illustration.
 	draw_rect(Rect2(8, 139, 115, 24), Color(0.02, 0.02, 0.04, 0.85))
-	_text("CANDY  %d/3" % mini(_candies.size(), 3), Vector2(14, 154), 14, Color(1, 0.9, 0.7))
+	_text("MEMORIES  %d/3" % mini(_candies.size(), 3), Vector2(14, 154), 14, Color(1, 0.9, 0.7))
 	for i in mini(_candies.size(), 3):
 		draw_texture_rect_region(Candy.SPRITE, Rect2(Vector2(86 + i * 11, 146), Candy.ICON_SIZE), Candy.sprite_region(_candies[i]))
 
@@ -117,13 +121,17 @@ func _draw_echoes() -> void:
 
 
 func _draw_results() -> void:
-	draw_rect(Rect2(162, 12, 150, 78), Color(0.02, 0.02, 0.04, 0.9))
+	draw_rect(Rect2(162, 12, 150, 119), Color(0.02, 0.02, 0.04, 0.9))
 	_text("END OF TAPE", Vector2(172, 32), 23, Color(0.93, 0.95, 1.0))
-	_text("CANDY      %d/3" % mini(_candies.size(), 3), Vector2(172, 49), 15, Color(0.9, 0.9, 1.0))
+	_text("MEMORIES   %d/3" % mini(_candies.size(), 3), Vector2(172, 49), 15, Color(0.9, 0.9, 1.0))
 	_text("ATTEMPTS   %d" % _attempts, Vector2(172, 64), 15, Color(0.9, 0.9, 1.0))
 	_text("TAPE USED  %.1f s" % _tape, Vector2(172, 79), 15, Color(0.9, 0.9, 1.0))
-	# Runtime label: the reward changes only the label, never unlocks another level.
-	var label := "Gledalec" if _candies.size() == 3 else "G#e%?l#c"
+	for i in 3:
+		var name: String = ["Maja 1989", "Luka 1994", "Tina 2003"][i]
+		var freed := _candies.has(name)
+		_text("%s  %s" % [name.to_upper(), "FREE" if freed else "LOST"], Vector2(172, 96 + i * 11), 13, Color(0.52, 1.0, 0.95) if freed else Color(0.74, 0.7, 0.8))
+	# The cassette label reveals the fate of the voices, including partial rescues.
+	var label := "ALL FREE" if _candies.size() == 3 else "STILL LOST"
 	var width := FONT.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 28).x / 2.0
 	_text(label, Vector2(160 - width / 2.0, 141), 14, Color(0.1, 0.06, 0.05))
 	draw_rect(Rect2(0, 163, 320, 17), Color(0.02, 0.02, 0.04, 0.85))

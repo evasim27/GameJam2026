@@ -1,7 +1,6 @@
 extends Room
-## Static below the stairs. First a long hallway with a hole in the floor two kids wide: nothing
-## on the tape gets across, so the kid falls in twice and both echoes stay standing in it, heads
-## level with the floor, until the kid walks over them. Then the stairs: a shadow slides across the foot of the stairs on a rhythm, then a
+## Static below the stairs. One fall leaves an echo in the hole; the next take can cross it.
+## Then the stairs: a shadow slides across the foot of the stairs on a rhythm, then a
 ## short safe stretch by a small TV full of static. Glitching while the kid is at the TV and the
 ## frame tears shifts the wardrobe and shows a hidden door under the stairs. Ignore it and the kid
 ## goes up the stairs into the long shadow. Luka 1994 waits behind the door if it opened early.
@@ -49,7 +48,9 @@ func build() -> void:
 	add_drawing(_cobwebs, Vector2(HALL, 0))
 	add_drawing(_warm_spill)
 
-	add_object(Hole.new(), HOLE_X)
+	var hole := Hole.new()
+	hole.slots = 1
+	add_object(hole, HOLE_X)
 
 	var foot := Shadow.new()
 	foot.width = 24.0
@@ -99,7 +100,7 @@ func floor_y(x: float) -> float:
 
 func trigger_hints() -> Array:
 	return [
-		{"x": HOLE_X - 50.0, "text": "The floor is gone here. Nothing on the tape gets you across."},
+		{"x": HOLE_X - 50.0, "text": "The floor is gone. Your next take may need the last one."},
 		{"x": HALL + 120.0, "text": "The picture is damaged here. Try it.", "button": "track", "keys": ["E"], "hold": false, "done": "glitch"},
 	]
 
@@ -109,11 +110,11 @@ func retry_hint() -> String:
 	for g in ghosts:
 		if g.get("bridge", false):
 			bridged += 1
-	if bridged == 1:
-		return "Your echo is still down there. Walk on it."
-	if bridged >= 2 and fails - bridged == 0:
-		return "Two echoes fill the hole. Walk over them."
-	return "The door is where the picture skips." if fails - bridged >= 2 else ""
+	if bridged >= 1:
+		if fails > bridged:
+			return "At the TV, glitch the torn picture to find the door."
+		return "Your last take is still here. Walk over its echo."
+	return ""
 
 
 func idle_hint_target(run: RoomRun) -> float:
