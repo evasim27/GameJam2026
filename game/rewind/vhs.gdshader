@@ -8,6 +8,7 @@ uniform sampler2D screen_tex : hint_screen_texture, filter_nearest;
 uniform float noise_amount = 0.04;
 uniform float aberration = 1.0;
 uniform float tracking = 0.0;
+uniform float bat_tracking = 0.0;
 uniform float rewind_amount = 0.0;
 
 uniform bool crt_curve_enabled = true;
@@ -66,7 +67,14 @@ void fragment() {
 	uv.x += band * (rand(vec2(line, floor(t * 30.0))) - 0.5) * 0.1;
 	uv.x += (rand(vec2(line, floor(t * 24.0))) - 0.5) * 0.003 * (0.3 + tracking * 3.0);
 
-	vec2 px = vec2(SCREEN_PIXEL_SIZE.x * (aberration + tracking * 3.0), 0.0);
+	// Bat releases tear the camera vertically, across full-height columns.
+	float column = floor(uv.x * 320.0);
+	float band_x = fract(t * 0.61);
+	float vertical_band = (1.0 - smoothstep(0.0, 0.11, abs(uv.x - band_x))) * bat_tracking;
+	float column_jitter = rand(vec2(column, floor(t * 28.0))) - 0.5;
+	uv.y += column_jitter * (vertical_band * 0.12 + bat_tracking * 0.006);
+
+	vec2 px = vec2(SCREEN_PIXEL_SIZE.x * (aberration + tracking * 3.0), SCREEN_PIXEL_SIZE.y * vertical_band * 8.0);
 	vec3 col = vec3(
 		texture(screen_tex, uv + px).r,
 		texture(screen_tex, uv).g,
@@ -81,7 +89,8 @@ void fragment() {
 
 	col *= (1.0 - scan_strength) + scan_strength * sin(uv.y * 360.0 * 3.14159);
 	float n = rand(floor(uv * vec2(320.0, 180.0)) + fract(t * 7.0) * 100.0);
-	col = mix(col, vec3(n), clamp(noise_amount + band * 0.4, 0.0, 1.0));
+	col = mix(col, vec3(n), clamp(noise_amount + band * 0.4 + vertical_band * 0.35, 0.0, 1.0));
+	col += vec3(0.06, 0.13, 0.16) * vertical_band;
 	// Rewinding changes the recorded house while the kid holds position. A violet cast
 	// distinguishes that state from ordinary PLAY and the cyan tracking glitches.
 	col = mix(col, col * vec3(0.78, 0.72, 1.1) + vec3(0.02, 0.0, 0.045), rewind_amount * 0.38);

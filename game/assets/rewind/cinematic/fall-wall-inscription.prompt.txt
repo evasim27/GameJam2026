@@ -1,0 +1,12 @@
+Generated with the built-in image_gen tool, with transparent_background=true.
+
+Use case: stylized-concept
+Asset type: transparent 2D game wall-scratch decal, wide landscape aspect ratio approximately 3:1.
+Primary request: A desperate handwritten message scratched INTO old wallpaper/plaster, isolated on actual transparent background. Only the engraved letter strokes and tiny chipped edges are visible, absolutely no wall rectangle behind them. Will be overlaid on dark gray violet Victorian floral wallpaper in a haunted house side scrolling game.
+Text (verbatim), laid out in exactly three centered lines:
+"SOMETIMES YOU HAVE
+TO FALL
+TO GET AHEAD"
+Style: rough uneven uppercase lettering gouged by a sharp object, readable handmade narrow capitals, tiny warm pale stone-colored exposed plaster highlights with dark charcoal inset grooves. Clearly carved scratched lettering, not chalk or paint. Second line a little larger. Each stroke substantial enough to survive reduction to 152 pixels wide; avoid excessive fine detail.
+Composition: lettering fills nearly the full image with small transparent margins. Three lines close together. Flat straight-on view, no perspective.
+Constraints: real alpha transparency everywhere outside carved strokes; no physical sign, no plaque, no border, no background texture, no illustration, no extra symbols, no drop shadow, no glow. Correct spelling exactly. Muted bone gray/beige and charcoal suitable for dim candlelight.

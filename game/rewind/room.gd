@@ -86,8 +86,8 @@ func retry_hint() -> String:
 ## the next thing blocking the kid, or the way out.
 func idle_hint_target(run: RoomRun) -> float:
 	for o in objects:
-		if o.blocks(run) and o.position.x > run.kid_x:
-			return o.position.x
+		if o.blocks(run) and o.block_x() > run.kid_x:
+			return o.block_x()
 	return width - 24.0
 
 

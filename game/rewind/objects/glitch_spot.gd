@@ -11,6 +11,11 @@ extends TapeObject
 @export var to := 2.4
 @export var kid_min := -INF
 @export var kid_max := INF
+## Another glitch that has to happen first; until then this frame doesn't tear at all.
+@export var requires := ""
+@export var tint := Color(0.4, 1.0, 1.0)
+## Chime as soon as the window opens (boss fight), so the moment is heard as well as seen.
+@export var cue := false
 
 ## Raised by the room after repeated failures, so the tear gets more obvious.
 var strength := 0.0
@@ -23,21 +28,30 @@ func active(t: float) -> bool:
 	return periodic(t, period, from, to)
 
 
+## Whether the frame tears right now. Subclasses can time it on more than room time.
+func window_open(run: RoomRun) -> bool:
+	return active(run.room_time)
+
+
+func unlocked(run: RoomRun) -> bool:
+	return not run.glitched.has(glitch_id) and (requires == "" or run.glitched.has(requires))
+
+
 func can_glitch(run: RoomRun) -> bool:
-	return not run.glitched.has(glitch_id) and active(run.room_time) and run.kid_x >= kid_min and run.kid_x <= kid_max
+	return unlocked(run) and window_open(run) and run.kid_x >= kid_min and run.kid_x <= kid_max
 
 
 func show_time(run: RoomRun) -> void:
 	_t = run.room_time
-	_done = run.glitched.has(glitch_id)
-	_active = active(_t)
+	_done = not unlocked(run)
+	_active = window_open(run)
 	queue_redraw()
 
 
 func _draw() -> void:
 	if _done:
 		return
-	var cyan := Color(0.4, 1.0, 1.0)
+	var cyan := tint
 	if _active:
 		# Tracking tear: horizontal slices shifted sideways. Seeded by room time, so it scrubs.
 		var noise_seed := int(_t * 20.0)
@@ -60,8 +74,8 @@ func _draw() -> void:
 
 
 func screen_effect(run: RoomRun) -> Dictionary:
-	return {"tracking": 0.35} if active(run.room_time) and not run.glitched.has(glitch_id) else {}
+	return {"tracking": 0.35} if unlocked(run) and window_open(run) else {}
 
 
 func timeline_marks(length: float) -> Array:
-	return periodic_marks(length, period, from, to, Color(0.4, 1.0, 1.0, 0.9))
+	return periodic_marks(length, period, from, to, Color(tint, 0.9))

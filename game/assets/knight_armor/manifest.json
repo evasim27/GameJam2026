@@ -1,0 +1,37 @@
+{
+  "sheet": "knight-armor-swing-v2-6f.png",
+  "frame_size": [
+    128,
+    128
+  ],
+  "columns": 6,
+  "rows": 1,
+  "anchor_pixels": [
+    76,
+    112
+  ],
+  "base_width_pixels": 37,
+  "facing": "left",
+  "durations_seconds": [
+    1.6,
+    0.16,
+    0.12,
+    0.07,
+    0.14,
+    0.22
+  ],
+  "frames": [
+    "idle",
+    "anticipation",
+    "raised",
+    "slash",
+    "follow_through",
+    "recover"
+  ],
+  "generation": "built-in image_gen v2; coarser pumpkin-reference pixel art, nearest-neighbor packing and base alignment",
+  "scene_scale": 0.4398148148148148,
+  "idle_visible_height_pixels": 64,
+  "pumpkin_visible_height_world": 14.074074074074074,
+  "armor_idle_visible_height_world": 28.14814814814815,
+  "height_ratio": 2
+}

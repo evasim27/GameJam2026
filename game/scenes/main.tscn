@@ -61,7 +61,7 @@ position = Vector2(459, 297)
 position = Vector2(819, 162)
 
 [node name="Player" parent="." instance=ExtResource("6_ya4ey")]
-position = Vector2(73, 282)
+position = Vector2(127, 313)
 
 [node name="HUD" type="CanvasLayer" parent="."]
 

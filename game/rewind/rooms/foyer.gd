@@ -98,7 +98,7 @@ func trigger_hints() -> Array:
 	return [
 		{"x": 40.0, "text": "D again = PAUSE. PAUSE doesn't use tape.", "button": "pause", "keys": ["D"], "hold": false, "done": "pause"},
 		{"x": 140.0, "text": "This pumpkin isn't on the timeline. Watch for when it starts shaking."},
-		{"x": 196.0, "text": "Pink window = candy. Gives back 2 s of tape."},
+		{"x": 196.0, "text": "Pink window = memory. Gives back 2 s of tape."},
 		{"x": 280.0, "text": "The door is only open 0:05-0:08. SHIFT + A rewinds faster.", "button": "rew", "keys": ["SHIFT", "A"], "done": "fast_rewind"},
 		{"x": 345.0, "text": "FF moves the house forward, but only through footage you've seen.", "button": "ff", "keys": ["F"], "done": "scrub"},
 		{"x": 390.0, "text": "When the picture tears (cyan), press E. A glitch costs 3 s.", "button": "track", "keys": ["E"], "hold": false, "done": "glitch"},

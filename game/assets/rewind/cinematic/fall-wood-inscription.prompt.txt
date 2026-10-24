@@ -1,0 +1,13 @@
+Generated with the built-in image_gen tool, with transparent_background=true.
+
+Use case: stylized-concept
+Asset type: transparent 2D game decal of knife-cut text for an existing dark walnut wooden wall panel.
+Primary request: a small crudely hand-carved inscription cut INTO dark brown stained wood. Generate ONLY the incised letter grooves and their narrow raw-wood edges on genuine transparent alpha background. The existing wooden panel in the game must remain visible around and between the strokes.
+Text verbatim in exactly three centered lines:
+"SOMETIMES YOU HAVE
+TO FALL
+TO GET AHEAD"
+Style: thin angular handmade uppercase knife cuts, slightly uneven, readable. Recessed almost-black warm brown grooves, with very narrow muted amber-brown raw wood bevels along their lower edges. Subtle material, shallow cuts, no chunky stone edges. All three lines approximately equal letter height, compact.
+Composition: wide landscape approximately 3:1; fill image with text and little transparent margin; front orthographic view.
+Palette: dark walnut, deep brown groove shadows, subdued warm brown bevels. No white, cream, gray, chalk, plaster, metallic, or bright gold strokes.
+Constraints: transparent everywhere outside cuts, no background wood rectangle, no board, no sign, no border, no wallpaper, no objects. No raised lettering, glow, drop shadow, paint, chalk or stone. It must look dug into dark wood, never sitting on top. Designed to remain legible at a small final game size of about 48x16 pixels.

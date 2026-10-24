@@ -23,6 +23,8 @@ const LINES := [
 ]
 const LINE_TAPE := "I ran out."
 const LINE_EATER := "The tape is hungry."
+## Said after every failure in the boss's second phase, so it is never used up.
+const LINE_SCREEN := "Rewind feeds it. The empty frame doesn't."
 const MEMORY_NAMES := ["MAJA", "LUKA", "TINA"]
 const MEMORY_IDS := ["Maja 1989", "Luka 1994", "Tina 2003"]
 const SFX := {
@@ -107,6 +109,11 @@ func _ready() -> void:
 		player.volume_db = -20.0 if id == "rewind" or id == "static" else (-6.0 if id.begins_with("whisper_") else -12.0)
 		add_child(player)
 		_sound_players[id] = player
+	var ping := AudioStreamPlayer.new()
+	ping.stream = _ping_stream()
+	ping.volume_db = -10.0
+	add_child(ping)
+	_sound_players["ping"] = ping
 	hud.visible = false
 	_intro = Intro.new()
 	_intro.finished.connect(_on_intro_finished)
@@ -198,6 +205,8 @@ func _enter_room(i: int, first_time: bool) -> void:
 	run = RoomRun.new(room)
 	world.scale = Vector2(ROOM_ZOOM, ROOM_ZOOM)
 	_cam = _camera_target()
+	run.view_width = get_viewport_rect().size.x / ROOM_ZOOM
+	run.camera_right = _cam.x + run.view_width
 	run.free_rewind = room.free_first_rewind and not _free_rewind_used
 	_echo_spoke = false
 
@@ -283,6 +292,8 @@ func _process(delta: float) -> void:
 	hud.date = "31/10/%d" % YEARS[mini(total_fails, YEARS.size() - 1)]
 	hud.candies = candies.size() + (run.taken.size() if state == State.ROOM else 0)
 	if state == State.ROOM:
+		run.view_width = get_viewport_rect().size.x / ROOM_ZOOM
+		run.camera_right = (-world.position.x + get_viewport_rect().size.x) / ROOM_ZOOM
 		_tick(delta)
 	if state == State.FORBIDDEN and _forbidden:
 		var view := get_viewport_rect().size / FORBIDDEN_ZOOM
@@ -352,6 +363,7 @@ func _tick(delta: float) -> void:
 		_sound("candy")
 	_show()
 	_update_warning_sounds(mode)
+	_update_boss_cues()
 	if not _glitch_unlocked and run.kid_x >= room.glitch_from_x:
 		_glitch_unlocked = true
 		_update_controls()
@@ -415,6 +427,10 @@ func _glitch() -> void:
 		hud.clear_prompt()
 	_fx_burst = 0.35
 	_sound("glitch")
+	if id == "reel":
+		hud.hint("The tape jammed. It fled into the TV.")
+	elif id == "screen":
+		hud.say("THE PICTURE SWALLOWED IT")
 	_show()
 	if run.tape <= RoomRun.EPS:
 		run.out_of_tape = true
@@ -468,6 +484,48 @@ func _update_warning_sounds(mode: String) -> void:
 		if warn and not _warning_state.get(key, false):
 			_sound(cue)
 		_warning_state[key] = warn
+
+
+## The boss fight is also heard: a chime the moment a glitch window opens, and the hiss of the
+## static wave for exactly as long as it rolls. Works in every mode, the wave is met by rewinding.
+func _update_boss_cues() -> void:
+	for o in room.objects:
+		var cue := ""
+		var on := false
+		if o is GlitchSpot and o.cue:
+			cue = "ping"
+			on = o.can_glitch(run)
+		elif o is TapeEater:
+			cue = "static"
+			on = (o as TapeEater).static_wave(run)
+		if cue == "":
+			continue
+		var key := "cue%d" % o.get_instance_id()
+		var was: bool = _warning_state.get(key, false)
+		if on and not was:
+			_sound(cue)
+		elif was and not on and cue == "static":
+			_stop_sound(cue)
+		_warning_state[key] = on
+
+
+## A short rising two-tone chime, made here so it needs no asset.
+static func _ping_stream() -> AudioStreamWAV:
+	var rate := 22050
+	var length := 0.24
+	var n := int(rate * length)
+	var data := PackedByteArray()
+	data.resize(n * 2)
+	for i in n:
+		var t := float(i) / rate
+		var f := 988.0 if t < 0.1 else 1480.0
+		var env := minf(t * 300.0, 1.0) * (1.0 - t / length)
+		data.encode_s16(i * 2, int(sin(TAU * f * t) * env * 12000.0))
+	var s := AudioStreamWAV.new()
+	s.format = AudioStreamWAV.FORMAT_16_BITS
+	s.mix_rate = rate
+	s.data = data
+	return s
 
 
 ## Top-left corner of the view, in room pixels, keeping the kid in sight and the view inside the room.
@@ -586,6 +644,7 @@ func _cleanup_forbidden() -> void:
 
 func _update_screen_fx() -> void:
 	var tracking := 0.0
+	var bat_tracking := 0.0
 	var noise := 0.04
 	if hud.mode == "REW" or hud.mode.begins_with("SCRUB"):
 		tracking = 0.5
@@ -593,16 +652,19 @@ func _update_screen_fx() -> void:
 	for o in room.objects:
 		var fx := o.screen_effect(run)
 		tracking += fx.get("tracking", 0.0)
+		bat_tracking = maxf(bat_tracking, fx.get("bat_tracking", 0.0))
 		noise += fx.get("noise", 0.0)
 	if _fx_burst > 0.0:
 		tracking = 1.5
 		noise = 0.5
 	vhs.set_shader_parameter("tracking", tracking)
+	vhs.set_shader_parameter("bat_tracking", bat_tracking)
 	vhs.set_shader_parameter("noise_amount", noise)
 	vhs.set_shader_parameter("rewind_amount", 1.0 if hud.mode == "REW" or hud.mode == "SCRUB-" else 0.0)
 
 
 func _fail() -> void:
+	vhs.set_shader_parameter("bat_tracking", 0.0)
 	state = State.FAILING
 	_stop_sound("rewind")
 	_sound("echo")
@@ -625,9 +687,9 @@ func _fail() -> void:
 		hud.sub_message = "the tape for this room is used up"
 		line = LINE_TAPE
 	elif run.cause is TapeEater:
-		hud.message = "TAPE EATEN"
-		hud.sub_message = "the eater reached the playhead"
-		line = LINE_EATER
+		hud.message = "SIGNAL LOST"
+		hud.sub_message = "the tape monster reached the playhead"
+		line = LINE_SCREEN if (run.cause as TapeEater).phase(run) == TapeEater.Phase.SCREEN else LINE_EATER
 		target = run.cause.hint_target(run)
 		create_tween().tween_property(hud, "wrap", 1.0, 0.8)
 	else:
@@ -643,9 +705,9 @@ func _fail() -> void:
 	if reset:
 		hud.message = "REWIND TO START"
 		hud.sub_message = "%d failures in one room: the tape goes back to the house" % MAX_ROOM_FAILS
-	if line == "" or _used_lines.has(line):
+	if line == "" or (_used_lines.has(line) and line != LINE_SCREEN):
 		line = LINES[mini(total_fails - 1, LINES.size() - 1)]
-	if _used_lines.has(line):
+	if _used_lines.has(line) and line != LINE_SCREEN:
 		line = ""
 	_used_lines[line] = true
 	# Echoes pile up: every failure in a room leaves one that stays until the room is cleared.
@@ -694,6 +756,7 @@ func _leave_room() -> void:
 
 func _end() -> void:
 	_cleanup_forbidden()
+	vhs.set_shader_parameter("bat_tracking", 0.0)
 	state = State.ENDING
 	room.queue_free()
 	room = null

@@ -21,12 +21,21 @@ var tape_used := 0.0
 var free_rewind := false
 var glitched := {}  # glitch id -> kid_x when it happened
 var glitch_times := {}  # glitch id -> room_time when it happened
+var glitch_kid_times := {}  # glitch id -> kid_time when it happened
 var taken := {}  # candy name -> true
 var eater := 0.0  # tape-eater progress towards the playhead, 0..1
 var cause: TapeObject = null  # what ended the attempt
 var out_of_tape := false
+## The renderer supplies the actual camera edge; headless replays use its target framing.
+var camera_right := NAN
+var view_width := 640.0 / 3.0
 
 var _rewound_free := false
+
+
+func right_of_view() -> float:
+	var target_right := clampf(kid_x - view_width * 0.4, 0.0, maxf(room.width - view_width, 0.0)) + view_width
+	return maxf(camera_right, target_right) if is_finite(camera_right) else target_right
 
 
 func _init(r: Room) -> void:
@@ -44,8 +53,8 @@ func play(dt: float) -> String:
 	var from_x := kid_x
 	var to_x := kid_x + KID_SPEED * dt
 	for o in room.objects:
-		if o.blocks(self) and from_x < o.position.x and to_x >= o.position.x:
-			to_x = minf(to_x, o.position.x - EPS)
+		if o.blocks(self) and from_x < o.block_x() and to_x >= o.block_x():
+			to_x = minf(to_x, o.block_x() - EPS)
 	kid_time += dt
 	room_time += dt
 	seen_time = maxf(seen_time, room_time)
@@ -92,7 +101,10 @@ func glitch() -> String:
 		if o is GlitchSpot and o.can_glitch(self):
 			glitched[o.glitch_id] = kid_x
 			glitch_times[o.glitch_id] = room_time
+			glitch_kid_times[o.glitch_id] = kid_time
 			_spend(minf(GLITCH_COST, tape))
+			for other in room.objects:
+				other.on_glitch(self, o.glitch_id)
 			return o.glitch_id
 	return ""
 

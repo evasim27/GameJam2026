@@ -1,0 +1,39 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/skeleton/skeleton-swing-6f.png" id="1_sheet"]
+
+[sub_resource type="AtlasTexture" id="Atlas_0"]
+atlas = ExtResource("1_sheet")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="Atlas_1"]
+atlas = ExtResource("1_sheet")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="Atlas_2"]
+atlas = ExtResource("1_sheet")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="Atlas_3"]
+atlas = ExtResource("1_sheet")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="Atlas_4"]
+atlas = ExtResource("1_sheet")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="Atlas_5"]
+atlas = ExtResource("1_sheet")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_skeleton"]
+animations = [{"frames": [{"duration": 1, "texture": SubResource("Atlas_0")}], "loop": true, "name": &"idle", "speed": 10.0},
+{"frames": [{"duration": 1, "texture": SubResource("Atlas_0")}, {"duration": 1.6, "texture": SubResource("Atlas_1")}, {"duration": 1.2, "texture": SubResource("Atlas_2")}, {"duration": 0.7, "texture": SubResource("Atlas_3")}, {"duration": 1.4, "texture": SubResource("Atlas_4")}, {"duration": 2.2, "texture": SubResource("Atlas_5")}], "loop": false, "name": &"swing", "speed": 10.0},
+{"frames": [{"duration": 16, "texture": SubResource("Atlas_0")}, {"duration": 1.6, "texture": SubResource("Atlas_1")}, {"duration": 1.2, "texture": SubResource("Atlas_2")}, {"duration": 0.7, "texture": SubResource("Atlas_3")}, {"duration": 1.4, "texture": SubResource("Atlas_4")}, {"duration": 2.2, "texture": SubResource("Atlas_5")}], "loop": true, "name": &"display", "speed": 10.0}]
+
+[node name="Skeleton" type="AnimatedSprite2D"]
+texture_filter = 1
+scale = Vector2(0.4398148148148148, 0.4398148148148148)
+sprite_frames = SubResource("SpriteFrames_skeleton")
+animation = &"idle"
+offset = Vector2(-12, -48)

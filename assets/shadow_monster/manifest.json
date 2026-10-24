@@ -1,0 +1,18 @@
+{
+  "texture": "game/assets/rewind/cinematic/shadow-monster.png",
+  "frame_rects": {
+    "idle": [
+      42,
+      16,
+      43,
+      96
+    ],
+    "reach": [
+      133,
+      16,
+      118,
+      96
+    ]
+  },
+  "generation": "built-in image_gen; nearest-neighbor export; original alpha preserved"
+}

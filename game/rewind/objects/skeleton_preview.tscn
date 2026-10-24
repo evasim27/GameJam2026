@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://rewind/objects/skeleton.tscn" id="1_armor"]
+[ext_resource type="Texture2D" path="res://assets/rewind/pumpkin-styled.png" id="2_pumpkin"]
+
+[node name="SkeletonPreview" type="Node2D"]
+
+[node name="Background" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(0, 0, 640, 0, 640, 360, 0, 360)
+color = Color(0.106, 0.09, 0.114, 1)
+
+[node name="Comparison" type="Node2D" parent="."]
+position = Vector2(105, 290)
+scale = Vector2(7, 7)
+
+[node name="Pumpkin" type="Sprite2D" parent="Comparison"]
+texture_filter = 1
+texture = ExtResource("2_pumpkin")
+centered = false
+position = Vector2(0, -14.1037037)
+scale = Vector2(0.02962962963, 0.02962962963)
+region_enabled = true
+region_rect = Rect2(248, 232, 540, 480)
+
+[node name="Skeleton" parent="Comparison" instance=ExtResource("1_armor")]
+position = Vector2(50, 0)
+animation = &"display"
+autoplay = "display"
+
+[node name="PumpkinLabel" type="Label" parent="."]
+offset_left = 105.0
+offset_top = 312.0
+text = "BUCA / 1x"
+
+[node name="SkeletonLabel" type="Label" parent="."]
+offset_left = 410.0
+offset_top = 312.0
+text = "OKOSTNJAK / 2x"

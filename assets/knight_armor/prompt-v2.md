@@ -1,0 +1,9 @@
+# Knight armor v2 — pumpkin pixel density
+
+Tool: built-in `image_gen`, transparent background enabled.
+References: original knight sprite sheet and `game/assets/rewind/pumpkin-styled.png`.
+
++Use case: stylized-concept
+Edit target: image 1 existing six-frame knight armor animation. Style reference: image 2 orange pumpkin sprite.
+Redraw the SAME empty knight armor on wooden pedestal with the SAME six sword-swing poses, but match the pumpkin's COARSE LOW RESOLUTION PIXEL ART. The armor including its stand must be twice the pumpkin height when placed together; its logical silhouette should be about 64 art pixels tall, whereas the pumpkin is about 32 art pixels tall. This is an intentionally low-detail sprite: large clearly visible square pixel clusters, dark thick stepped outline, broad simple silver-gray plate shapes, only 3 metal shading tones plus muted brass accents, brown pedestal. Remove all tiny scratches, ornate filigree, stippling, fine reflective highlights, dithering and texture noise. The armor should have the same apparent pixel grid density as the pumpkin, rather than looking like a miniature detailed illustration. Each drawn art pixel a uniform square block, no antialiasing.
+Output ONLY the armor animation, no pumpkin: exactly six equal square cells in 3 columns by 2 rows on true transparent background. Same side/three-quarter view facing left, closed helmet without face or glowing eyes. Same grounded pedestal size and identical location in every frame. All armor and sword visible inside each cell with margins. Reading order: idle sword down-left; anticipation sword up-back; raised sword over head; slash down-left; low follow-through; recovery. Empty background, no floor, no shadows, no text, no borders. Keep planted feet, same scale and consistent armor design.

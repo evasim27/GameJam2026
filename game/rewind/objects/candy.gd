@@ -1,12 +1,12 @@
 class_name Candy
 extends TapeObject
-## A memory candy with a name and a year. The kid picks it up when walking past it inside
+## A memory VHS cassette with a name and a year. The kid picks it up when walking past it inside
 ## a narrow optional window. It never comes back on rewind; the room confirms it on success.
 
-const SPRITE := preload("res://assets/rewind/cinematic/candy-styled.png")
-const ICON_SIZE := Vector2(10, 5)
-## Remove the sheet's transparent margins so all three wrappers have the same visible size.
-const REGIONS := [Rect2(95, 212, 605, 292), Rect2(795, 212, 600, 292), Rect2(1474, 212, 610, 292)]
+const SPRITE := preload("res://assets/rewind/cinematic/memory-vhs.png")
+const ICON_SIZE := Vector2(10, 5.25)
+## Remove the sheet's transparent margins so all three cassettes have the same visible size.
+const REGIONS := [Rect2(103, 201, 580, 303), Rect2(796, 201, 579, 303), Rect2(1490, 201, 579, 303)]
 
 @export var candy_name := "Maja 1989"
 ## Room-time window when it can be picked up. period 0 means a single window [from, to).
@@ -31,7 +31,7 @@ func _ready() -> void:
 	add_child(_sprite)
 
 
-## Use the same wrapper for each memory in the rooms and the collected-candy display.
+## Use the same cassette for each memory in the rooms and the collected-memory display.
 static func sprite_region(memory_name: String) -> Rect2:
 	var index := 0
 	if memory_name == "Luka 1994":

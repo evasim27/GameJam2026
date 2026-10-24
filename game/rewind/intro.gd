@@ -64,7 +64,7 @@ const SHOTS := [
 	{
 		"duration": 8.5,
 		"image": "res://assets/intro/house_05_pulled_into_tv.png",
-		"lines": ["The screen pulls the kid in. Caught on tape.", "You can't control the kid. Control the tape.", "Find three candy memories. Free the voices."],
+		"lines": ["The screen pulls the kid in. Caught on tape.", "You can't control the kid. Control the tape.", "Find three memories. Free the voices."],
 	},
 ]
 

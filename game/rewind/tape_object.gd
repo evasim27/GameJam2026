@@ -13,6 +13,11 @@ func blocks(_run: RoomRun) -> bool:
 	return false
 
 
+## Where the kid stops while `blocks` is true.
+func block_x() -> float:
+	return position.x
+
+
 ## Width of the zone starting at `position.x` where `is_deadly` applies.
 func zone_width() -> float:
 	return 0.0
@@ -36,12 +41,17 @@ func advance(_run: RoomRun, _mode: String, _dt: float) -> void:
 	pass
 
 
+## Called right after a glitch happened anywhere in the room.
+func on_glitch(_run: RoomRun, _id: String) -> void:
+	pass
+
+
 ## Called every frame to update visuals.
 func show_time(_run: RoomRun) -> void:
 	pass
 
 
-## How much this object distorts the screen right now: {tracking, noise}.
+## How much this object distorts the screen right now: {tracking, bat_tracking, noise}.
 func screen_effect(_run: RoomRun) -> Dictionary:
 	return {}
 

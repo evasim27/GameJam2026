@@ -3,9 +3,9 @@ extends TapeObject
 ## A shadow off the stairs that slides across the kid's path on a rhythm of room time.
 ## With `always` it never leaves: the over-long shadow waiting at the top of the stairs.
 
-const ART := preload("res://assets/monsters/static_below_the_stairs_monster.png")
-const IDLE_FRAME := Rect2(224, 15, 361, 910)
-const REACH_FRAME := Rect2(699, 96, 938, 823)
+const ART := preload("res://assets/rewind/cinematic/shadow-monster.png")
+const IDLE_FRAME := Rect2(42, 16, 43, 96)
+const REACH_FRAME := Rect2(133, 16, 118, 96)
 
 @export var width := 24.0
 @export var period := 3.2
@@ -57,7 +57,10 @@ func _draw() -> void:
 	var dest := Rect2(centre - sprite_width / 2.0, -sprite_height + bob, sprite_width, sprite_height)
 	# A dim cool halo keeps the figure readable under the staircase.
 	draw_circle(Vector2(centre, -sprite_height * 0.72 + bob), 11.0, Color(0.26, 0.44, 0.8, 0.08 * alpha))
+	# Mirror both poses around the sprite centre so the monster faces the approaching kid.
+	draw_set_transform(Vector2(centre * 2.0, 0.0), 0.0, Vector2(-1.0, 1.0))
 	draw_texture_rect_region(ART, dest, frame, Color(1.0, 1.0, 1.0, alpha))
+	draw_set_transform(Vector2.ZERO)
 	draw_rect(Rect2(-4, -2, width + 8, 3), Color(0.03, 0.0, 0.06, 0.3 * alpha))
 
 

@@ -1,0 +1,41 @@
+{
+  "texture": "game/assets/rewind/cinematic/bat-flight-4f.png",
+  "frame_size": [
+    128,
+    128
+  ],
+  "frames": [
+    "wings_up",
+    "wings_open",
+    "wings_down",
+    "recovery"
+  ],
+  "anchor_pixels": [
+    64,
+    64
+  ],
+  "draw_size_world": [
+    32,
+    32
+  ],
+  "source_anchors": [
+    [
+      505,
+      340
+    ],
+    [
+      1270,
+      340
+    ],
+    [
+      505,
+      700
+    ],
+    [
+      1270,
+      700
+    ]
+  ],
+  "source_scale": 0.13333333333333333,
+  "generation": "built-in image_gen; pumpkin and skeleton style references; nearest-neighbor packing; original alpha preserved"
+}

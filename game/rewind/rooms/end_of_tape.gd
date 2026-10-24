@@ -1,8 +1,11 @@
 extends Room
-## End of Tape. Shelves of cassettes, a VCR and a big CRT. The exit on the right is covered by a
-## wrong frame of wall: glitch it at its cyan tear. Once the kid gets close, the tape-eater crawls
-## out of the VCR after the playhead; glitch the wound reel next to the VCR to trap it in the TV.
-## Both glitches are needed. Tina 2003 lies behind the wall for a quick, precise pass.
+## End of Tape. First a long gallery: two knights in armour swing on their own rhythms while a
+## damaged stretch of tape keeps releasing diving bats. Then shelves of cassettes, a VCR and a big CRT. The exit on the right is covered by a
+## wrong frame of wall: glitch it at its cyan tear. Once the kid gets close, the tape monster
+## crawls out of the VCR and its spilled tape holds the kid: a two-phase boss fight (TapeEater).
+## The Reel: glitch the wound reel while it flashes blue to jam it. The Screen: rewind until the
+## TV's empty frame meets the static wave, then glitch so the picture swallows it.
+## Tina 2003 lies behind the wall for a quick, precise pass.
 
 const WALL := preload("res://assets/rewind/cinematic/wall.png")
 const FLOOR_TEX := preload("res://assets/rewind/cinematic/floor.png")
@@ -12,33 +15,71 @@ const ARMCHAIR := preload("res://assets/noble_interior/armchair_tall.png")
 const KID := preload("res://assets/exterior/player_walk_6f.png")
 const FONT := preload("res://assets/fonts/VT323-Regular.ttf")
 
-const VCR_X := 112.0
-const CRT_X := 176.0
-const WALL_X := 272.0
-const EXIT_X := 300.0
+## The gallery with the knights and bats; the tape room starts after it.
+const HALL := 320.0
+const KNIGHT_X := 110.0
+const SECOND_KNIGHT_X := 236.0
+const BATS_X := 180.0
+const VCR_X := HALL + 112.0
+const CRT_X := HALL + 176.0
+const WALL_X := HALL + 272.0
+const EXIT_X := HALL + 300.0
+const TRIGGER_X := HALL + 150.0
+const BATS_START := 4.0
+## Where the spilled tape holds the kid during the boss fight: VCR and CRT both in view.
+const HOLD_X := HALL + 166.0
 const NAMES := ["Maja", "Luka", "Tina", "Ana", "Jaka", "Eva"]
 
 
 func build() -> void:
 	title = "END OF TAPE"
-	tape_budget = 22.0
-	timeline_length = 24.0
+	width = HALL + WIDTH
+	tape_budget = 50.0
+	timeline_length = 50.0
 
 	add_tiled(WALL, Rect2(0, 0, width, FLOOR), Color(0.1, 0.09, 0.14))
 	add_tiled(FLOOR_TEX, Rect2(0, FLOOR, width, 44), Color(0.3, 0.27, 0.34))
-	var portrait := add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(123, 88), 2)
-	portrait.rotation = 0.12
-	add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(270, 88), 1)
-	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(237, 99))
+	# The gallery: sconces between the knights, portraits watching them.
 	add_wall_decor(WallDecor.Kind.WEB, Vector2(2, 73))
-	add_wall_decor(WallDecor.Kind.WEB, Vector2(318, 73), 1, true)
-	add_wall_decor(WallDecor.Kind.WEB, Vector2(86, 75), 1)
-	add_wall_decor(WallDecor.Kind.SCRATCHES, Vector2(251, 112))
-	add_drawing(_shelves, Vector2(14, FLOOR))
-	add_drawing(_label, Vector2(206, 76))
+	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(60, 98))
+	add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(KNIGHT_X + 13, 86), 1)
+	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(172, 98))
+	add_wall_decor(WallDecor.Kind.SCRATCHES, Vector2(196, 110))
+	add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(SECOND_KNIGHT_X + 13, 86), 2)
+	# The tape room.
+	var portrait := add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(HALL + 123, 88), 2)
+	portrait.rotation = 0.12
+	add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(HALL + 270, 88), 1)
+	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(HALL + 237, 99))
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(width - 2, 73), 1, true)
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(HALL + 86, 75), 1)
+	add_wall_decor(WallDecor.Kind.SCRATCHES, Vector2(HALL + 251, 112))
+	add_drawing(_shelves, Vector2(HALL + 14, FLOOR))
+	add_drawing(_label, Vector2(HALL + 206, 76))
 	add_drawing(_daylight, Vector2(EXIT_X, FLOOR))
 	add_drawing(_crt, Vector2(CRT_X, FLOOR))
 	add_drawing(_vcr, Vector2(VCR_X, FLOOR))
+
+	var knight := SwordGuard.new()
+	knight.kind = SwordGuard.Kind.KNIGHT
+	knight.swing_from = 4.0
+	add_object(knight, KNIGHT_X)
+	var second_knight := SwordGuard.new()
+	second_knight.kind = SwordGuard.Kind.KNIGHT
+	second_knight.period = 3.6
+	second_knight.swing_from = 1.2
+	add_object(second_knight, SECOND_KNIGHT_X)
+	# A damaged stretch of tape between the knights keeps releasing diving bats.
+	var bats := Bat.new()
+	bats.starts_at = BATS_START
+	bats.period = 6.0
+	bats.bob = 3.2
+	bats.enter_x = BATS_X + 60.0
+	bats.release_from_x = BATS_X - 140.0
+	bats.release_to_x = BATS_X + 50.0
+	bats.reach = 160.0
+	bats.damage_duration = 0.75
+	add_object(bats, BATS_X)
 
 	var exit := Door.new()
 	exit.light = Color(0.95, 0.95, 1.0)
@@ -48,7 +89,7 @@ func build() -> void:
 	tina.period = 5.0
 	tina.from = 0.0
 	tina.to = 0.4
-	add_object(tina, 286)
+	add_object(tina, HALL + 286)
 	add_object(FalseWall.new(), WALL_X)
 
 	var wall_tear := GlitchSpot.new()
@@ -57,12 +98,14 @@ func build() -> void:
 	wall_tear.period = 5.0
 	wall_tear.from = 3.6
 	wall_tear.to = 4.6
+	wall_tear.kid_min = HALL
 	add_object(wall_tear, WALL_X)
 
 	var eater := TapeEater.new()
-	eater.trigger_x = 150.0
-	eater.hiding_spot = Vector2(50, 80)
-	eater.tv = Vector2(CRT_X - VCR_X, -40)
+	eater.trigger_x = TRIGGER_X
+	eater.hold_x = HOLD_X
+	eater.hiding_spot = Vector2(HALL + 50, 80)
+	eater.screen = Rect2(CRT_X - VCR_X - 18, -46, 33, 22)
 	eater.hint_x = VCR_X
 	add_object(eater, VCR_X, FLOOR - 6)
 
@@ -72,12 +115,39 @@ func build() -> void:
 	reel.period = 4.0
 	reel.from = 2.5
 	reel.to = 3.1
-	reel.kid_min = 150.0
+	reel.kid_min = TRIGGER_X
+	reel.tint = TapeEater.BLUE
+	reel.cue = true
 	add_object(reel, VCR_X - 14.0)
+	eater.reel_spot = reel
+
+	var tv := ScreenSpot.new()
+	tv.glitch_id = "screen"
+	tv.requires = "reel"
+	tv.area = Rect2(-18, -52, 33, 22)
+	tv.cue = true
+	tv.eater = eater
+	tv.z_index = 21
+	add_object(tv, CRT_X)
 
 
 func idle_hint_target(run: RoomRun) -> float:
+	if run.kid_x < HALL:
+		return super.idle_hint_target(run)
+	if not run.glitched.has("reel") and run.kid_x >= TRIGGER_X:
+		return VCR_X
+	if not run.glitched.has("screen") and run.glitched.has("reel"):
+		return CRT_X
 	return WALL_X + 10.0 if not run.glitched.has("wall") else EXIT_X
+
+
+func trigger_hints() -> Array:
+	return [
+		{"x": KNIGHT_X - 44.0, "text": "A knight. Wait for the blade to fall, or rewind the swing."},
+		{"x": BATS_X - 60.0, "text": "Damaged tape: bats keep coming. Let them pass above your head."},
+		{"x": SECOND_KNIGHT_X - 44.0, "text": "This one swings faster."},
+		{"x": TRIGGER_X, "text": "It crawls out of the VCR. When the reel flashes blue, press E."},
+	]
 
 
 ## Parted tapes on the second shelf hide the blinking reel eyes.
@@ -105,9 +175,7 @@ func _vcr(d: Node2D) -> void:
 	d.draw_rect(Rect2(-20, -5, 22, 1), Color(0.02, 0.02, 0.02))
 	var blink := 1.0 if fmod(d.t, 1.0) < 0.5 else 0.3
 	d.draw_rect(Rect2(8, -4, 2, 1), Color(0.4, 1.0, 0.5, blink))
-	# The wound reel by the VCR.
-	d.draw_circle(Vector2(-14, -10), 4.0, Color(0.06, 0.04, 0.04))
-	d.draw_arc(Vector2(-14, -10), 4.0, 0, TAU, 12, Color(0.35, 0.2, 0.15), 1.0)
+	# Its reels are drawn by the TapeEater, they turn with the tape.
 
 
 ## The big CRT. Mostly the kid from the foyer; after 6 failures, an empty armchair in a dark room.
