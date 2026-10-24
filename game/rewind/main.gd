@@ -75,6 +75,7 @@ var _sound_players := {}
 @onready var world: Node2D = $World
 @onready var hud: Control = $HUD/OSD
 @onready var vhs: ShaderMaterial = $VHS/Screen.material
+@onready var intro_music: AudioStreamPlayer = $IntroMusic
 
 
 func _ready() -> void:
@@ -82,8 +83,8 @@ func _ready() -> void:
 		var player := AudioStreamPlayer.new()
 		player.stream = SFX[id].duplicate() if id == "rewind" else SFX[id]
 		if id == "rewind":
-			var rewind_stream := player.stream as AudioStreamOggVorbis
-			rewind_stream.loop = true
+			var loop_stream := player.stream as AudioStreamOggVorbis
+			loop_stream.loop = true
 		player.volume_db = -20.0 if id == "rewind" or id == "static" else -12.0
 		add_child(player)
 		_sound_players[id] = player
@@ -94,6 +95,9 @@ func _ready() -> void:
 
 
 func _on_intro_finished() -> void:
+	var fade := create_tween()
+	fade.tween_property(intro_music, "volume_db", -60.0, 0.8)
+	fade.tween_callback(intro_music.stop)
 	_intro.queue_free()
 	hud.visible = true
 	_enter_room(0, true)

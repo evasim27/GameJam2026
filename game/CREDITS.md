@@ -11,3 +11,4 @@
 - **Level up, power up, Coin get (13 Sounds)** by WobbleBoxx Workshop (https://opengameart.org/content/level-up-power-up-coin-get-13-sounds) — CC0. `assets/audio/candy.wav` is a shortened, faded, 16-bit conversion of `Coin01.aif`.
 - **Ghost** by Ogrebane (https://opengameart.org/content/ghost) — CC0. `assets/audio/echo.wav` is a shortened, faded, 16-bit conversion of `ghost.wav`.
 - **Static** by xhunterko (https://opengameart.org/content/static) — CC0. `assets/audio/static.mp3` plays briefly when a run fails.
+- **Quiet Walk Through the Mist** by Cosme Leites, from [Halloween Volumen II Music Pack](https://cosmeleites.itch.io/halloween-volumen-ii-music-pack). The creator permits use in personal and commercial games without requiring attribution, but prohibits resale or standalone redistribution of the asset pack. `assets/audio/7-Quiet Walk Through the Mist-loop.wav` plays during the exterior walk and opening cutscenes.

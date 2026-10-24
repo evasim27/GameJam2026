@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://rewind/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://rewind/hud.gd" id="2_hud"]
 [ext_resource type="Shader" path="res://rewind/vhs.gdshader" id="3_vhs"]
+[ext_resource type="AudioStream" path="res://assets/audio/7-Quiet Walk Through the Mist-loop.wav" id="4_intro_music"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vhs"]
 shader = ExtResource("3_vhs")
@@ -15,6 +16,10 @@ script = ExtResource("1_main")
 
 [node name="World" type="Node2D" parent="."]
 scale = Vector2(2, 2)
+
+[node name="IntroMusic" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_intro_music")
+autoplay = true
 
 [node name="VHS" type="CanvasLayer" parent="."]
 
