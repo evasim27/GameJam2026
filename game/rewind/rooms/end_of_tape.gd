@@ -6,7 +6,7 @@ extends Room
 
 const WALL := preload("res://assets/rewind/cinematic/wall.png")
 const FLOOR_TEX := preload("res://assets/rewind/cinematic/floor.png")
-const BOOKCASE := preload("res://assets/rewind/cinematic/bookcase.png")
+const BOOKCASE := preload("res://assets/rewind/cinematic/bookcase-hidden-monster.png")
 const CRT := preload("res://assets/rewind/cinematic/crt-cabinet.png")
 const ARMCHAIR := preload("res://assets/noble_interior/armchair_tall.png")
 const KID := preload("res://assets/exterior/player_walk_6f.png")
@@ -61,6 +61,7 @@ func build() -> void:
 
 	var eater := TapeEater.new()
 	eater.trigger_x = 150.0
+	eater.hiding_spot = Vector2(50, 80)
 	eater.tv = Vector2(CRT_X - VCR_X, -40)
 	eater.hint_x = VCR_X
 	add_object(eater, VCR_X, FLOOR - 6)
@@ -79,7 +80,7 @@ func idle_hint_target(run: RoomRun) -> float:
 	return WALL_X + 10.0 if not run.glitched.has("wall") else EXIT_X
 
 
-## Shelves of tapes.
+## Parted tapes on the second shelf hide the blinking reel eyes.
 func _shelves(d: Node2D) -> void:
 	d.draw_texture_rect_region(BOOKCASE, Rect2(0, -96, 70, 96), Rect2(176, 102, 792, 1168))
 

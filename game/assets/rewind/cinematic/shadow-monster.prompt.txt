@@ -1,0 +1,8 @@
+Generated with built-in imagegen. Style references: stairs.png and foyer-preview.png.
+
+Use case: stylized-concept
+Asset type: one transparent enemy sprite for a side-view gothic pixel art horror game.
+Primary request: redesign an existing shadow monster while preserving its identity: FOUR thin uneven unnaturally long shadow fingers hanging DOWNWARD from a small joined shadow mass at the TOP. A tall narrow silhouette, roughly width:height 1:2.5. Fingers are separated by clear transparent gaps, gently crooked and tapering to pointed ends at varying heights, the longest reaches near the bottom. Like a disembodied shadow hand reaching down across a child's path from above the staircase, NOT a standing character. Small ragged smoky wrist/root at the top, four downward tapering talons. No face, eyes, mouth, torso or legs.
+Input images: image 1 staircase style reference; image 2 game room style reference. Match the detailed retro pixel art and restrained haunted Victorian atmosphere; do not reproduce any scenery.
+Style: hard pixel clusters, dark textured near-black silhouette, subtle muted plum/umber shadows and sparse desaturated gray-violet edge highlights for readability. Dusty shadow texture, slender sinister hooked fingers. Intended display about 28x70 game pixels. Low contrast details but legible contour. No bright glow, no smooth airbrush, no realism or 3D.
+Composition: ONE complete isolated hanging shadow hand centered, wrist at top, four fingers pointing down; all tips and outer edges fully visible. Genuinely transparent background, no cast shadow, floor, scenery, text, border, extra poses or sprite sheet.

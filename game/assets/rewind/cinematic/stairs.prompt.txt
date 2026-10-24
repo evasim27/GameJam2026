@@ -1,0 +1,3 @@
+Generated with built-in image_gen.
+
+Use case: stylized-concept. Transparent side-view 2D game staircase ascending left to right, rise/run 0.41. Haunted Victorian dark walnut, worn amber edges, crisp retro pixel-art clusters matching assets/tiles/cinematic/foyer-preview.png. Carved handrail, turned balusters, open transparent space beneath narrow stringer for existing furniture and hidden door. No room, floor, people, text, glow, or shadow. Display width approximately 260 logical pixels.

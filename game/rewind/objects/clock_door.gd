@@ -31,8 +31,9 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO)
 
 
+## Above the timeline, so the candy's pink windows on row 2 can't cover it.
 func timeline_marks(_length: float) -> Array:
-	return [{"from": open_from, "to": open_to, "color": Color(1.0, 0.85, 0.45, 0.9), "row": 2}]
+	return [{"from": open_from, "to": open_to, "color": Color(1.0, 0.85, 0.45, 0.9), "row": 3}]
 
 
 static func _clock(t: float) -> String:

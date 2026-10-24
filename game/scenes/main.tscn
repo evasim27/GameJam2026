@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d1ivdxnot1vvb" path="res://scripts/main.gd" id="1_tefeu"]
 [ext_resource type="Texture2D" uid="uid://bryh8gpr1k5lm" path="res://assets/kenney_pixel_platformer/tilemap-backgrounds_packed.png" id="2_o6xl0"]
-[ext_resource type="TileSet" path="res://assets/tileset.tres" id="3_tipki"]
+[ext_resource type="TileSet" uid="uid://da1qpul3c4ywu" path="res://assets/tileset.tres" id="3_tipki"]
 [ext_resource type="PackedScene" path="res://scenes/spikes.tscn" id="4_85g3d"]
 [ext_resource type="PackedScene" path="res://scenes/exit_door.tscn" id="5_choun"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="6_ya4ey"]
@@ -61,7 +61,7 @@ position = Vector2(459, 297)
 position = Vector2(819, 162)
 
 [node name="Player" parent="." instance=ExtResource("6_ya4ey")]
-position = Vector2(63, 297)
+position = Vector2(73, 282)
 
 [node name="HUD" type="CanvasLayer" parent="."]
 

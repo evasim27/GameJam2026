@@ -8,8 +8,14 @@ extends Room
 const WALL := preload("res://assets/rewind/cinematic/wall.png")
 const WAINSCOT := preload("res://assets/rewind/cinematic/wainscot.png")
 const FLOOR_TEX := preload("res://assets/rewind/cinematic/floor.png")
+const STAIRS_ART := preload("res://assets/rewind/cinematic/stairs.png")
+const TV_ART := preload("res://assets/rewind/cinematic/crt-unplugged.png")
+const COSTUME_GHOST := preload("res://assets/rewind/costumes_level2/ghost.png")
+const COSTUME_WIZARD := preload("res://assets/rewind/costumes_level2/wizard.png")
+const COSTUME_BAT := preload("res://assets/rewind/costumes_level2/bat.png")
 const WARDROBE := preload("res://assets/noble_interior/wardrobe_small.png")
 const DOOR_ART := preload("res://rewind/door_art.gd")
+const HOLE_SIGN := preload("res://assets/rewind/cinematic/hole-sign.png")
 
 ## The hallway with the hole; everything under the stairs starts after it.
 const HALL := 240.0
@@ -47,6 +53,7 @@ func build() -> void:
 	add_drawing(_crates, Vector2(HALL + 236, FLOOR))
 	add_drawing(_cobwebs, Vector2(HALL, 0))
 	add_drawing(_warm_spill)
+	add_drawing(_hole_sign, Vector2(HOLE_X - 11.0, FLOOR))
 
 	var hole := Hole.new()
 	hole.slots = 1
@@ -130,14 +137,8 @@ func show_run(run: RoomRun) -> void:
 func _back_stairs(d: Node2D) -> void:
 	var under := PackedVector2Array([Vector2(60, FLOOR), Vector2(320, 30), Vector2(320, FLOOR)])
 	d.draw_colored_polygon(under, Color(0.05, 0.03, 0.08, 0.75))
-	var wood := Color(0.3, 0.18, 0.13)
-	var x := 60.0
-	while x < 320.0:
-		var y := FLOOR - (x - 60.0) * 0.41
-		d.draw_rect(Rect2(x, y - 4, 9, 4), wood)
-		d.draw_rect(Rect2(x, y - 4, 9, 1), Color(0.45, 0.28, 0.2))
-		x += 9.0
-	d.draw_line(Vector2(60, FLOOR), Vector2(320, 30), Color(0.18, 0.1, 0.08), 2.0)
+	var art_size := Vector2(260.0, 260.0 * STAIRS_ART.get_height() / STAIRS_ART.get_width())
+	d.draw_texture_rect(STAIRS_ART, Rect2(Vector2(60, FLOOR - art_size.y), art_size), false)
 	# A shadow that is far too long for the banister.
 	d.draw_colored_polygon(PackedVector2Array([
 		Vector2(200, 52), Vector2(320, 0), Vector2(320, 20), Vector2(230, 64)]), Color(0, 0, 0, 0.5))
@@ -161,6 +162,11 @@ func _crates(d: Node2D) -> void:
 		d.draw_line(c.position, c.end, Color(0.16, 0.09, 0.06), 1.0)
 
 
+## A warning on the near side of the pit, readable before the first fall.
+func _hole_sign(d: Node2D) -> void:
+	d.draw_texture_rect(HOLE_SIGN, Rect2(-9, -14, 18, 14), false)
+
+
 func _cobwebs(d: Node2D) -> void:
 	var c := Color(0.8, 0.8, 0.9, 0.25)
 	for p in [Vector2(250, 60), Vector2(186, 84)]:
@@ -177,31 +183,38 @@ func _warm_spill(d: Node2D) -> void:
 		d.draw_rect(Rect2(0, 0, 10 + i * 8, 180), Color(1.0, 0.6, 0.25, 0.03))
 
 
-## Photos of different kids, all in the same spot and the same pose. Clearer after 3 failures.
+## Small costume pictures hang low on the wall, crooked around their top hooks.
 func _photos(d: Node2D) -> void:
-	var a := 0.35 if total_fails < 3 else 0.9
-	var kids := [Color(0.35, 0.2, 0.5), Color(0.85, 0.85, 0.82), Color(0.85, 0.45, 0.15)]
-	for i in kids.size():
-		var p := Vector2(i * 14, (i % 2) * 4)
-		d.draw_rect(Rect2(p, Vector2(11, 14)), Color(0.35, 0.25, 0.12, a))
-		d.draw_rect(Rect2(p + Vector2(1, 1), Vector2(9, 12)), Color(0.75, 0.7, 0.6, a))
-		var k: Color = kids[i]
-		k.a = a
-		d.draw_rect(Rect2(p + Vector2(4, 3), Vector2(3, 3)), k)
-		d.draw_rect(Rect2(p + Vector2(3, 6), Vector2(5, 6)), k)
+	var costumes := [COSTUME_GHOST, COSTUME_WIZARD, COSTUME_BAT]
+	var angles := [-0.16, 0.0, 0.2]
+	for i in costumes.size():
+		var hook := Vector2(6 + i * 16, 3 if i == 1 else 0)
+		d.draw_set_transform(hook, angles[i])
+		var frame := Rect2(-6, 0, 12, 17)
+		# Layered walnut and aged brass frame around a dark portrait background.
+		d.draw_rect(Rect2(frame.position + Vector2(1, 1), frame.size), Color(0, 0, 0, 0.35))
+		d.draw_rect(frame, Color(0.12, 0.08, 0.07))
+		d.draw_rect(frame.grow(-1), Color(0.48, 0.35, 0.18))
+		d.draw_rect(frame.grow(-2), Color(0.07, 0.08, 0.12))
+		var texture: Texture2D = costumes[i]
+		var scale_factor := minf(8.0 / texture.get_width(), 13.0 / texture.get_height())
+		var size := Vector2(texture.get_width(), texture.get_height()) * scale_factor
+		d.draw_texture_rect(texture, Rect2(frame.get_center() - size / 2.0, size), false, Color(0.8, 0.84, 0.94))
+	d.draw_set_transform(Vector2.ZERO)
 
 
-## A small CRT without a cable, hissing cyan static. After a failure it flashes the door outline.
+## The loose two-pin plug is visible on the floor, yet the CRT still hisses with static.
+## After a failure it flashes the door outline.
 func _tv(d: Node2D) -> void:
-	d.draw_rect(Rect2(-10, -12, 20, 12), Color(0.3, 0.2, 0.14))
-	d.draw_rect(Rect2(-9, -28, 18, 16), Color(0.15, 0.14, 0.16))
-	var screen := Rect2(-7, -26, 14, 11)
+	# Full image includes the cable and plug; cabinet feet meet the floor baseline.
+	d.draw_texture_rect(TV_ART, Rect2(-18, -37, 60, 40), false)
+	var screen := Rect2(-10, -30, 16, 12)
 	var noise_seed := int(d.t * 24.0)
 	for y in int(screen.size.y):
 		for x in int(screen.size.x):
 			var n := float((noise_seed * 73 + x * 31 + y * 17 + x * y * 7) % 11) / 10.0
-			d.draw_rect(Rect2(screen.position + Vector2(x, y), Vector2.ONE), Color(0.3 + n * 0.5, 0.8 + n * 0.2, 1.0, 1.0))
+			d.draw_rect(Rect2(screen.position + Vector2(x, y), Vector2.ONE), Color(0.3 + n * 0.5, 0.8 + n * 0.2, 1.0, 0.72))
 	if fails > 0 and fmod(d.t, 2.0) < 0.15:
 		DOOR_ART.draw_door(d, Rect2(screen.position + Vector2(4, 1), Vector2(6, 10)), true, Color.TRANSPARENT, Color(0.4, 0.65, 0.75))
 	for i in 4:
-		d.draw_circle(Vector2(0, -20), 16.0 - i * 3.0, Color(0.4, 1.0, 1.0, 0.03))
+		d.draw_circle(screen.get_center(), 16.0 - i * 3.0, Color(0.4, 1.0, 1.0, 0.03))

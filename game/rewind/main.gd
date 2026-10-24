@@ -24,8 +24,8 @@ const LINE_EATER := "The tape is hungry."
 const MEMORY_NAMES := ["MAJA", "LUKA", "TINA"]
 const MEMORY_IDS := ["Maja 1989", "Luka 1994", "Tina 2003"]
 const SFX := {
-	"play": preload("res://assets/audio/play.ogg"),
-	"pause": preload("res://assets/audio/pause.ogg"),
+	"click": preload("res://assets/audio/vhs_button_click.mp3"),
+	"tape": preload("res://assets/audio/vhs_play.mp3"),
 	"rewind": preload("res://assets/audio/rewind.ogg"),
 	"glitch": preload("res://assets/audio/glitch.ogg"),
 	"candy": preload("res://assets/audio/candy.wav"),
@@ -76,6 +76,8 @@ var _ending: Node2D
 var _cam := Vector2.ZERO
 var _sound_players := {}
 var _warning_state := {}
+var _jumps := 0  # bumped by the debug level picker so pending fail/leave timers don't fire
+var _debug_list: VBoxContainer
 
 @onready var world: Node2D = $World
 @onready var hud: Control = $HUD/OSD
@@ -86,10 +88,10 @@ var _warning_state := {}
 func _ready() -> void:
 	for id in SFX:
 		var player := AudioStreamPlayer.new()
-		player.stream = SFX[id].duplicate() if id == "rewind" else SFX[id]
-		if id == "rewind":
-			var loop_stream := player.stream as AudioStreamOggVorbis
-			loop_stream.loop = true
+		var looping: bool = id == "rewind" or id == "tape"
+		player.stream = SFX[id].duplicate() if looping else SFX[id]
+		if looping:
+			player.stream.set("loop", true)
 		player.volume_db = -20.0 if id == "rewind" or id == "static" else -12.0
 		add_child(player)
 		_sound_players[id] = player
@@ -97,6 +99,66 @@ func _ready() -> void:
 	_intro = Intro.new()
 	_intro.finished.connect(_on_intro_finished)
 	world.add_child(_intro)
+	if OS.is_debug_build():
+		_build_debug_menu()
+
+
+## Debug builds only: a corner button that opens a list of levels to jump straight into.
+func _build_debug_menu() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 10
+	add_child(layer)
+	var box := VBoxContainer.new()
+	box.position = Vector2(8, 8)
+	layer.add_child(box)
+	var toggle := _debug_button("DEBUG")
+	toggle.pressed.connect(func(): _debug_list.visible = not _debug_list.visible)
+	box.add_child(toggle)
+	_debug_list = VBoxContainer.new()
+	_debug_list.visible = false
+	box.add_child(_debug_list)
+	var levels := ["Intro", "1 · The Last House", "2 · Static Below the Stairs", "3 · End of Tape", "Ending"]
+	for i in levels.size():
+		var b := _debug_button(levels[i])
+		b.pressed.connect(_debug_jump.bind(i - 1))
+		_debug_list.add_child(b)
+
+
+func _debug_button(text: String) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	# Never take focus, or the deck keys would press it.
+	b.focus_mode = Control.FOCUS_NONE
+	return b
+
+
+## -1 restarts from the intro, 0.. enters that room, ROOMS.size() plays the ending.
+func _debug_jump(target: int) -> void:
+	_debug_list.visible = false
+	if target < 0:
+		get_tree().reload_current_scene()
+		return
+	_jumps += 1
+	if is_instance_valid(_intro):
+		_intro.queue_free()
+		intro_music.stop()
+	if is_instance_valid(_ending):
+		_ending.queue_free()
+		_ending = null
+	# Later rooms assume the foyer already taught rewind.
+	if target > 0 and not _rewind_unlocked:
+		_rewind_unlocked = true
+		hud.clear_prompt()
+	vhs.set_shader_parameter("rewind_amount", 0.0)
+	if target >= ROOMS.size():
+		if not room:
+			room = ROOMS[0].new()
+			world.add_child(room)
+		_end()
+		return
+	hud.visible = true
+	_enter_room(target, true)
 
 
 func _on_intro_finished() -> void:
@@ -168,10 +230,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if state != State.ROOM:
 		return
+	# Every deck button clicks, even when it does nothing yet.
+	for action in ["tape_play", "tape_rewind", "tape_ff", "tape_glitch"]:
+		if event.is_action_pressed(action) and not event.is_echo():
+			_sound("click")
 	if event.is_action_pressed("tape_play") and not event.is_echo():
 		_playing = not _playing
 		hud.flash("play" if _playing else "pause")
-		_sound("play" if _playing else "pause")
 	elif event.is_action_pressed("tape_glitch") and _glitch_unlocked:
 		_glitch()
 	elif event.is_action_pressed("restart"):
@@ -187,6 +252,14 @@ func _process(delta: float) -> void:
 		_cam = _cam.lerp(_camera_target(), minf(CAMERA_SPEED * delta, 1.0))
 		world.position = (-_cam * ROOM_ZOOM).round()
 	_fx_burst = maxf(_fx_burst - delta, 0.0)
+	# The deck only whirrs while the tape is actually playing.
+	var tape_player: AudioStreamPlayer = _sound_players["tape"]
+	var tape_running := state == State.ROOM and _last_mode == "PLAY"
+	if tape_running != tape_player.playing:
+		if tape_running:
+			tape_player.play()
+		else:
+			tape_player.stop()
 	if state == State.ROOM or state == State.LEAVING:
 		_update_screen_fx()
 
@@ -422,7 +495,10 @@ func _fail() -> void:
 
 	vhs.set_shader_parameter("noise_amount", 0.85)
 	vhs.set_shader_parameter("tracking", 1.0)
+	var jumps := _jumps
 	await get_tree().create_timer(1.6).timeout
+	if jumps != _jumps:
+		return
 	if reset:
 		_rewind_to_start()
 	else:
@@ -446,7 +522,10 @@ func _leave_room() -> void:
 		candies.append(candy_name)
 	_echoes.erase(room_index)
 	room.kid.leave()
+	var jumps := _jumps
 	await get_tree().create_timer(1.2).timeout
+	if jumps != _jumps:
+		return
 	if room_index + 1 < ROOMS.size():
 		_enter_room(room_index + 1, true)
 	else:

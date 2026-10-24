@@ -1,0 +1,5 @@
+Generated using built-in imagegen; reference: tape-monster.png.
+
+Use case: precise-object-edit
+Asset type: transparent game sprite, isolated pair of eyes.
+Using the reference tape monster image, create an asset containing ONLY its two cassette-reel eyes, removed from the head and body. Preserve the recognizable design: aged bone-beige concentric reel rings, hollow black central holes, subtle chunky spokes/notches, a thin dark brown outer rim, detailed hard-edged retro pixel art with warm amber highlights. Match the original three-quarter right-facing perspective: the left eye is larger and rounder, the right eye is smaller and narrower, at nearly the same height. Keep their relative scale, spacing, angle and colors faithful to the original face. Both eyes fully visible as two separate floating reel shapes with transparent space between them. Center the pair, tight usable framing with modest margin. Genuinely transparent background. Remove ALL tape ribbons, face, sockets beyond the thin reel rims, mouth, teeth, head, body and scenery. Exactly two eyes, no extra objects, no glow, no text, no watermark. Preserve crisp pixel clusters, no smooth vector or 3D style.

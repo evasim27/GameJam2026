@@ -180,6 +180,8 @@ func _draw_timeline() -> void:
 			r = Rect2(a, y + 10, maxf(b - a, 2.0), 3)
 		elif row == 2:
 			r = Rect2(a, y + 15, maxf(b - a, 2.0), 3)
+		elif row == 3:
+			r = Rect2(a, y - 5, maxf(b - a, 2.0), 3)
 		draw_rect(r, m.color)
 	var head := x0 + span * clampf(room_time / timeline_length, 0.0, 1.0)
 	# The tape-eater's red trail creeping up on the playhead.

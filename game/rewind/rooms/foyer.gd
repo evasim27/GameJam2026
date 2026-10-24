@@ -60,7 +60,6 @@ func build() -> void:
 	add_drawing(_candle, Vector2(258, FLOOR - 30))
 	add_drawing(_candle.bind(1), Vector2(268, FLOOR - 30))
 	add_drawing(_candle.bind(3), Vector2(538, FLOOR - 28))
-	add_drawing(_date_graffiti, Vector2(150, 87))
 
 	# Play, Pause, Rewind.
 	add_object(_pumpkin(4.0, 2.8, 4.0, true, 1.0, Color.WHITE), 100)
@@ -89,36 +88,10 @@ func build() -> void:
 	tear.kid_min = glitch_from_x
 	add_object(tear, WALL_X)
 	# The glitch tears the film and lets bats out; each one has to fly over the kid, not into it.
-	add_object(Bat.new(), BAT_X)
+	var bats := Bat.new()
+	bats.enter_x = width + 12.0
+	add_object(bats, BAT_X)
 	add_object(Door.new(), EXIT_X)
-
-
-## Hand-sprayed date: uneven strokes, soft overspray and a few runs of wet paint.
-func _date_graffiti(d: Node2D) -> void:
-	var strokes := [
-		PackedVector2Array([Vector2(0, 2), Vector2(3, 0), Vector2(6, 1), Vector2(5, 5), Vector2(2, 6), Vector2(5, 6), Vector2(6, 9), Vector2(4, 12), Vector2(0, 11)]),
-		PackedVector2Array([Vector2(9, 3), Vector2(12, 0), Vector2(11, 12)]),
-		PackedVector2Array([Vector2(15, 13), Vector2(21, -1)]),
-		PackedVector2Array([Vector2(23, 3), Vector2(26, 1), Vector2(25, 12)]),
-		PackedVector2Array([Vector2(32, 0), Vector2(29, 2), Vector2(28, 9), Vector2(30, 12), Vector2(33, 11), Vector2(35, 4), Vector2(34, 1), Vector2(32, 0)]),
-	]
-	# Repeatable speckles stay attached to the wallpaper even when the tape moves.
-	var spray := RandomNumberGenerator.new()
-	spray.seed = 3110
-	for stroke in strokes:
-		d.draw_polyline(stroke, Color(0.83, 0.81, 0.72, 0.055), 4.0, true)
-		d.draw_polyline(stroke, Color(0.87, 0.85, 0.76, 0.16), 2.6, true)
-		d.draw_polyline(stroke, Color(0.91, 0.89, 0.8, 0.78), 1.25, true)
-		for segment in range(stroke.size() - 1):
-			for dot in 9:
-				var p: Vector2 = stroke[segment].lerp(stroke[segment + 1], spray.randf())
-				p += Vector2(spray.randfn(0, 1.2), spray.randfn(0, 1.2))
-				d.draw_circle(p, spray.randf_range(0.12, 0.35), Color(0.89, 0.86, 0.77, spray.randf_range(0.12, 0.38)), true, -1, true)
-	for drip in [Vector3(4, 11, 5), Vector3(11, 10, 3), Vector3(30, 11, 4)]:
-		var start := Vector2(drip.x, drip.y)
-		var end := start + Vector2(-0.3, drip.z)
-		d.draw_line(start, end, Color(0.88, 0.85, 0.76, 0.5), 0.6, true)
-		d.draw_circle(end, 0.45, Color(0.9, 0.87, 0.78, 0.65), true, -1, true)
 
 
 func trigger_hints() -> Array:
@@ -129,7 +102,7 @@ func trigger_hints() -> Array:
 		{"x": 280.0, "text": "The door is only open 0:05-0:08. SHIFT + A rewinds faster.", "button": "rew", "keys": ["SHIFT", "A"], "done": "fast_rewind"},
 		{"x": 345.0, "text": "FF moves the house forward, but only through footage you've seen.", "button": "ff", "keys": ["F"], "done": "scrub"},
 		{"x": 390.0, "text": "When the picture tears (cyan), press E. A glitch costs 3 s.", "button": "track", "keys": ["E"], "hold": false, "done": "glitch"},
-		{"x": 486.0, "text": "The glitch damaged the film. Bats fly out at you: let each one pass while it is up high."},
+		{"x": 486.0, "text": "The glitch damaged the film. Bats fly in at you: let each one pass while it is up high."},
 	]
 
 
