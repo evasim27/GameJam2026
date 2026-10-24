@@ -1,64 +1,89 @@
 extends Node2D
-## Seven ending shots. Results stay on screen until the player rewinds to the start.
-## Art stays independent of run data: candy, echoes and the final label are drawn at runtime.
+## Incomplete rescues play Rewind with the exact rescued cast; all three play Exchange.
+## Narration is wrapped and timed for this viewport. Results persist until R restarts.
 
 const FONT := preload("res://assets/fonts/VT323-Regular.ttf")
+const SEQUENCES := preload("res://rewind/ending_sequences.gd")
 const FADE_IN := 0.4
 const CHARS_PER_SECOND := 28.0
 const LINE_PAUSE := 0.7
-const SHOTS := [
-	{"duration": 6.5, "image": "res://assets/ending/01_waking_home.png",
-		"lines": ["November 1st. Morning in the kid's own home.", "The kid wakes in bed. Halloween is over."]},
-	{"duration": 5.5, "image": "res://assets/ending/02_candy_bag_home.png",
-		"lines": ["The kid checks last night's candy bag.", "Something else has come home, too."]},
-	{"duration": 5.5, "image": "res://assets/ending/03_blank_tape_home.png",
-		"lines": ["A blank videotape. No warning. No name."]},
-	{"duration": 6.5, "image": "res://assets/ending/04_camera_gaze_home_v2.png",
-		"lines": ["For a moment, the kid looks straight at you."]},
-	{"duration": 5.5, "image": "res://assets/ending/05_empty_armchair.png",
-		"lines": ["Elsewhere, the viewer's chair is empty."]},
-	{"duration": 5.0, "image": "res://assets/ending/06_ejected_tape.png",
-		"lines": ["The VCR ejects the tape.", "The recording has ended."]},
-	{"duration": 0.0, "image": "res://assets/ending/07_results.png",
-		"lines": []},
-]
+const TEXT_WIDTH := 308.0
 
 var _candies: Array[String] = []
 var _fails := 0
 var _attempts := 0
 var _tape := 0.0
 var _unlisted_tape := false
+var _rescue_mask := 0
+var _ending_name := "REWIND"
+var _shots: Array[Dictionary] = []
 var _shot := 0
 var _t := 0.0
 var _images: Array[Texture2D] = []
-var _echo_texture: Texture2D
-var _echo_region := Rect2()
 
 
 func setup(candies: Array[String], fails: int, attempts: int, tape_used: float, unlisted_tape := false) -> void:
-	_candies.assign(candies)
+	_candies.clear()
+	_rescue_mask = 0
+	for i in SEQUENCES.NAMES.size():
+		var name: String = SEQUENCES.NAMES[i]
+		if candies.has(name):
+			_candies.append(name)
+			_rescue_mask |= 1 << i
 	_fails = maxi(fails, 0)
 	_attempts = maxi(attempts, 0)
 	_tape = maxf(tape_used, 0.0)
 	_unlisted_tape = unlisted_tape
+	_build_shots()
+
+
+func _build_shots() -> void:
+	_shots.clear()
+	_shot = 0
+	_t = 0.0
+	_ending_name = "EXCHANGE" if _rescue_mask == 7 else "REWIND"
+	var frames: Array = SEQUENCES.EXCHANGE if _rescue_mask == 7 else SEQUENCES.REWIND[_rescue_mask]
+	for frame in frames:
+		var lines := _wrap_caption(frame.caption)
+		var duration := FADE_IN + 1.4
+		for line in lines:
+			duration += line.length() / CHARS_PER_SECOND + LINE_PAUSE
+		_shots.append({"image": frame.image, "lines": lines, "duration": maxf(5.0, duration)})
+	# Reuse the last new still behind the statistics, without the old visual overlays.
+	_shots.append({"image": frames.back().image, "lines": [], "duration": 0.0})
+
+
+func _wrap_caption(caption: String) -> Array[String]:
+	var lines: Array[String] = []
+	var line := ""
+	for word in caption.split(" ", false):
+		var candidate := word if line.is_empty() else line + " " + word
+		if not line.is_empty() and FONT.get_string_size(candidate, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x / 2.0 > TEXT_WIDTH:
+			lines.append(line)
+			line = word
+		else:
+			line = candidate
+	if not line.is_empty():
+		lines.append(line)
+	return lines
 
 
 func _ready() -> void:
-	_echo_texture = load("res://assets/ending/pajama_echo.png") as Texture2D
-	_echo_region = Rect2(_echo_texture.get_image().get_used_rect())
-	for shot in SHOTS:
+	if _shots.is_empty():
+		_build_shots()
+	for shot in _shots:
 		_images.append(load(shot.image) as Texture2D)
 
 
 func results_visible() -> bool:
-	return _shot == SHOTS.size() - 1
+	return not _shots.is_empty() and _shot == _shots.size() - 1
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if results_visible() or not (event is InputEventKey and event.pressed and not event.echo):
 		return
 	if event.keycode == KEY_ESCAPE:
-		_shot = SHOTS.size() - 1
+		_shot = _shots.size() - 1
 		_t = 0.0
 	else:
 		_next_shot()
@@ -67,13 +92,13 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _next_shot() -> void:
-	_shot = mini(_shot + 1, SHOTS.size() - 1)
+	_shot = mini(_shot + 1, _shots.size() - 1)
 	_t = 0.0
 
 
 func _process(delta: float) -> void:
 	_t += delta
-	if not results_visible() and _t >= SHOTS[_shot].duration:
+	if not results_visible() and _t >= _shots[_shot].duration:
 		_next_shot()
 	queue_redraw()
 
@@ -82,69 +107,37 @@ func _draw() -> void:
 	if _images.is_empty():
 		return
 	draw_texture_rect(_images[_shot], Rect2(0, 0, 320, 180), false)
-	if _shot == 1:
-		_draw_candy_count()
-	if _shot == 3 and _fails > 0:
-		_draw_echoes()
 	if results_visible():
 		_draw_results()
 	else:
-		var lines: Array = SHOTS[_shot].lines.duplicate()
-		if _shot == 1:
-			lines[1] = "Three memories made it out." if _candies.size() == 3 else "Some names are still trapped on the tape."
-		if _shot == 5:
-			lines[1] = "The voices are free." if _candies.size() == 3 else "The missing voices remain inside."
-		if _shot == 3 and _fails > 0:
-			lines.append("Behind the kid, earlier attempts linger.")
-		_draw_story(lines)
+		_draw_story(_shots[_shot].lines)
+		draw_rect(Rect2(0, 164, 320, 16), Color(0.02, 0.02, 0.04, 0.8))
 		_text("any key: next   ESC: results", Vector2(4, 176), 12, Color(0.7, 0.7, 0.8))
-		_text("%d / 7" % (_shot + 1), Vector2(290, 176), 12, Color(0.7, 0.7, 0.8))
+		_text("%d / %d" % [_shot + 1, _shots.size() - 1], Vector2(290, 176), 12, Color(0.7, 0.7, 0.8))
 	if _t < FADE_IN:
 		draw_rect(Rect2(0, 0, 320, 180), Color(0, 0, 0, 1.0 - _t / FADE_IN))
 
 
-func _draw_candy_count() -> void:
-	# Never paint uncollected candy into a fixed illustration.
-	draw_rect(Rect2(8, 139, 115, 24), Color(0.02, 0.02, 0.04, 0.85))
-	_text("MEMORIES  %d/3" % mini(_candies.size(), 3), Vector2(14, 154), 14, Color(1, 0.9, 0.7))
-	for i in mini(_candies.size(), 3):
-		draw_texture_rect_region(Candy.SPRITE, Rect2(Vector2(86 + i * 11, 146), Candy.ICON_SIZE), Candy.sprite_region(_candies[i]))
-
-
-func _draw_echoes() -> void:
-	var appear := clampf((_t - 0.8) / 1.2, 0.0, 1.0)
-	for i in mini(_fails, 6):
-		var x := 18.0 + i * 14.0
-		var alpha := appear * (0.22 + sin(_t * 2.0 + i) * 0.06)
-		var height := 48.0
-		var width := height * _echo_region.size.x / maxf(_echo_region.size.y, 1.0)
-		draw_texture_rect_region(_echo_texture, Rect2(x, 80 + i % 2 * 5, width, height),
-			_echo_region, Color(0.65, 0.95, 1.0, alpha))
-
-
 func _draw_results() -> void:
-	draw_rect(Rect2(162, 12, 150, 119), Color(0.02, 0.02, 0.04, 0.9))
-	_text("END OF TAPE", Vector2(172, 32), 23, Color(0.93, 0.95, 1.0))
-	_text("MEMORIES   %d/3" % mini(_candies.size(), 3), Vector2(172, 49), 15, Color(0.9, 0.9, 1.0))
-	_text("ATTEMPTS   %d" % _attempts, Vector2(172, 64), 15, Color(0.9, 0.9, 1.0))
-	_text("TAPE USED  %.1f s" % _tape, Vector2(172, 79), 15, Color(0.9, 0.9, 1.0))
-	for i in 3:
-		var name: String = ["Maja 1989", "Luka 1994", "Tina 2003"][i]
+	draw_rect(Rect2(154, 10, 158, 148), Color(0.02, 0.02, 0.04, 0.92))
+	_text("END OF TAPE", Vector2(164, 29), 23, Color(0.93, 0.95, 1.0))
+	_text(_ending_name, Vector2(164, 44), 14, Color(0.52, 1.0, 0.95))
+	_text("MEMORIES   %d/3" % _candies.size(), Vector2(164, 60), 15, Color(0.9, 0.9, 1.0))
+	_text("ATTEMPTS   %d" % _attempts, Vector2(164, 75), 15, Color(0.9, 0.9, 1.0))
+	_text("TAPE USED  %.1f s" % _tape, Vector2(164, 90), 15, Color(0.9, 0.9, 1.0))
+	for i in SEQUENCES.NAMES.size():
+		var name: String = SEQUENCES.NAMES[i]
 		var freed := _candies.has(name)
-		_text("%s  %s" % [name.to_upper(), "FREE" if freed else "LOST"], Vector2(172, 96 + i * 11), 13, Color(0.52, 1.0, 0.95) if freed else Color(0.74, 0.7, 0.8))
+		_text("%s  %s" % [name.to_upper(), "FREE" if freed else "LOST"], Vector2(164, 107 + i * 11), 13, Color(0.52, 1.0, 0.95) if freed else Color(0.74, 0.7, 0.8))
 	if _unlisted_tape:
-		_text("UNLISTED TAPE FOUND", Vector2(172, 127), 12, Color(0.83, 0.68, 1.0))
-	# The cassette label reveals the fate of the voices, including partial rescues.
-	var label := "ALL FREE" if _candies.size() == 3 else "STILL LOST"
-	var width := FONT.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 28).x / 2.0
-	_text(label, Vector2(160 - width / 2.0, 141), 14, Color(0.1, 0.06, 0.05))
+		_text("UNLISTED TAPE FOUND", Vector2(164, 147), 12, Color(0.83, 0.68, 1.0))
 	draw_rect(Rect2(0, 163, 320, 17), Color(0.02, 0.02, 0.04, 0.85))
 	_text("R — rewind to start", Vector2(108, 175), 12, Color(0.75, 0.75, 0.85))
 
 
 func _draw_story(lines: Array) -> void:
 	draw_rect(Rect2(0, 4, 320, 10 + lines.size() * 11), Color(0, 0, 0, 0.65))
-	var start := 0.4
+	var start := FADE_IN
 	for i in lines.size():
 		var line: String = lines[i]
 		var shown := clampi(int((_t - start) * CHARS_PER_SECOND), 0, line.length())

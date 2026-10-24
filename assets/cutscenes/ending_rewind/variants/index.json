@@ -1,0 +1,75 @@
+{
+  "title": "Rewind — all incomplete rescue combinations",
+  "generation": "built-in image_gen",
+  "mask_bits": {
+    "maja": 1,
+    "luka": 2,
+    "tina": 4
+  },
+  "selection": {
+    "rewind_masks": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "exchange_mask": 7
+  },
+  "variants": [
+    {
+      "rescue_mask": 0,
+      "rescued": [],
+      "manifest": "none/manifest.json"
+    },
+    {
+      "rescue_mask": 1,
+      "rescued": [
+        "Maja 1989"
+      ],
+      "manifest": "maja/manifest.json"
+    },
+    {
+      "rescue_mask": 2,
+      "rescued": [
+        "Luka 1994"
+      ],
+      "manifest": "luka/manifest.json"
+    },
+    {
+      "rescue_mask": 3,
+      "rescued": [
+        "Maja 1989",
+        "Luka 1994"
+      ],
+      "manifest": "maja_luka/manifest.json"
+    },
+    {
+      "rescue_mask": 4,
+      "rescued": [
+        "Tina 2003"
+      ],
+      "manifest": "tina/manifest.json"
+    },
+    {
+      "rescue_mask": 5,
+      "rescued": [
+        "Maja 1989",
+        "Tina 2003"
+      ],
+      "manifest": "maja_tina/manifest.json"
+    },
+    {
+      "rescue_mask": 6,
+      "rescued": [
+        "Luka 1994",
+        "Tina 2003"
+      ],
+      "manifest": "luka_tina/manifest.json"
+    }
+  ],
+  "full_rescue_manifest": "../../ending_exchange/manifest.json",
+  "notes": "Mask 7 is excluded. Original all-three Rewind storyboard is reference art only. Shared close-ups show an actually rescued child; group frames always show the exact rescued set. Reunion follows Maja if present, otherwise Luka, otherwise Tina. No-rescue sequence has no rescue or reunion scene."
+}

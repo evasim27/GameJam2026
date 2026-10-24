@@ -1,0 +1,239 @@
+{
+  "mode": "built-in image_gen",
+  "jobs": [
+    {
+      "id": "rescue_maja",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/shared/01_rescue_maja.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1: edit target for exact room, composition and protagonist. Input 2: supporting costume reference. Edit the rescue shot to show ONLY the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots on the floor and ONLY Maja, one eight-year-old brown-haired girl in the supplied Simba costume: faded desaturated golden lion onesie, rusty russet mane hood with round ears, cream belly, soft paw feet and tufted tail halfway emerging OUT of cyan CRT membrane. Exactly TWO people total. Protagonist grips emerging child's hand and leans backward pulling them out toward room. The rescued child's face and recognizable hood/hat, torso and one free arm are visible. Every visible emerging hand belongs to this ONE child. Remove every other child, head, sleeve, limb and hand from original. The rest of screen is cyan static. Same camera, TV, furniture, lighting and pixel style, no shattered glass. Do not introduce any other figure.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/01_screen_membrane.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/lion-king-simba.png"
+      ],
+      "expected": [
+        "maja"
+      ]
+    },
+    {
+      "id": "rescue_luka",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/shared/01_rescue_luka.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1: edit target for exact room, composition and protagonist. Input 2: supporting costume reference. Edit the rescue shot to show ONLY the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots on the floor and ONLY Luka, one eight-year-old brown-haired boy in the supplied Indiana Jones costume: weathered brown fedora, faded brown leather jacket over ivory shirt, tan trousers, cross-body satchel and coiled leather whip halfway emerging OUT of cyan CRT membrane. Exactly TWO people total. Protagonist grips emerging child's hand and leans backward pulling them out toward room. The rescued child's face and recognizable hood/hat, torso and one free arm are visible. Every visible emerging hand belongs to this ONE child. Remove every other child, head, sleeve, limb and hand from original. The rest of screen is cyan static. Same camera, TV, furniture, lighting and pixel style, no shattered glass. Do not introduce any other figure.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/01_screen_membrane.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/indiana-jones.png"
+      ],
+      "expected": [
+        "luka"
+      ]
+    },
+    {
+      "id": "rescue_tina",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/shared/01_rescue_tina.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1: edit target for exact room, composition and protagonist. Input 2: supporting costume reference. Edit the rescue shot to show ONLY the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots on the floor and ONLY Tina, one eight-year-old dark-haired girl in the supplied Jack Sparrow costume: worn brown tricorn, faded red bandanna, beaded dark braids, long faded brown coat, ivory shirt, layered belts, muted red sash and dark trousers halfway emerging OUT of cyan CRT membrane. Exactly TWO people total. Protagonist grips emerging child's hand and leans backward pulling them out toward room. The rescued child's face and recognizable hood/hat, torso and one free arm are visible. Every visible emerging hand belongs to this ONE child. Remove every other child, head, sleeve, limb and hand from original. The rest of screen is cyan static. Same camera, TV, furniture, lighting and pixel style, no shattered glass. Do not introduce any other figure.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/01_screen_membrane.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/pirates-of-the-caribbean-jack-sparrow.png"
+      ],
+      "expected": [
+        "tina"
+      ]
+    },
+    {
+      "id": "room_maja",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/maja/02_children_returned.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target. Preserve original group shot camera, room, furniture and lighting; MODIFY CAST ONLY. Final frame contains EXACTLY 2 children total, standing fully outside TV on rug: the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots; Maja, one eight-year-old brown-haired girl in the supplied Simba costume: faded desaturated golden lion onesie, rusty russet mane hood with round ears, cream belly, soft paw feet and tufted tail. Remove all other children entirely and naturally reconstruct empty room behind them. Redistribute remaining figures naturally without changing costumes, visible full bodies, each child clearly separated. No silhouettes, reflections, faces, hands or ghosts of missing children anywhere. Missing costumes must not appear hanging in background either. Quiet bewilderment, blue TV rim light, faded worn cloth. Allowed rescued cast ONLY: maja.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/02_children_returned.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/lion-king-simba.png"
+      ],
+      "expected": [
+        "maja"
+      ]
+    },
+    {
+      "id": "exit_maja",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/maja/03_wrong_morning.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target. Preserve exact rear-view foyer camera, open front door, modern wet residential street with parked hatchback and SUV, overcast gray morning and wood architecture. MODIFY CAST ONLY: show EXACTLY 2 children total paused at threshold, all backs to us staring outside: the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots; Maja, one eight-year-old brown-haired girl in the supplied Simba costume: faded desaturated golden lion onesie, rusty russet mane hood with round ears, cream belly, soft paw feet and tufted tail. Remove ALL other children completely and reconstruct doorway/floor behind them. Remaining children stand together naturally, full bodies and recognizable hats/hoods, subtle worn faded costumes. No extra people, no ghosts or missing child's costume. Do not show the living-room TV in exterior. Only protagonist and maja present.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/03_wrong_morning.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/lion-king-simba.png"
+      ],
+      "expected": [
+        "maja"
+      ]
+    },
+    {
+      "id": "room_luka",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/luka/02_children_returned.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target. Preserve original group shot camera, room, furniture and lighting; MODIFY CAST ONLY. Final frame contains EXACTLY 2 children total, standing fully outside TV on rug: the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots; Luka, one eight-year-old brown-haired boy in the supplied Indiana Jones costume: weathered brown fedora, faded brown leather jacket over ivory shirt, tan trousers, cross-body satchel and coiled leather whip. Remove all other children entirely and naturally reconstruct empty room behind them. Redistribute remaining figures naturally without changing costumes, visible full bodies, each child clearly separated. No silhouettes, reflections, faces, hands or ghosts of missing children anywhere. Missing costumes must not appear hanging in background either. Quiet bewilderment, blue TV rim light, faded worn cloth. Allowed rescued cast ONLY: luka.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/02_children_returned.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/indiana-jones.png"
+      ],
+      "expected": [
+        "luka"
+      ]
+    },
+    {
+      "id": "exit_luka",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/luka/03_wrong_morning.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target. Preserve exact rear-view foyer camera, open front door, modern wet residential street with parked hatchback and SUV, overcast gray morning and wood architecture. MODIFY CAST ONLY: show EXACTLY 2 children total paused at threshold, all backs to us staring outside: the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots; Luka, one eight-year-old brown-haired boy in the supplied Indiana Jones costume: weathered brown fedora, faded brown leather jacket over ivory shirt, tan trousers, cross-body satchel and coiled leather whip. Remove ALL other children completely and reconstruct doorway/floor behind them. Remaining children stand together naturally, full bodies and recognizable hats/hoods, subtle worn faded costumes. No extra people, no ghosts or missing child's costume. Do not show the living-room TV in exterior. Only protagonist and luka present.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/03_wrong_morning.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/indiana-jones.png"
+      ],
+      "expected": [
+        "luka"
+      ]
+    },
+    {
+      "id": "room_maja_luka",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/maja_luka/02_children_returned.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target. Preserve original group shot camera, room, furniture and lighting; MODIFY CAST ONLY. Final frame contains EXACTLY 3 children total, standing fully outside TV on rug: the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots; Maja, one eight-year-old brown-haired girl in the supplied Simba costume: faded desaturated golden lion onesie, rusty russet mane hood with round ears, cream belly, soft paw feet and tufted tail; Luka, one eight-year-old brown-haired boy in the supplied Indiana Jones costume: weathered brown fedora, faded brown leather jacket over ivory shirt, tan trousers, cross-body satchel and coiled leather whip. Remove all other children entirely and naturally reconstruct empty room behind them. Redistribute remaining figures naturally without changing costumes, visible full bodies, each child clearly separated. No silhouettes, reflections, faces, hands or ghosts of missing children anywhere. Missing costumes must not appear hanging in background either. Quiet bewilderment, blue TV rim light, faded worn cloth. Allowed rescued cast ONLY: maja, luka.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/02_children_returned.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/lion-king-simba.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/indiana-jones.png"
+      ],
+      "expected": [
+        "maja",
+        "luka"
+      ]
+    },
+    {
+      "id": "exit_maja_luka",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/maja_luka/03_wrong_morning.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target. Preserve exact rear-view foyer camera, open front door, modern wet residential street with parked hatchback and SUV, overcast gray morning and wood architecture. MODIFY CAST ONLY: show EXACTLY 3 children total paused at threshold, all backs to us staring outside: the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots; Maja, one eight-year-old brown-haired girl in the supplied Simba costume: faded desaturated golden lion onesie, rusty russet mane hood with round ears, cream belly, soft paw feet and tufted tail; Luka, one eight-year-old brown-haired boy in the supplied Indiana Jones costume: weathered brown fedora, faded brown leather jacket over ivory shirt, tan trousers, cross-body satchel and coiled leather whip. Remove ALL other children completely and reconstruct doorway/floor behind them. Remaining children stand together naturally, full bodies and recognizable hats/hoods, subtle worn faded costumes. No extra people, no ghosts or missing child's costume. Do not show the living-room TV in exterior. Only protagonist and maja, luka present.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/03_wrong_morning.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/lion-king-simba.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/indiana-jones.png"
+      ],
+      "expected": [
+        "maja",
+        "luka"
+      ]
+    },
+    {
+      "id": "room_tina",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/tina/02_children_returned.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target. Preserve original group shot camera, room, furniture and lighting; MODIFY CAST ONLY. Final frame contains EXACTLY 2 children total, standing fully outside TV on rug: the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots; Tina, one eight-year-old dark-haired girl in the supplied Jack Sparrow costume: worn brown tricorn, faded red bandanna, beaded dark braids, long faded brown coat, ivory shirt, layered belts, muted red sash and dark trousers. Remove all other children entirely and naturally reconstruct empty room behind them. Redistribute remaining figures naturally without changing costumes, visible full bodies, each child clearly separated. No silhouettes, reflections, faces, hands or ghosts of missing children anywhere. Missing costumes must not appear hanging in background either. Quiet bewilderment, blue TV rim light, faded worn cloth. Allowed rescued cast ONLY: tina.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/02_children_returned.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/pirates-of-the-caribbean-jack-sparrow.png"
+      ],
+      "expected": [
+        "tina"
+      ]
+    },
+    {
+      "id": "exit_tina",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/tina/03_wrong_morning.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target. Preserve exact rear-view foyer camera, open front door, modern wet residential street with parked hatchback and SUV, overcast gray morning and wood architecture. MODIFY CAST ONLY: show EXACTLY 2 children total paused at threshold, all backs to us staring outside: the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots; Tina, one eight-year-old dark-haired girl in the supplied Jack Sparrow costume: worn brown tricorn, faded red bandanna, beaded dark braids, long faded brown coat, ivory shirt, layered belts, muted red sash and dark trousers. Remove ALL other children completely and reconstruct doorway/floor behind them. Remaining children stand together naturally, full bodies and recognizable hats/hoods, subtle worn faded costumes. No extra people, no ghosts or missing child's costume. Do not show the living-room TV in exterior. Only protagonist and tina present.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/03_wrong_morning.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/pirates-of-the-caribbean-jack-sparrow.png"
+      ],
+      "expected": [
+        "tina"
+      ]
+    },
+    {
+      "id": "room_maja_tina",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/maja_tina/02_children_returned.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target. Preserve original group shot camera, room, furniture and lighting; MODIFY CAST ONLY. Final frame contains EXACTLY 3 children total, standing fully outside TV on rug: the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots; Maja, one eight-year-old brown-haired girl in the supplied Simba costume: faded desaturated golden lion onesie, rusty russet mane hood with round ears, cream belly, soft paw feet and tufted tail; Tina, one eight-year-old dark-haired girl in the supplied Jack Sparrow costume: worn brown tricorn, faded red bandanna, beaded dark braids, long faded brown coat, ivory shirt, layered belts, muted red sash and dark trousers. Remove all other children entirely and naturally reconstruct empty room behind them. Redistribute remaining figures naturally without changing costumes, visible full bodies, each child clearly separated. No silhouettes, reflections, faces, hands or ghosts of missing children anywhere. Missing costumes must not appear hanging in background either. Quiet bewilderment, blue TV rim light, faded worn cloth. Allowed rescued cast ONLY: maja, tina.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/02_children_returned.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/lion-king-simba.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/pirates-of-the-caribbean-jack-sparrow.png"
+      ],
+      "expected": [
+        "maja",
+        "tina"
+      ]
+    },
+    {
+      "id": "exit_maja_tina",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/maja_tina/03_wrong_morning.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target. Preserve exact rear-view foyer camera, open front door, modern wet residential street with parked hatchback and SUV, overcast gray morning and wood architecture. MODIFY CAST ONLY: show EXACTLY 3 children total paused at threshold, all backs to us staring outside: the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots; Maja, one eight-year-old brown-haired girl in the supplied Simba costume: faded desaturated golden lion onesie, rusty russet mane hood with round ears, cream belly, soft paw feet and tufted tail; Tina, one eight-year-old dark-haired girl in the supplied Jack Sparrow costume: worn brown tricorn, faded red bandanna, beaded dark braids, long faded brown coat, ivory shirt, layered belts, muted red sash and dark trousers. Remove ALL other children completely and reconstruct doorway/floor behind them. Remaining children stand together naturally, full bodies and recognizable hats/hoods, subtle worn faded costumes. No extra people, no ghosts or missing child's costume. Do not show the living-room TV in exterior. Only protagonist and maja, tina present.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/03_wrong_morning.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/lion-king-simba.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/pirates-of-the-caribbean-jack-sparrow.png"
+      ],
+      "expected": [
+        "maja",
+        "tina"
+      ]
+    },
+    {
+      "id": "room_luka_tina",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/luka_tina/02_children_returned.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target. Preserve original group shot camera, room, furniture and lighting; MODIFY CAST ONLY. Final frame contains EXACTLY 3 children total, standing fully outside TV on rug: the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots; Luka, one eight-year-old brown-haired boy in the supplied Indiana Jones costume: weathered brown fedora, faded brown leather jacket over ivory shirt, tan trousers, cross-body satchel and coiled leather whip; Tina, one eight-year-old dark-haired girl in the supplied Jack Sparrow costume: worn brown tricorn, faded red bandanna, beaded dark braids, long faded brown coat, ivory shirt, layered belts, muted red sash and dark trousers. Remove all other children entirely and naturally reconstruct empty room behind them. Redistribute remaining figures naturally without changing costumes, visible full bodies, each child clearly separated. No silhouettes, reflections, faces, hands or ghosts of missing children anywhere. Missing costumes must not appear hanging in background either. Quiet bewilderment, blue TV rim light, faded worn cloth. Allowed rescued cast ONLY: luka, tina.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/02_children_returned.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/indiana-jones.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/pirates-of-the-caribbean-jack-sparrow.png"
+      ],
+      "expected": [
+        "luka",
+        "tina"
+      ]
+    },
+    {
+      "id": "exit_luka_tina",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/luka_tina/03_wrong_morning.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target. Preserve exact rear-view foyer camera, open front door, modern wet residential street with parked hatchback and SUV, overcast gray morning and wood architecture. MODIFY CAST ONLY: show EXACTLY 3 children total paused at threshold, all backs to us staring outside: the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots; Luka, one eight-year-old brown-haired boy in the supplied Indiana Jones costume: weathered brown fedora, faded brown leather jacket over ivory shirt, tan trousers, cross-body satchel and coiled leather whip; Tina, one eight-year-old dark-haired girl in the supplied Jack Sparrow costume: worn brown tricorn, faded red bandanna, beaded dark braids, long faded brown coat, ivory shirt, layered belts, muted red sash and dark trousers. Remove ALL other children completely and reconstruct doorway/floor behind them. Remaining children stand together naturally, full bodies and recognizable hats/hoods, subtle worn faded costumes. No extra people, no ghosts or missing child's costume. Do not show the living-room TV in exterior. Only protagonist and luka, tina present.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/03_wrong_morning.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/indiana-jones.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/pirates-of-the-caribbean-jack-sparrow.png"
+      ],
+      "expected": [
+        "luka",
+        "tina"
+      ]
+    },
+    {
+      "id": "mother_luka",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/shared/04_mother_recognizes_luka.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target for composition, gray-morning exterior, ordinary home open front door, warm inside lighting and pixel style. Change the ONE child to Luka, one eight-year-old brown-haired boy in the supplied Indiana Jones costume: weathered brown fedora, faded brown leather jacket over ivory shirt, tan trousers, cross-body satchel and coiled leather whip, seen three-quarter from behind, one small hand raised after knocking. Exactly TWO people: this child and their mother. Mother is now in her late sixties, gray hair and a plain warm cardigan, visibly older than the child remembers. Mother stands motionless inside open door, hand near mouth, astonished tearful recognition as she sees the old costume. Child remains eight years old. Replace the lion costume ENTIRELY; no lion ears, mane, tail or golden onesie anywhere. No protagonist, no other children. Quiet restrained family reunion, no text.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/04_mother_recognizes.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/indiana-jones.png"
+      ],
+      "expected": [
+        "luka"
+      ]
+    },
+    {
+      "id": "mother_tina",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/shared/04_mother_recognizes_tina.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target for composition, gray-morning exterior, ordinary home open front door, warm inside lighting and pixel style. Change the ONE child to Tina, one eight-year-old dark-haired girl in the supplied Jack Sparrow costume: worn brown tricorn, faded red bandanna, beaded dark braids, long faded brown coat, ivory shirt, layered belts, muted red sash and dark trousers, seen three-quarter from behind, one small hand raised after knocking. Exactly TWO people: this child and their mother. Mother is now in her fifties, graying dark hair, subtle face lines and a plain cardigan, visibly older than the child remembers. Mother stands motionless inside open door, hand near mouth, astonished tearful recognition as she sees the old costume. Child remains eight years old. Replace the lion costume ENTIRELY; no lion ears, mane, tail or golden onesie anywhere. No protagonist, no other children. Quiet restrained family reunion, no text.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/04_mother_recognizes.png",
+        "/Users/zanlah/Documents/GameJam2026/assets/costumes/pirates-of-the-caribbean-jack-sparrow.png"
+      ],
+      "expected": [
+        "tina"
+      ]
+    },
+    {
+      "id": "no_hands",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/shared/01_no_hands.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is style and equipment reference. NEW CLOSE-UP of the same modest CRT and black VCR on the same dark wooden cabinet, cyan-blue analog STATIC on curved screen. Glass is intact and perfectly closed, nothing protrudes from screen. NO PEOPLE anywhere, no hands, arms, faces, silhouettes or costumes inside screen, outside screen or in reflections. The TV has not released anyone. Frame only equipment with small glimpse of familiar VHS shelf and floral wallpaper, dark readable melancholy. No letters or UI.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_exchange/02_empty_tape.png"
+      ],
+      "expected": []
+    },
+    {
+      "id": "exit_none",
+      "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/none/03_wrong_morning.png",
+      "prompt": "Use case: illustration-story. ONE finished full-bleed landscape 1672 x 941 pixel-art game cinematic still matching Lost in Tape opening and supplied ending references. Richly textured hand-painted pixel art, deliberate crisp pixel clusters and dark outlines, subtle amber wood edges contrasting with cyan CRT light. Preserve the supplied character identities and costume designs, all children remain eight years old, garments look old and faded like worn VHS colors, never aged bodies. No captions, lettering, panels, borders or watermark unless screen lettering explicitly requested. Not smooth 3D or photorealism. Same room: floral wallpaper, dark wooden wainscot, parquet, rectangular burgundy rug, worn brown wingback chair with lace cloth on left, low wood coffee table, modest CRT on low wood cabinet with VCR underneath and VHS shelves behind to right. No living-room windows or freestanding pillars. Input 1 is the edit target. Preserve exact rear-view foyer, OPEN front door, wet modern residential street with modern cars, gray overcast morning and dark wooden architecture. Final frame contains EXACTLY ONE child total: the same eight-year-old brown-haired boy protagonist in lime green Shrek hood with TWO tubular ogre ears, cream tunic, brown vest, brown trousers and boots, standing ALONE at threshold, back toward us, looking outside, holding own orange pumpkin bucket. Remove ALL THREE other costumed children, their buckets, tails, hats, hands, reflections and all traces. Reconstruct doorway, floor and exterior naturally where they stood. Empty space around lone child emphasizes absence. No other people anywhere, no ghosts, no lion/Indiana/pirate costume. No lettering.",
+      "refs": [
+        "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/03_wrong_morning.png"
+      ],
+      "expected": []
+    }
+  ]
+}

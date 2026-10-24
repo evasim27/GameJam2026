@@ -1,0 +1,44 @@
+{
+  "title": "Rewind",
+  "generation": "built-in image_gen",
+  "status": "reference-only storyboard; use variants/index.json for incomplete rescues",
+  "notes": "The original all-three group shots are reference artwork, not a playable Rewind outcome. Rewind only uses rescue masks 0\u20136; mask 7 selects Menjava.",
+  "frames": [
+    {
+      "file": "01_screen_membrane.png",
+      "caption": "The screen gives way. Small hands reach through the glass.",
+      "order": 1,
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "file": "02_children_returned.png",
+      "caption": "Maja, 1989. Luka, 1994. Tina, 2003. None of them a day older.",
+      "order": 2,
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "file": "03_wrong_morning.png",
+      "caption": "Outside, it is not their Halloween anymore.",
+      "order": 3,
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "file": "04_mother_recognizes.png",
+      "caption": "Her mother still recognizes the costume.",
+      "order": 4,
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "file": "05_something_rewinds.png",
+      "caption": "The VCR clicks. Something is rewinding.",
+      "order": 5,
+      "width": 1672,
+      "height": 941
+    }
+  ],
+  "variants_index": "variants/index.json"
+}

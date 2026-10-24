@@ -1,0 +1,116 @@
+[
+  {
+    "id": "rescue_maja",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/shared/01_rescue_maja.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-2540b600-aa3f-4f75-a1c4-4ea756c05b06.png",
+    "status": "generated"
+  },
+  {
+    "id": "rescue_luka",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/shared/01_rescue_luka.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-e7c10282-8f7f-40f3-9cd1-ffe31654a310.png",
+    "status": "generated"
+  },
+  {
+    "id": "rescue_tina",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/shared/01_rescue_tina.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-997b9a1f-66cd-491f-8c21-5776c2cd3f0d.png",
+    "status": "generated"
+  },
+  {
+    "id": "room_maja",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/maja/02_children_returned.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-2b203565-f852-49ac-99be-fac673760038.png",
+    "status": "generated"
+  },
+  {
+    "id": "exit_maja",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/maja/03_wrong_morning.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-5b0b0790-d571-4822-a622-9714607dc5e5.png",
+    "status": "generated"
+  },
+  {
+    "id": "room_luka",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/luka/02_children_returned.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-c7c772aa-faa8-48eb-a554-430fbe5b551f.png",
+    "status": "generated"
+  },
+  {
+    "id": "exit_luka",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/luka/03_wrong_morning.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-325e15b6-b368-4dc4-a1d2-c75a16801dd4.png",
+    "status": "generated"
+  },
+  {
+    "id": "room_maja_luka",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/maja_luka/02_children_returned.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-c3adb9ed-712a-4643-9cf7-b4fe03261f9a.png",
+    "status": "generated"
+  },
+  {
+    "id": "exit_maja_luka",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/maja_luka/03_wrong_morning.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-72ba1bb7-a12a-4a3d-8647-53d2f45bf72c.png",
+    "status": "generated"
+  },
+  {
+    "id": "room_tina",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/tina/02_children_returned.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-c8b02f3a-5533-426f-b94d-f4a923338afa.png",
+    "status": "generated"
+  },
+  {
+    "id": "exit_tina",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/tina/03_wrong_morning.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-0d131203-4ab6-4624-b281-08e483138f8b.png",
+    "status": "generated"
+  },
+  {
+    "id": "room_maja_tina",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/maja_tina/02_children_returned.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-7c63bc93-872f-4469-99ff-46ad313903b7.png",
+    "status": "generated"
+  },
+  {
+    "id": "exit_maja_tina",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/maja_tina/03_wrong_morning.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-84621c58-3d9b-43a3-824e-58a5728a8b80.png",
+    "status": "generated"
+  },
+  {
+    "id": "room_luka_tina",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/luka_tina/02_children_returned.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-63e94029-5391-4470-aeb4-aca0f7d2161c.png",
+    "status": "generated"
+  },
+  {
+    "id": "exit_luka_tina",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/luka_tina/03_wrong_morning.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-092da2aa-5d65-45bc-b20a-d0b0d2891fc8.png",
+    "status": "generated"
+  },
+  {
+    "id": "mother_luka",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/shared/04_mother_recognizes_luka.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-85686c4a-a229-4705-93e9-4848c3c0db32.png",
+    "status": "generated"
+  },
+  {
+    "id": "mother_tina",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/shared/04_mother_recognizes_tina.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-f1d26e45-6430-407b-a2ee-5911b5dca4b4.png",
+    "status": "generated"
+  },
+  {
+    "id": "no_hands",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/shared/01_no_hands.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-afd5abe3-560b-4a53-95e3-e3ef39bd80d0.png",
+    "status": "generated"
+  },
+  {
+    "id": "exit_none",
+    "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/none/03_wrong_morning.png",
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-c1cd6a3c-dc40-4c1b-a094-94737738a6ef.png",
+    "status": "generated"
+  }
+]
