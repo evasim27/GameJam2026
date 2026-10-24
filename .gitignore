@@ -1,3 +1,4 @@
 .DS_Store
 /work/
 /game/addons/godot-git-plugin-v3.3.0/addons/godot-git-plugin/lib/~*.dll
+/game/addons/godot-git-plugin-v3.3.0/addons/godot-git-plugin/lib/~*.TMP

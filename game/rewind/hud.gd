@@ -44,6 +44,8 @@ var unlocked := {"rew": false, "ff": false, "track": false}
 var marks: Array = []
 var message := ""
 var sub_message := ""
+## The secret hallway keeps only small captions so its full height remains visible.
+var cinematic_mode := false
 ## 0..1: the tape-eater wrapping the whole picture after it reached the playhead.
 var wrap := 0.0
 var prompt_done := ""
@@ -115,6 +117,12 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var font := get_theme_default_font()
 	var w := size.x
+	if cinematic_mode:
+		if _subtitle_t > 0.0:
+			_draw_cinematic_caption(font, _subtitle, size.y - 74.0, CYAN)
+		if _hint_t > 0.0:
+			_draw_cinematic_caption(font, _hint, size.y - 42.0, OSD)
+		return
 
 	if mode != "PAUSE" or fmod(_blink, 1.0) < 0.6:
 		draw_string(font, Vector2(16, 30), _mode_label(), HORIZONTAL_ALIGNMENT_LEFT, -1, 28, VIOLET if mode == "REW" or mode == "SCRUB-" else OSD)
@@ -143,13 +151,28 @@ func _draw() -> void:
 	if wrap > 0.0:
 		_draw_wrap()
 	if message != "":
-		if message == "SIGNAL LOST":
+		if message == "YOU WEREN'T MEANT TO SEE THAT":
+			var shake := Vector2(sin(_blink * 29.0) * 1.5, cos(_blink * 23.0) * 0.5)
+			for i in 2:
+				var line := "YOU WEREN'T MEANT" if i == 0 else "TO SEE THAT"
+				var y := 137.0 + i * 39.0
+				draw_string(BLOOD_FONT, Vector2(2, y + 3) + shake, line, HORIZONTAL_ALIGNMENT_CENTER, w, 34, Color(0.12, 0.01, 0.02))
+				draw_string(BLOOD_FONT, Vector2(0, y) + shake, line, HORIZONTAL_ALIGNMENT_CENTER, w, 34, Color(0.78, 0.06, 0.09))
+		elif message == "SIGNAL LOST":
 			var shake := Vector2(sin(_blink * 29.0) * 1.5, cos(_blink * 23.0) * 0.5)
 			draw_string(BLOOD_FONT, Vector2(2, 153) + shake, message, HORIZONTAL_ALIGNMENT_CENTER, w, 42, Color(0.12, 0.01, 0.02))
 			draw_string(BLOOD_FONT, Vector2(0, 150) + shake, message, HORIZONTAL_ALIGNMENT_CENTER, w, 42, Color(0.78, 0.06, 0.09))
 		else:
 			draw_string(font, Vector2(0, 148), message, HORIZONTAL_ALIGNMENT_CENTER, w, 48, OSD)
 		draw_string(font, Vector2(0, 182), sub_message, HORIZONTAL_ALIGNMENT_CENTER, w, 20, DIM)
+
+
+func _draw_cinematic_caption(font: Font, text: String, y: float, color: Color) -> void:
+	var text_width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+	var box_width := minf(text_width + 24.0, size.x - 24.0)
+	var box_x := (size.x - box_width) / 2.0
+	draw_rect(Rect2(box_x, y - 21.0, box_width, 27.0), Color(0.01, 0.04, 0.04, 0.78))
+	draw_string(font, Vector2(12, y - 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, size.x - 24.0, 20, color)
 
 
 func _draw_rewind_cue(font: Font) -> void:

@@ -27,6 +27,7 @@ var _candies: Array[String] = []
 var _fails := 0
 var _attempts := 0
 var _tape := 0.0
+var _unlisted_tape := false
 var _shot := 0
 var _t := 0.0
 var _images: Array[Texture2D] = []
@@ -34,11 +35,12 @@ var _echo_texture: Texture2D
 var _echo_region := Rect2()
 
 
-func setup(candies: Array[String], fails: int, attempts: int, tape_used: float) -> void:
+func setup(candies: Array[String], fails: int, attempts: int, tape_used: float, unlisted_tape := false) -> void:
 	_candies.assign(candies)
 	_fails = maxi(fails, 0)
 	_attempts = maxi(attempts, 0)
 	_tape = maxf(tape_used, 0.0)
+	_unlisted_tape = unlisted_tape
 
 
 func _ready() -> void:
@@ -130,6 +132,8 @@ func _draw_results() -> void:
 		var name: String = ["Maja 1989", "Luka 1994", "Tina 2003"][i]
 		var freed := _candies.has(name)
 		_text("%s  %s" % [name.to_upper(), "FREE" if freed else "LOST"], Vector2(172, 96 + i * 11), 13, Color(0.52, 1.0, 0.95) if freed else Color(0.74, 0.7, 0.8))
+	if _unlisted_tape:
+		_text("UNLISTED TAPE FOUND", Vector2(172, 127), 12, Color(0.83, 0.68, 1.0))
 	# The cassette label reveals the fate of the voices, including partial rescues.
 	var label := "ALL FREE" if _candies.size() == 3 else "STILL LOST"
 	var width := FONT.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 28).x / 2.0

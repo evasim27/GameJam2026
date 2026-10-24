@@ -4,6 +4,8 @@ extends Node2D
 
 const Intro := preload("res://rewind/intro.gd")
 const Ending := preload("res://rewind/ending.gd")
+const ForbiddenRoom := preload("res://rewind/rooms/forbidden.gd")
+const ForbiddenTape := preload("res://rewind/forbidden_tape.gd")
 const KidNode := preload("res://rewind/kid.gd")
 const ROOMS := [
 	preload("res://rewind/rooms/foyer.gd"),
@@ -31,6 +33,9 @@ const SFX := {
 	"candy": preload("res://assets/audio/candy.wav"),
 	"echo": preload("res://assets/audio/echo.wav"),
 	"static": preload("res://assets/audio/static.mp3"),
+	"door_creak": preload("res://assets/audio/door_creak.wav"),
+	"whisper_frame": preload("res://assets/forbidden/whisper_frame.wav"),
+	"whisper_see": preload("res://assets/forbidden/whisper_see.wav"),
 	"pumpkin_warning": preload("res://assets/audio/pumpkin_rattle.wav"),
 	"bat_warning": preload("res://assets/audio/bat_warning.ogg"),
 	"shadow_warning": preload("res://assets/audio/shadow_warning.ogg"),
@@ -41,6 +46,7 @@ const YEARS := [1989, 1994, 2003, 2009, 2016, 2026]
 ## Rooms are seen up close and the camera follows the kid; the intro and ending use the full view.
 const ROOM_ZOOM := 3.0
 const FULL_ZOOM := 2.0
+const FORBIDDEN_ZOOM := 2.0
 ## How far from the left edge of the view the kid stays, so there is room to see what's coming.
 const LOOK_AHEAD := 0.4
 const CAMERA_SPEED := 6.0
@@ -50,7 +56,7 @@ const MAX_ROOM_FAILS := 6
 const REWIND_SPEED := 1.0
 const SCRUB_SPEED := 4.0
 
-enum State { INTRO, ROOM, FAILING, LEAVING, ENDING }
+enum State { INTRO, ROOM, FAILING, LEAVING, ENDING, FORBIDDEN, FORBIDDEN_VIDEO, FORBIDDEN_LOST }
 
 var state := State.INTRO
 var room_index := 0
@@ -73,6 +79,12 @@ var _last_mode := ""
 var _fx_burst := 0.0
 var _intro: Node2D
 var _ending: Node2D
+var _forbidden: Room
+var _forbidden_video: Node2D
+var _secret_visited := false
+var _secret_found := false
+var _secret_prompted := false
+var _secret_lost_t := 0.0
 var _cam := Vector2.ZERO
 var _sound_players := {}
 var _warning_state := {}
@@ -92,7 +104,7 @@ func _ready() -> void:
 		player.stream = SFX[id].duplicate() if looping else SFX[id]
 		if looping:
 			player.stream.set("loop", true)
-		player.volume_db = -20.0 if id == "rewind" or id == "static" else -12.0
+		player.volume_db = -20.0 if id == "rewind" or id == "static" else (-6.0 if id.begins_with("whisper_") else -12.0)
 		add_child(player)
 		_sound_players[id] = player
 	hud.visible = false
@@ -140,6 +152,7 @@ func _debug_jump(target: int) -> void:
 		get_tree().reload_current_scene()
 		return
 	_jumps += 1
+	_cleanup_forbidden()
 	if is_instance_valid(_intro):
 		_intro.queue_free()
 		intro_music.stop()
@@ -171,6 +184,8 @@ func _on_intro_finished() -> void:
 
 
 func _enter_room(i: int, first_time: bool) -> void:
+	_cleanup_forbidden()
+	hud.cinematic_mode = false
 	_stop_sound("rewind")
 	_stop_sound("static")
 	_warning_state.clear()
@@ -215,6 +230,7 @@ func _enter_room(i: int, first_time: bool) -> void:
 		hud.hint(retry)
 	_update_controls()
 	_playing = false
+	_secret_prompted = false
 	state = State.ROOM
 	_show()
 
@@ -225,6 +241,23 @@ func _update_controls() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if state == State.FORBIDDEN_VIDEO:
+		if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_SPACE:
+			_forbidden_video.skip()
+			get_viewport().set_input_as_handled()
+		return
+	if state == State.FORBIDDEN:
+		if event is InputEventKey and event.pressed and not event.echo:
+			if event.physical_keycode == KEY_D and not _forbidden.at_tape:
+				_forbidden.playing = not _forbidden.playing
+				if not _forbidden.playing:
+					_forbidden.stopped()
+				hud.mode = "PLAY" if _forbidden.playing else "PAUSE"
+				_sound("click")
+			elif event.physical_keycode == KEY_E and _forbidden.at_tape:
+				_start_forbidden_video()
+			get_viewport().set_input_as_handled()
+		return
 	if state == State.ENDING and _ending.results_visible() and event.is_action_pressed("restart"):
 		get_tree().reload_current_scene()
 		return
@@ -237,6 +270,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("tape_play") and not event.is_echo():
 		_playing = not _playing
 		hud.flash("play" if _playing else "pause")
+	elif event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_E and _can_enter_forbidden():
+		_enter_forbidden()
+		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("tape_glitch") and _glitch_unlocked:
 		_glitch()
 	elif event.is_action_pressed("restart"):
@@ -248,7 +284,16 @@ func _process(delta: float) -> void:
 	hud.candies = candies.size() + (run.taken.size() if state == State.ROOM else 0)
 	if state == State.ROOM:
 		_tick(delta)
-	if room:
+	if state == State.FORBIDDEN and _forbidden:
+		var view := get_viewport_rect().size / FORBIDDEN_ZOOM
+		var target_x := clampf(_forbidden.walk_x - view.x * LOOK_AHEAD, 0.0, maxf(_forbidden.width - view.x, 0.0))
+		_cam = _cam.lerp(Vector2(target_x, 0.0), minf(CAMERA_SPEED * delta, 1.0))
+		world.position = (-_cam * FORBIDDEN_ZOOM).round()
+	elif state == State.FORBIDDEN_LOST:
+		_secret_lost_t -= delta
+		if _secret_lost_t <= 0.0:
+			_return_from_forbidden()
+	elif room and state != State.FORBIDDEN_VIDEO:
 		_cam = _cam.lerp(_camera_target(), minf(CAMERA_SPEED * delta, 1.0))
 		world.position = (-_cam * ROOM_ZOOM).round()
 	_fx_burst = maxf(_fx_burst - delta, 0.0)
@@ -260,7 +305,11 @@ func _process(delta: float) -> void:
 			tape_player.play()
 		else:
 			tape_player.stop()
-	if state == State.ROOM or state == State.LEAVING:
+	if state == State.FORBIDDEN:
+		vhs.set_shader_parameter("tracking", _forbidden.tracking_flash())
+		vhs.set_shader_parameter("noise_amount", 0.04 + _forbidden.tracking_flash() * 0.35)
+		vhs.set_shader_parameter("rewind_amount", 0.0)
+	elif state == State.ROOM or state == State.LEAVING:
 		_update_screen_fx()
 
 
@@ -307,6 +356,11 @@ func _tick(delta: float) -> void:
 		_glitch_unlocked = true
 		_update_controls()
 	_check_hints()
+	if _can_enter_forbidden() and not _secret_prompted:
+		_secret_prompted = true
+		hud.hint("The clock hides an unlisted room. E = ENTER; PLAY continues forward.")
+	elif not _can_enter_forbidden():
+		_secret_prompted = false
 	if ev == "fail":
 		_fail()
 	elif ev == "win":
@@ -424,6 +478,112 @@ func _camera_target() -> Vector2:
 	return Vector2(x, y)
 
 
+func _can_enter_forbidden() -> bool:
+	return room_index == 0 and not _secret_visited and state == State.ROOM \
+		and run.kid_x >= 285.0 and run.kid_x <= 342.0 \
+		and run.room_time >= 5.0 and run.room_time < 8.0
+
+
+func _enter_forbidden() -> void:
+	_stop_sound("rewind")
+	_secret_visited = true
+	_playing = false
+	room.visible = false
+	_forbidden = ForbiddenRoom.new()
+	_forbidden.setup(0, 0)
+	_forbidden.cue.connect(_forbidden_cue)
+	_forbidden.tape_reached.connect(_forbidden_tape_reached)
+	world.add_child(_forbidden)
+	world.scale = Vector2(FORBIDDEN_ZOOM, FORBIDDEN_ZOOM)
+	_cam = Vector2.ZERO
+	state = State.FORBIDDEN
+	hud.clear_prompt()
+	hud.message = ""
+	hud.sub_message = ""
+	hud.cinematic_mode = true
+	hud.mode = "PAUSE"
+	hud.hint("THE FORBIDDEN ROOM  ·  D = PLAY / PAUSE")
+	_sound("door_creak")
+
+
+func _forbidden_cue(text: String, sound_id: String) -> void:
+	hud.say(text)
+	_sound(sound_id)
+
+
+func _forbidden_tape_reached() -> void:
+	hud.mode = "PAUSE"
+	hud.hint("An unlisted VHS tape. E = PICK UP AND INSERT.")
+	_sound("static")
+
+
+func _start_forbidden_video() -> void:
+	state = State.FORBIDDEN_VIDEO
+	_secret_found = true
+	_stop_sound("static")
+	_sound("click")
+	_sound("static")
+	_forbidden.visible = false
+	_forbidden_video = ForbiddenTape.new()
+	_forbidden_video.finished.connect(_forbidden_signal_lost)
+	world.add_child(_forbidden_video)
+	world.scale = Vector2(FULL_ZOOM, FULL_ZOOM)
+	world.position = Vector2.ZERO
+	hud.visible = false
+	vhs.set_shader_parameter("noise_amount", 0.28)
+	vhs.set_shader_parameter("tracking", 0.16)
+
+
+func _forbidden_signal_lost() -> void:
+	if state != State.FORBIDDEN_VIDEO:
+		return
+	state = State.FORBIDDEN_LOST
+	_secret_lost_t = 2.2
+	_forbidden_video.visible = false
+	hud.visible = true
+	hud.cinematic_mode = false
+	hud.clear_texts()
+	hud.mode = "STOP"
+	hud.message = "YOU WEREN'T MEANT TO SEE THAT"
+	hud.sub_message = ""
+	vhs.set_shader_parameter("noise_amount", 0.85)
+	vhs.set_shader_parameter("tracking", 1.0)
+	_sound("echo")
+	_sound("static")
+
+
+func _return_from_forbidden() -> void:
+	if state != State.FORBIDDEN_LOST:
+		return
+	_cleanup_forbidden()
+	room.visible = true
+	run.kid_x = 313.0
+	run.room_time = 6.5
+	run.seen_time = maxf(run.seen_time, 6.5)
+	_playing = false
+	state = State.ROOM
+	world.scale = Vector2(ROOM_ZOOM, ROOM_ZOOM)
+	_cam = _camera_target()
+	hud.visible = true
+	hud.cinematic_mode = false
+	hud.mode = "PAUSE"
+	hud.message = "UNLISTED TAPE FOUND"
+	hud.sub_message = "The clock door is still open. D = PLAY."
+	hud.hint("That recording wasn't meant for this house.")
+	_show()
+	_sound("glitch")
+
+
+func _cleanup_forbidden() -> void:
+	_stop_sound("static")
+	if is_instance_valid(_forbidden_video):
+		_forbidden_video.queue_free()
+		_forbidden_video = null
+	if is_instance_valid(_forbidden):
+		_forbidden.queue_free()
+		_forbidden = null
+
+
 func _update_screen_fx() -> void:
 	var tracking := 0.0
 	var noise := 0.04
@@ -533,6 +693,7 @@ func _leave_room() -> void:
 
 
 func _end() -> void:
+	_cleanup_forbidden()
 	state = State.ENDING
 	room.queue_free()
 	room = null
@@ -545,7 +706,7 @@ func _end() -> void:
 	# Attempts: one per room plus every failure except the planned tutorial one.
 	var attempts := ROOMS.size() + maxi(total_fails - 1, 0)
 	_ending = Ending.new()
-	_ending.setup(candies, total_fails, attempts, tape_used)
+	_ending.setup(candies, total_fails, attempts, tape_used, _secret_found)
 	world.add_child(_ending)
 
 
