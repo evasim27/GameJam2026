@@ -1,0 +1,32 @@
+[
+  {
+    "file": "01_entering_house.png",
+    "title": "Entering the house",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "file": "02_screen_lit_room.png",
+    "title": "The screen-lit room",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "file": "03_discovering_vhs.png",
+    "title": "The VHS on the table",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "file": "04_inserting_vhs.png",
+    "title": "Inserting the VHS",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "file": "05_pulled_into_tv.png",
+    "title": "Pulled into the TV",
+    "width": 1672,
+    "height": 941
+  }
+]

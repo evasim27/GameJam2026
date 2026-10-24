@@ -3,6 +3,10 @@ extends TapeObject
 ## A shadow off the stairs that slides across the kid's path on a rhythm of room time.
 ## With `always` it never leaves: the over-long shadow waiting at the top of the stairs.
 
+const ART := preload("res://assets/monsters/static_below_the_stairs_monster.png")
+const IDLE_FRAME := Rect2(224, 15, 361, 910)
+const REACH_FRAME := Rect2(699, 96, 938, 823)
+
 @export var width := 24.0
 @export var period := 3.2
 @export var from := 2.0
@@ -43,30 +47,18 @@ func show_time(run: RoomRun) -> void:
 func _draw() -> void:
 	if _cover <= 0.0:
 		return
-	# Thin, uneven fingers reaching down from above, fading towards the tips.
-	var reach := height * _cover
-	var fingers := 4
-	for i in fingers:
-		var x := width * (i + 0.5) / fingers
-		var sway := sin(_t * 3.0 + i * 1.7) * 2.0
-		var tip := -height - 20.0 + (reach + 20.0) * (0.6 + 0.4 * absf(sin(i * 2.3 + 0.5)))
-		var top := -height - 30.0
-		var segs := 6
-		for k in segs:
-			var f0 := float(k) / segs
-			var f1 := float(k + 1) / segs
-			var y0 := lerpf(top, tip, f0)
-			var y1 := lerpf(top, tip, f1)
-			var w0 := lerpf(3.0, 0.5, f0)
-			var w1 := lerpf(3.0, 0.5, f1)
-			var c0 := Color(0.03, 0.0, 0.06, (0.85 - 0.5 * f0) * (0.4 + 0.6 * _cover))
-			draw_colored_polygon(PackedVector2Array([
-				Vector2(x - w0 + sway * f0, y0), Vector2(x + w0 + sway * f0, y0),
-				Vector2(x + w1 + sway * f1, y1), Vector2(x - w1 + sway * f1, y1)]), c0)
-	var c := Color(0.03, 0.0, 0.06, 0.5 * _cover)
-	var floor_c := c
-	floor_c.a *= 0.6
-	draw_rect(Rect2(-4, -2, width + 8, 3), floor_c)
+	var alpha := clampf(_cover, 0.0, 1.0)
+	var centre := width / 2.0 + sin(_t * 2.0) * 1.2
+	var reaching := _cover > 0.8 and fposmod(_t + position.x * 0.01, 2.4) < 0.36
+	var frame := REACH_FRAME if reaching else IDLE_FRAME
+	var sprite_height := height + 24.0
+	var sprite_width := sprite_height * frame.size.x / frame.size.y
+	var bob := sin(_t * 2.3) * 1.2
+	var dest := Rect2(centre - sprite_width / 2.0, -sprite_height + bob, sprite_width, sprite_height)
+	# A dim cool halo keeps the figure readable under the staircase.
+	draw_circle(Vector2(centre, -sprite_height * 0.72 + bob), 11.0, Color(0.26, 0.44, 0.8, 0.08 * alpha))
+	draw_texture_rect_region(ART, dest, frame, Color(1.0, 1.0, 1.0, alpha))
+	draw_rect(Rect2(-4, -2, width + 8, 3), Color(0.03, 0.0, 0.06, 0.3 * alpha))
 
 
 func timeline_marks(length: float) -> Array:

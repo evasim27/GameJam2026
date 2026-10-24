@@ -20,6 +20,7 @@ var tape := 0.0
 var tape_used := 0.0
 var free_rewind := false
 var glitched := {}  # glitch id -> kid_x when it happened
+var glitch_times := {}  # glitch id -> room_time when it happened
 var taken := {}  # candy name -> true
 var eater := 0.0  # tape-eater progress towards the playhead, 0..1
 var cause: TapeObject = null  # what ended the attempt
@@ -90,6 +91,7 @@ func glitch() -> String:
 	for o in room.objects:
 		if o is GlitchSpot and o.can_glitch(self):
 			glitched[o.glitch_id] = kid_x
+			glitch_times[o.glitch_id] = room_time
 			_spend(minf(GLITCH_COST, tape))
 			return o.glitch_id
 	return ""

@@ -1,0 +1,5 @@
+# Frame 3 hood correction
+
+Built-in image_gen edit.
+
+Use case: precise-object-edit. Correct ONLY the extra third ogre ear on the green costume hood in the supplied image. There are currently THREE tube-shaped ears: one projects at upper-left of hood (around x310,y285), one at upper-right (around x615,y365), and an erroneous extra round ear sits ON THE MIDDLE of the visible hood surface (center around x488,y387). REMOVE ONLY that MIDDLE ear, including its short stem and black outline (approximately x440–535,y340–430 in the 1672x941 image). Restore smooth continuous GREEN FABRIC with matching pixel-art shading in its place. KEEP the TWO ears at the outer upper-left and upper-right silhouette, so the hood has exactly TWO ogre ears total. Do not remove or add other hood parts. Preserve all other content and composition as closely as possible: child's pose and face, flashlight, candy bucket, table, rectangular rug, furniture, portraits, television, same pixel art and lighting. VHS label must still read exactly "DO NOT PLAY". Keep 1672x941 canvas. This is a very small local correction, not a scene redesign.

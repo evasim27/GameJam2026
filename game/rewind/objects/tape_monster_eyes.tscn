@@ -1,0 +1,42 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/rewind/cinematic/tape-monster-eyes-blink.png" id="1_sheet"]
+
+[sub_resource type="AtlasTexture" id="Atlas_open"]
+atlas = ExtResource("1_sheet")
+region = Rect2(40, 180, 700, 400)
+
+[sub_resource type="AtlasTexture" id="Atlas_half"]
+atlas = ExtResource("1_sheet")
+region = Rect2(740, 180, 700, 400)
+
+[sub_resource type="AtlasTexture" id="Atlas_closed"]
+atlas = ExtResource("1_sheet")
+region = Rect2(1420, 180, 700, 400)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_blink"]
+animations = [{
+"frames": [{
+"duration": 10.0,
+"texture": SubResource("Atlas_open")
+}, {
+"duration": 0.7,
+"texture": SubResource("Atlas_half")
+}, {
+"duration": 1.0,
+"texture": SubResource("Atlas_closed")
+}, {
+"duration": 0.7,
+"texture": SubResource("Atlas_half")
+}],
+"loop": true,
+"name": &"blink",
+"speed": 10.0
+}]
+
+[node name="TapeMonsterEyes" type="AnimatedSprite2D"]
+texture_filter = 1
+scale = Vector2(0.08, 0.08)
+sprite_frames = SubResource("SpriteFrames_blink")
+animation = &"blink"
+autoplay = "blink"

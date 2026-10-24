@@ -1,0 +1,1 @@
+Built-in image_gen. Transparent pixel-art sprite: one small weathered wooden sign on a short stake, front view, warm dark brown wood, chipped edges, rusty nails, muted spooky game palette. Large cream painted text: "FALL". No scenery or other objects. Displayed at 40x32 game pixels.

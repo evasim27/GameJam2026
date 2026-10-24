@@ -2,7 +2,11 @@ class_name Pumpkin
 extends TapeObject
 ## A jack-o'-lantern that bites anything in front of it on a fixed rhythm of room time.
 
-const SHEET := preload("res://assets/rewind/pumpkin.png")
+const SHEET := preload("res://assets/rewind/pumpkin-styled.png")
+## The generated sheet has uneven transparent margins; crop both poses to a common baseline.
+const FRAME_SIZE := Vector2(540, 480)
+const FRAME_ORIGINS := [Vector2(248, 232), Vector2(978, 232)]
+const SPRITE_WIDTH := 16.0
 const WARN_TIME := 0.5
 
 @export var width := 16.0
@@ -21,10 +25,12 @@ var _sprite: Sprite2D
 func _ready() -> void:
 	_sprite = Sprite2D.new()
 	_sprite.texture = SHEET
-	_sprite.hframes = 2
-	_sprite.scale = Vector2(size, size)
+	_sprite.region_enabled = true
+	_sprite.region_rect = Rect2(FRAME_ORIGINS[0], FRAME_SIZE)
+	var sprite_scale := SPRITE_WIDTH * size / FRAME_SIZE.x
+	_sprite.scale = Vector2(sprite_scale, sprite_scale)
 	_sprite.modulate = tint
-	_sprite.position = Vector2(width / 2.0, -8.0 * size)
+	_sprite.position = Vector2(width / 2.0, -FRAME_SIZE.y * sprite_scale / 2.0)
 	add_child(_sprite)
 
 
@@ -39,10 +45,10 @@ func is_deadly(t: float) -> bool:
 func show_time(run: RoomRun) -> void:
 	var t := run.room_time
 	var biting := is_deadly(t)
-	_sprite.frame = 1 if biting else 0
+	_sprite.region_rect = Rect2(FRAME_ORIGINS[1 if biting else 0], FRAME_SIZE)
 	var until_bite := fposmod(bite_from - t, period)
 	var shaking := not biting and until_bite < WARN_TIME
-	_sprite.offset = Vector2(sin(t * 80.0), 0) if shaking else Vector2.ZERO
+	_sprite.position.x = width / 2.0 + (sin(t * 80.0) if shaking else 0.0)
 
 
 func timeline_marks(length: float) -> Array:

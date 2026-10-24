@@ -4,13 +4,16 @@ extends Room
 ## out of the VCR after the playhead; glitch the wound reel next to the VCR to trap it in the TV.
 ## Both glitches are needed. Tina 2003 lies behind the wall for a quick, precise pass.
 
-const WALL := preload("res://assets/rewind/wall.png")
-const FLOOR_TEX := preload("res://assets/rewind/floor.png")
+const WALL := preload("res://assets/rewind/cinematic/wall.png")
+const FLOOR_TEX := preload("res://assets/rewind/cinematic/floor.png")
+const BOOKCASE := preload("res://assets/rewind/cinematic/bookcase-hidden-monster.png")
+const CRT := preload("res://assets/rewind/cinematic/crt-cabinet.png")
 const ARMCHAIR := preload("res://assets/noble_interior/armchair_tall.png")
-const KID := preload("res://assets/rewind/kid.png")
+const KID := preload("res://assets/exterior/player_walk_6f.png")
 const FONT := preload("res://assets/fonts/VT323-Regular.ttf")
 
 const VCR_X := 112.0
+const CRT_X := 176.0
 const WALL_X := 272.0
 const EXIT_X := 300.0
 const NAMES := ["Maja", "Luka", "Tina", "Ana", "Jaka", "Eva"]
@@ -21,12 +24,20 @@ func build() -> void:
 	tape_budget = 22.0
 	timeline_length = 24.0
 
-	add_tiled(WALL, Rect2(0, 0, WIDTH, FLOOR), Color(0.1, 0.09, 0.14))
-	add_tiled(FLOOR_TEX, Rect2(0, FLOOR, WIDTH, 44), Color(0.3, 0.27, 0.34))
+	add_tiled(WALL, Rect2(0, 0, width, FLOOR), Color(0.1, 0.09, 0.14))
+	add_tiled(FLOOR_TEX, Rect2(0, FLOOR, width, 44), Color(0.3, 0.27, 0.34))
+	var portrait := add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(123, 88), 2)
+	portrait.rotation = 0.12
+	add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(270, 88), 1)
+	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(237, 99))
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(2, 73))
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(318, 73), 1, true)
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(86, 75), 1)
+	add_wall_decor(WallDecor.Kind.SCRATCHES, Vector2(251, 112))
 	add_drawing(_shelves, Vector2(14, FLOOR))
-	add_drawing(_label, Vector2(204, 40))
+	add_drawing(_label, Vector2(206, 76))
 	add_drawing(_daylight, Vector2(EXIT_X, FLOOR))
-	add_drawing(_crt, Vector2(176, FLOOR))
+	add_drawing(_crt, Vector2(CRT_X, FLOOR))
 	add_drawing(_vcr, Vector2(VCR_X, FLOOR))
 
 	var exit := Door.new()
@@ -42,7 +53,7 @@ func build() -> void:
 
 	var wall_tear := GlitchSpot.new()
 	wall_tear.glitch_id = "wall"
-	wall_tear.area = Rect2(-4, -48, 28, 48)
+	wall_tear.area = FalseWall.AREA.grow(2)
 	wall_tear.period = 5.0
 	wall_tear.from = 3.6
 	wall_tear.to = 4.6
@@ -50,7 +61,8 @@ func build() -> void:
 
 	var eater := TapeEater.new()
 	eater.trigger_x = 150.0
-	eater.tv = Vector2(176 - VCR_X, -40)
+	eater.hiding_spot = Vector2(50, 80)
+	eater.tv = Vector2(CRT_X - VCR_X, -40)
 	eater.hint_x = VCR_X
 	add_object(eater, VCR_X, FLOOR - 6)
 
@@ -68,17 +80,9 @@ func idle_hint_target(run: RoomRun) -> float:
 	return WALL_X + 10.0 if not run.glitched.has("wall") else EXIT_X
 
 
-## Shelves of tapes.
+## Parted tapes on the second shelf hide the blinking reel eyes.
 func _shelves(d: Node2D) -> void:
-	var wood := Color(0.2, 0.12, 0.09)
-	for row in 4:
-		var y := -18.0 - row * 22.0
-		d.draw_rect(Rect2(0, y, 70, 2), wood)
-		for i in 11:
-			var c := Color(0.12, 0.12, 0.14) if (i + row) % 3 else Color(0.85, 0.82, 0.75)
-			d.draw_rect(Rect2(2 + i * 6, y - 12, 4, 12), c)
-	d.draw_rect(Rect2(0, -96, 2, 96), wood)
-	d.draw_rect(Rect2(68, -96, 2, 96), wood)
+	d.draw_texture_rect_region(BOOKCASE, Rect2(0, -96, 70, 96), Rect2(176, 102, 792, 1168))
 
 
 ## A tape label pinned to the wall with children's names. More are crossed out after 5 failures.
@@ -108,16 +112,17 @@ func _vcr(d: Node2D) -> void:
 
 ## The big CRT. Mostly the kid from the foyer; after 6 failures, an empty armchair in a dark room.
 func _crt(d: Node2D) -> void:
-	d.draw_rect(Rect2(-24, -14, 48, 14), Color(0.12, 0.08, 0.06))
-	d.draw_rect(Rect2(-22, -54, 44, 40), Color(0.1, 0.1, 0.11))
-	var screen := Rect2(-18, -50, 36, 30)
+	var screen := Rect2(-18, -52, 33, 22)
 	var flicker := 0.85 + 0.15 * sin(d.t * 30.0)
+	for i in 5:
+		d.draw_rect(screen.grow(3 + i * 3), Color(0.12, 0.48, 0.8, 0.008 * flicker))
+	d.draw_texture_rect_region(CRT, Rect2(-26, -58, 52, 58), Rect2(64, 84, 1056, 1168))
 	d.draw_rect(screen, Color(0.1, 0.18, 0.2) * flicker)
 	if total_fails >= 6 and fmod(d.t, 5.0) < 1.0:
 		d.draw_rect(screen, Color(0.02, 0.02, 0.03))
-		d.draw_texture_rect(ARMCHAIR, Rect2(screen.position + Vector2(8, 4), Vector2(20, 20)), false, Color(0.4, 0.4, 0.5))
+		d.draw_texture_rect(ARMCHAIR, Rect2(screen.get_center() - Vector2(8, 8), Vector2(16, 16)), false, Color(0.4, 0.4, 0.5))
 	elif fmod(d.t, 3.0) < 1.2:
-		d.draw_texture_rect_region(KID, Rect2(screen.position + Vector2(13, 8), Vector2(10, 15)), Rect2(0, 0, 16, 24), Color(0.6, 1.0, 1.0, 0.8))
+		d.draw_texture_rect_region(KID, Rect2(screen.get_center() - Vector2(5, 7), Vector2(10, 14)), Rect2(0, 0, 40, 56), Color(0.6, 1.0, 1.0, 0.8))
 	for y in range(int(screen.position.y), int(screen.end.y), 2):
 		d.draw_line(Vector2(screen.position.x, y), Vector2(screen.end.x, y), Color(0, 0, 0, 0.25), 1.0)
 
