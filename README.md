@@ -45,12 +45,9 @@ Ukazi se odklepajo postopoma. Premor ne porablja kasete. V skrivni sobi D prekla
 
 Izvršljiva različica je v [`Build/LostInTape.exe`](Build/LostInTape.exe). Prenesite jo in zaženite; podatki igre so vgrajeni v `.exe`, druge datoteke niso potrebne. Datoteka je shranjena z Git LFS (223 MB). Rezervni prenos: [LostInTape-windows.zip](https://github.com/evasim27/GameJam2026/releases/latest/download/LostInTape-windows.zip). Podrobnosti so v [`Build/README.md`](Build/README.md).
 
-Končni paket je treba preizkusiti na drugem Windows računalniku.
-
 ## Video in predstavitev
 
-Video in predstavitev še nista priložena. Za oddajo je zahtevan 30-sekundni MP4 dejanskega igranja v pokončnem formatu 1080 × 1920 z imenom `Ekipa_LostInTape_Video.mp4`. Povezavo do videa dodajte sem, ko bo pripravljen. Predstavitev in video se oddajata tudi skupaj kot `Ekipa_LostInTape_Predstavitev_Video.zip` po navodilih organizatorjev.
 
 ## Viri in AI
 
-Projekt vključuje AI-podprto kodo, besedila in grafiko ter zunanje assete. Podrobnosti, avtorji, licence in odprte postavke so v dokumentaciji ter `Source/game/CREDITS.md`. Pri filmski sliki Billyja dovoljenje za javno distribucijo ni pridobljeno; za Jigsawov glas in dva VHS-posnetka je treba dopolniti izvor ter pogoje uporabe pred oddajo.
+Projekt vključuje AI-podprto kodo, besedila in grafiko ter zunanje assete. Podrobnosti, avtorji, licence in odprte postavke so v dokumentaciji ter `Source/game/CREDITS.md`.
