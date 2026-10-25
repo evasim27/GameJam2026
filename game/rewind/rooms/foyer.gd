@@ -2,8 +2,8 @@ extends Room
 ## The Last House: the foyer, and the whole tutorial. Two screens long, one lesson each:
 ## Play/Pause; the first pumpkin always catches the kid on the first play (a planned lesson) and
 ## teaches Rewind (the first one is free); the second pumpkin has no marked window and holds the
-## Maja 1989 candy; the clock door only opened early in the recording, so the house has to be
-## wound back a long way (SHIFT is faster); the damaged wall teaches Glitch, and can't kill,
+## Maja 1989 candy; the clock door only opened early in the recording, and winding the house back
+## a long way (SHIFT is faster) opens the optional secret room behind it; the damaged wall teaches Glitch, and can't kill,
 ## but the glitch damages the film and lets out bats that fly at the kid and have to pass over it.
 
 const WALL := preload("res://assets/rewind/cinematic/wall.png")
@@ -38,7 +38,7 @@ func build() -> void:
 	add_tiled(WALL, Rect2(0, 0, width, 104), Color(0.72, 0.64, 0.58))  # faded floral wallpaper
 	add_tiled(WAINSCOT, Rect2(0, 104, width, 32), Color(0.88, 0.78, 0.7), 32.0)
 	add_tiled(FLOOR_TEX, Rect2(0, FLOOR, width, 44), Color(0.9, 0.8, 0.72))
-	for x in [86, 230, 412, 560]:
+	for x in [86, 214, 412, 560]:
 		var picture := add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(x, 88), int(x / 70))
 		picture.rotation = -0.06 if x == 412 else 0.025
 	for x in [136, 362, 510]:
@@ -50,15 +50,18 @@ func build() -> void:
 	add_drawing(_entrance_door, Vector2(0, FLOOR))
 	add_drawing(_coat_rack, Vector2(54, FLOOR + 3.0))
 	add_furniture(TABLE, 168, WARM)
-	add_furniture(CABINET, 262, WARM)
-	add_furniture(CLOCK, 306, WARM)
+	# Tall pieces approach the door's height; leave a gap around its frame.
+	var cabinet := add_furniture(CABINET, 254, WARM)
+	cabinet.scale = Vector2(0.875, 0.875)
+	var clock := add_furniture(CLOCK, 294, WARM)
+	clock.scale = Vector2.ONE
 	add_furniture(ARMCHAIR, 392, WARM)
 	add_furniture(WARDROBE, 540, WARM)
 	# Unevenly burned singles and close pairs share the furniture's surface baseline.
 	add_drawing(_candle.bind(2), Vector2(162, FLOOR - 18.5))
 	add_drawing(_candle.bind(1), Vector2(176, FLOOR - 18.5))
-	add_drawing(_candle, Vector2(258, FLOOR - 30))
-	add_drawing(_candle.bind(1), Vector2(268, FLOOR - 30))
+	add_drawing(_candle, Vector2(237, FLOOR - 47.25))
+	add_drawing(_candle.bind(1), Vector2(271, FLOOR - 47.25))
 	add_drawing(_candle.bind(3), Vector2(538, FLOOR - 28))
 
 	# Play, Pause, Rewind.
@@ -67,12 +70,9 @@ func build() -> void:
 	add_object(_pumpkin(2.2, 0.0, 1.0, false, 1.5, Color(1.0, 0.82, 0.62)), 210)
 	var maja := Candy.new()
 	maja.candy_name = "Maja 1989"
-	maja.period = 2.2
-	maja.from = 1.35
-	maja.to = 1.6
 	maja.lift = 9.0
 	add_object(maja, 218)
-	# Winding the house back a long way, and scrubbing.
+	# Optional: winding the house back a long way opens the secret room, and scrubbing.
 	var clock_door := ClockDoor.new()
 	clock_door.open_from = 5.0
 	clock_door.open_to = 8.0
@@ -99,7 +99,7 @@ func trigger_hints() -> Array:
 		{"x": 40.0, "text": "Press D to pause. Pausing doesn't use tape.", "button": "pause", "keys": ["D"], "hold": false, "done": "pause"},
 		{"x": 140.0, "text": "This pumpkin isn't on the timeline. Watch for when it starts shaking."},
 		{"x": 196.0, "text": "Pink window = memory. Gives back 2 s of tape."},
-		{"x": 280.0, "text": "The door is only open 0:05-0:08. SHIFT + A rewinds faster.", "button": "rew", "keys": ["SHIFT", "A"], "done": "fast_rewind"},
+		{"x": 280.0, "text": "The clock door is only open 0:05-0:08. Wind back (SHIFT + A is faster) to look inside, or keep walking.", "button": "rew", "keys": ["SHIFT", "A"], "done": "fast_rewind"},
 		{"x": 345.0, "text": "FF moves the house forward, but only through footage you've seen.", "button": "ff", "keys": ["F"], "done": "scrub"},
 		{"x": 390.0, "text": "When the picture tears (cyan), press E. A glitch costs 3 s.", "button": "track", "keys": ["E"], "hold": false, "done": "glitch"},
 		{"x": 486.0, "text": "The glitch damaged the film. Bats fly in at you: let each one pass while it is up high."},
@@ -121,7 +121,7 @@ func _entrance_door(d: Node2D) -> void:
 	DOOR_ART.draw_door(d, Rect2(-2, -64, 36, 64), false, Color(1.0, 0.65, 0.25, 0.6))
 
 
-## The fourth hook fills with a child's costume after the second failed attempt.
+## Indiana Jones, Simba and Jack Sparrow; Shrek fills the fourth hook after the second failure.
 func _coat_rack(d: Node2D) -> void:
 	var height := 48.0
 	var frame := 1 if total_fails >= 2 else 0

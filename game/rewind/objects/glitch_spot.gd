@@ -14,7 +14,7 @@ extends TapeObject
 ## Another glitch that has to happen first; until then this frame doesn't tear at all.
 @export var requires := ""
 @export var tint := Color(0.4, 1.0, 1.0)
-## Chime as soon as the window opens (boss fight), so the moment is heard as well as seen.
+## Boss windows: the tear only shows while the kid is in reach, so it never flashes in vain.
 @export var cue := false
 
 ## Raised by the room after repeated failures, so the tear gets more obvious.
@@ -37,14 +37,22 @@ func unlocked(run: RoomRun) -> bool:
 	return not run.glitched.has(glitch_id) and (requires == "" or run.glitched.has(requires))
 
 
+func in_reach(run: RoomRun) -> bool:
+	return run.kid_x >= kid_min and run.kid_x <= kid_max
+
+
 func can_glitch(run: RoomRun) -> bool:
-	return unlocked(run) and window_open(run) and run.kid_x >= kid_min and run.kid_x <= kid_max
+	return unlocked(run) and window_open(run) and in_reach(run)
 
 
 func show_time(run: RoomRun) -> void:
 	_t = run.room_time
 	_done = not unlocked(run)
 	_active = window_open(run)
+	if cue:
+		# Boss windows only tear when E really works, so the blue flash never lies.
+		_done = _done or not in_reach(run)
+		_active = _active and in_reach(run)
 	queue_redraw()
 
 
@@ -74,8 +82,14 @@ func _draw() -> void:
 
 
 func screen_effect(run: RoomRun) -> Dictionary:
+	if cue and not in_reach(run):
+		return {}
 	return {"tracking": 0.35} if unlocked(run) and window_open(run) else {}
 
 
 func timeline_marks(length: float) -> Array:
-	return periodic_marks(length, period, from, to, Color(tint, 0.9))
+	var marks := periodic_marks(length, period, from, to, Color(tint, 0.9))
+	if cue and is_finite(kid_min):
+		for m in marks:
+			m["from_x"] = kid_min
+	return marks

@@ -22,7 +22,7 @@ const BROWN := Color(0.25, 0.12, 0.08)
 const TAPE := Color(0.18, 0.1, 0.07)
 const BLUE := Color(0.3, 0.55, 1.0)
 ## Reels on top of the VCR, relative to position. The first one is the wound reel.
-const REELS := [Vector2(-14, -4), Vector2(-3, -4)]
+const REELS := [Vector2(-14, -10), Vector2(-2, -10)]
 const COLLAPSE := 0.8
 
 enum Phase { DORMANT, REEL, SCREEN, DEFEATED }
@@ -56,6 +56,8 @@ var _since_defeat := 0.0
 var _reel_open := false
 var _kid := Vector2.ZERO
 var _eyes: AnimatedSprite2D
+## The deck's reels sit with the scenery, behind the kid; the attack itself stays in front.
+var _deck: Node2D
 var _void: ColorRect
 var _void_material: ShaderMaterial
 var _ribbon_mesh := ArrayMesh.new()
@@ -79,6 +81,12 @@ func _ready() -> void:
 	_eyes.modulate = Color(0.45, 0.37, 0.30, 0.9)
 	add_child(_eyes)
 	_eyes.stop()
+	_deck = Node2D.new()
+	_deck.z_as_relative = false
+	_deck.z_index = 0
+	_deck.draw.connect(_draw_reels)
+	add_child(_deck)
+	# The kid is added to the room after the objects, so at equal z it draws over the deck.
 
 
 func phase(run: RoomRun) -> Phase:
@@ -169,7 +177,8 @@ func show_time(run: RoomRun) -> void:
 func _draw() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_update_void()
-	_draw_reels()
+	if is_instance_valid(_deck):
+		_deck.queue_redraw()
 	match _phase:
 		Phase.REEL:
 			_draw_held_kid()
@@ -187,22 +196,25 @@ func _draw() -> void:
 
 ## Two reels on the deck. They turn with room time, jam spills tape, and defeat stops both.
 func _draw_reels() -> void:
-	var spin := _t * 4.0
+	# Stepped poses match the sprite's pixel clusters; room time supports scrubbing.
+	var spin := floorf(_t * 12.0) / 12.0 * 4.0
 	if _phase == Phase.DEFEATED:
 		spin = 0.6
 	if _reel_open:
 		# The damaged reel flashes blue: this is the frame to catch.
 		for i in 4:
-			draw_circle(REELS[0], 5.0 + i * 2.0, Color(BLUE, 0.16 - i * 0.03))
+			_deck.draw_circle(REELS[0], 5.0 + i * 2.0, Color(BLUE, 0.16 - i * 0.03))
 	for i in REELS.size():
 		var c: Vector2 = REELS[i]
-		draw_circle(c, 4.0, Color(0.06, 0.04, 0.04))
+		_deck.draw_circle(c, 4.0, Color(0.06, 0.04, 0.04))
 		var rim := BLUE if i == 0 and _reel_open else Color(0.35, 0.2, 0.15)
-		draw_arc(c, 4.0, 0, TAU, 12, rim, 1.0)
-		draw_circle(c, 2.4 if i == 0 else 1.6, TAPE)  # wound tape
+		_deck.draw_arc(c, 4.0, 0, TAU, 16, rim, 1.0)
+		_deck.draw_arc(c, 4.4, PI, TAU, 8, Color(0.61, 0.39, 0.18), 0.7)
+		_deck.draw_circle(c, 2.4 if i == 0 else 1.6, TAPE)  # wound tape
 		for k in 3:
 			var a := spin * (1.0 if i == 0 else 1.4) + k * TAU / 3.0
-			draw_line(c, c + Vector2.from_angle(a) * 3.5, Color(0.55, 0.5, 0.45), 1.0)
+			_deck.draw_line(c, c + Vector2.from_angle(a) * 3.5, Color(0.55, 0.5, 0.45), 1.0)
+		_deck.draw_circle(c, 0.8, Color(0.75, 0.57, 0.3))
 	if _phase == Phase.SCREEN or _phase == Phase.DEFEATED:
 		# The jam: a loop of tape spilled out of the wound reel and down the side of the deck.
 		var sway := sin(_t * 3.0) if _phase == Phase.SCREEN else 0.0
@@ -210,7 +222,7 @@ func _draw_reels() -> void:
 		for k in 9:
 			var f := k / 8.0
 			pts.append(REELS[0] + Vector2(-4.0 - 6.0 * sin(f * PI) + sway, f * 9.0))
-		draw_polyline(pts, TAPE, 1.0)
+		_deck.draw_polyline(pts, TAPE, 1.0)
 
 
 ## Spilled tape runs from the VCR along the floor and wraps the kid's ankles.

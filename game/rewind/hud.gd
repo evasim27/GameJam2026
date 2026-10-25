@@ -14,6 +14,10 @@ const BLOOD_FONT := preload("res://assets/fonts/Nosifer-Regular.ttf")
 const DialogueBox := preload("res://rewind/dialogue_box.gd")
 
 const PANEL_H := 54.0
+## A recovered memory's card stays on the right this long, then its cassette flies to the counter.
+const PICKUP_HOLD := 2.6
+const PICKUP_FLY := 0.7
+const PICKUP_LAND := 0.5
 const BUTTON := Vector2(70, 18)
 const BUTTON_GAP := 8.0
 ## id, label on the button, keyboard key, input action held down (if any).
@@ -62,6 +66,7 @@ var _hint_t := 0.0
 var _pickup_id := ""
 var _pickup_t := 0.0
 var _pickup_bonus := 0
+var _landed_t := 0.0
 var _blink := 0.0
 var _flash := {}
 var _prompt_button := ""
@@ -87,7 +92,7 @@ func hint(text: String) -> void:
 
 func recover_memory(id: String, bonus_seconds: int) -> void:
 	_pickup_id = id
-	_pickup_t = 5.0
+	_pickup_t = PICKUP_HOLD + PICKUP_FLY
 	_pickup_bonus = bonus_seconds
 	queue_redraw()
 
@@ -122,6 +127,7 @@ func clear_texts() -> void:
 	_hint_t = 0.0
 	_pickup_t = 0.0
 	_pickup_id = ""
+	_landed_t = 0.0
 	message = ""
 	sub_message = ""
 	queue_redraw()
@@ -131,7 +137,10 @@ func _process(delta: float) -> void:
 	_blink += delta
 	_subtitle_t -= delta
 	_hint_t -= delta
+	if _pickup_t > 0.0 and _pickup_t <= delta:
+		_landed_t = PICKUP_LAND
 	_pickup_t = maxf(0.0, _pickup_t - delta)
+	_landed_t = maxf(0.0, _landed_t - delta)
 	for k in _flash.keys():
 		_flash[k] -= delta
 	if _prompt_button != "":
@@ -153,7 +162,7 @@ func _draw() -> void:
 
 	_draw_status(font)
 	if message == "":
-		_draw_memory_archive(font)
+		_draw_memory_pickup(font)
 
 	_draw_timeline()
 	if mode == "REW" or mode == "SCRUB-":
@@ -207,10 +216,14 @@ func _draw_status(font: Font) -> void:
 	_label(font, "VHS / SP", Vector2(23, 25), 9, faint)
 	_label(font, "MEMORIES", Vector2(137, 25), 9, faint)
 	_label(font, _mode_label(), Vector2(23, 46), 19, accent)
-	_label(font, "%d/3" % candies, Vector2(158, 46), 16, ink)
+	# A memory still flying in only counts once its cassette lands, then the counter flashes.
+	var shown := candies - (1 if _pickup_t > 0.0 and saved_memories.has(_pickup_id) else 0)
+	var land := _landed_t / PICKUP_LAND
+	_label(font, "%d/3" % shown, Vector2(158, 46), 16, ink.lerp(CYAN, land))
 	_label(font, "%s %s" % [memory_name, "SAVED" if memory_found else "MISSING"], Vector2(23, 65), 11, faint)
 	for i in 3:
-		draw_rect(Rect2(143 + i * 12, 60, 8, 2), ink if i < candies else Color(0.7, 0.7, 0.72, 0.18))
+		var lit := ink.lerp(CYAN, land) if i == shown - 1 else ink
+		draw_rect(Rect2(143 + i * 12, 60, 8, 2), lit if i < shown else Color(0.7, 0.7, 0.72, 0.18))
 
 	var x := size.x - 202.0
 	_draw_osd_field(Rect2(x, 12, 190, 62))
@@ -242,19 +255,39 @@ func _draw_osd_field(rect: Rect2) -> void:
 		draw_line(p, p + Vector2(0, inward.y * 5), Color(0.85, 0.86, 0.82, 0.14))
 
 
-func _draw_memory_archive(font: Font) -> void:
-	for i in saved_memories.size():
-		var id := saved_memories[i]
-		var recent := id == _pickup_id and _pickup_t > 0.0
-		var rect := Rect2(size.x - 190, 88 + i * 45, 178, 38)
-		_draw_card(rect, CYAN if recent else Color(0.5, 0.51, 0.61))
-		if recent:
-			draw_rect(Rect2(rect.position, Vector2(2, rect.size.y)), CYAN)
-		var caption := "MEMORY SAVED  +%ds" % _pickup_bonus if recent else "RECOVERED VHS"
-		_label(font, caption, rect.position + Vector2(10, 11), 10, CYAN if recent else DIM)
-		_label(font, id.to_upper().replace(" ", " / "), rect.position + Vector2(10, 29), 20)
-		var cassette := Rect2(rect.position + Vector2(141, 13), Candy.ICON_SIZE * 2.6)
-		draw_texture_rect_region(Candy.SPRITE, cassette, Candy.sprite_region(id))
+## The memory just recovered: a card on the right for a moment, then its cassette flies into
+## the MEMORIES counter in the top-left corner.
+func _draw_memory_pickup(font: Font) -> void:
+	if _pickup_t <= 0.0 or _pickup_id == "":
+		return
+	var rect := Rect2(size.x - 190, 88, 178, 38)
+	var cassette := Rect2(rect.position + Vector2(141, 13), Candy.ICON_SIZE * 2.6)
+	var region := Candy.sprite_region(_pickup_id)
+	if _pickup_t > PICKUP_FLY:
+		# Slides in from the right edge.
+		var shown := PICKUP_HOLD + PICKUP_FLY - _pickup_t
+		var slide := (1.0 - ease(clampf(shown / 0.25, 0.0, 1.0), 0.4)) * 200.0
+		rect.position.x += slide
+		cassette.position.x += slide
+		_draw_card(rect, CYAN)
+		draw_rect(Rect2(rect.position, Vector2(2, rect.size.y)), CYAN)
+		_label(font, "MEMORY SAVED  +%ds" % _pickup_bonus, rect.position + Vector2(10, 11), 10, CYAN)
+		_label(font, _pickup_id.to_upper().replace(" ", " / "), rect.position + Vector2(10, 29), 20)
+		draw_texture_rect_region(Candy.SPRITE, cassette, region)
+		return
+	var k := ease(1.0 - _pickup_t / PICKUP_FLY, -2.2)
+	var target := Rect2(Vector2(150, 34), Candy.ICON_SIZE * 1.4)
+	var from := cassette.get_center()
+	var to := target.get_center()
+	# An arc rather than a straight line, with a short cyan trail behind the cassette.
+	var arc := Vector2(0, -sin(k * PI) * 28.0)
+	for i in range(4, 0, -1):
+		var kt := maxf(k - i * 0.05, 0.0)
+		var p := from.lerp(to, kt) + Vector2(0, -sin(kt * PI) * 28.0)
+		draw_circle(p, 4.0 - i * 0.6, Color(CYAN, 0.35 - i * 0.07))
+	var r := Rect2(Vector2.ZERO, cassette.size.lerp(target.size, k))
+	r.position = from.lerp(to, k) + arc - r.size / 2.0
+	draw_texture_rect_region(Candy.SPRITE, r, region)
 
 
 func _draw_hint(font: Font) -> void:
@@ -265,7 +298,7 @@ func _draw_hint(font: Font) -> void:
 		var speech := _speech_layout(font)
 		if not speech.is_empty() and rect.intersects(speech.rect.grow(8)):
 			var left_space: float = speech.rect.position.x - 24
-			var right_edge := size.x - 202 if not saved_memories.is_empty() else size.x - 12
+			var right_edge := size.x - 202 if _pickup_t > PICKUP_FLY else size.x - 12
 			var right_space: float = right_edge - speech.rect.end.x - 12
 			if left_space >= 140 or right_space >= 140:
 				var available := left_space if left_space >= 140 else right_space

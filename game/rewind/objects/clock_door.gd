@@ -1,7 +1,7 @@
 class_name ClockDoor
 extends TapeObject
 ## A door the grandfather clock opens once, between `open_from` and `open_to` of room time.
-## By the time the kid gets there it is shut, so the house has to be wound back a long way.
+## It leads to the optional secret room, so it never stands in the kid's way down the hall.
 
 const FONT := preload("res://assets/fonts/VT323-Regular.ttf")
 const ART := preload("res://rewind/door_art.gd")
@@ -12,12 +12,12 @@ const ART := preload("res://rewind/door_art.gd")
 var _open := false
 
 
-func blocks(run: RoomRun) -> bool:
-	return not (run.room_time >= open_from and run.room_time < open_to)
+func is_open(run: RoomRun) -> bool:
+	return run.room_time >= open_from and run.room_time < open_to
 
 
 func show_time(run: RoomRun) -> void:
-	var open := not blocks(run)
+	var open := is_open(run)
 	if open != _open:
 		_open = open
 		queue_redraw()

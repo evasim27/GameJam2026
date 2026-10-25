@@ -131,7 +131,7 @@ func _ready() -> void:
 		_sound_players[id] = player
 	var ping := AudioStreamPlayer.new()
 	ping.stream = _ping_stream()
-	ping.volume_db = -10.0
+	ping.volume_db = -3.0
 	add_child(ping)
 	_sound_players["ping"] = ping
 	hud.visible = false
@@ -161,6 +161,13 @@ func _build_debug_menu() -> void:
 		var b := _debug_button(levels[i])
 		b.pressed.connect(_debug_jump.bind(i - 1))
 		_debug_list.add_child(b)
+	for kid_name in Ending.SEQUENCES.NAMES:
+		var one := _debug_button("Ending · Only %s" % kid_name)
+		one.pressed.connect(_debug_jump_rescued.bind([kid_name]))
+		_debug_list.add_child(one)
+	var all_saved := _debug_button("Ending · All Rescued")
+	all_saved.pressed.connect(_debug_jump_rescued.bind(Ending.SEQUENCES.NAMES))
+	_debug_list.add_child(all_saved)
 
 
 func _debug_button(text: String) -> Button:
@@ -172,6 +179,14 @@ func _debug_button(text: String) -> Button:
 	# Never take focus, or the deck keys would press it.
 	b.focus_mode = Control.FOCUS_NONE
 	return b
+
+
+## Plays the ending as if exactly these kids made it out.
+func _debug_jump_rescued(kid_names: Array) -> void:
+	candies.clear()
+	for kid_name in kid_names:
+		candies.append(kid_name)
+	_debug_jump(ROOMS.size())
 
 
 ## -1 restarts from the intro, 0.. enters that room, ROOMS.size() plays the ending.
@@ -243,7 +258,8 @@ func _enter_room(i: int, first_time: bool) -> void:
 		# A mark shows up on the timeline once the kid is about a screen away from its object,
 		# and disappears once the kid is past it.
 		for m in o.timeline_marks(room.timeline_length):
-			m["from_x"] = o.position.x - MARK_AHEAD
+			if not m.has("from_x"):
+				m["from_x"] = o.position.x - MARK_AHEAD
 			m["until_x"] = o.position.x + o.zone_width()
 			hud.marks.append(m)
 	# Short windows last, so they stay visible on top of long ones.
@@ -549,7 +565,8 @@ func _update_boss_cues() -> void:
 	for o in room.objects:
 		var cue := ""
 		var on := false
-		if o is GlitchSpot and o.cue:
+		if o is GlitchSpot:
+			# Every moment E really works is heard, not just seen.
 			cue = "ping"
 			on = o.can_glitch(run)
 		elif o is TapeEater:
@@ -566,18 +583,25 @@ func _update_boss_cues() -> void:
 		_warning_state[key] = on
 
 
-## A short rising two-tone chime, made here so it needs no asset.
+## "Press E now": a bright rising three-note chime, made here so it needs no asset.
+## A touch of third harmonic lets it cut through the rewind whirr and the static.
 static func _ping_stream() -> AudioStreamWAV:
 	var rate := 22050
-	var length := 0.24
+	var notes := [880.0, 1175.0, 1760.0]
+	var note_len := 0.07
+	var length := note_len * notes.size() + 0.18
 	var n := int(rate * length)
 	var data := PackedByteArray()
 	data.resize(n * 2)
+	var phase := 0.0
 	for i in n:
 		var t := float(i) / rate
-		var f := 988.0 if t < 0.1 else 1480.0
-		var env := minf(t * 300.0, 1.0) * (1.0 - t / length)
-		data.encode_s16(i * 2, int(sin(TAU * f * t) * env * 12000.0))
+		var k := mini(int(t / note_len), notes.size() - 1)
+		phase += TAU * notes[k] / rate
+		var local := t - k * note_len
+		var env := minf(local * 400.0, 1.0) * (exp(-local * 9.0) if k < notes.size() - 1 else exp(-local * 6.0))
+		var v := sin(phase) + 0.3 * sin(phase * 3.0)
+		data.encode_s16(i * 2, int(clampf(v * env * 15000.0, -32767.0, 32767.0)))
 	var s := AudioStreamWAV.new()
 	s.format = AudioStreamWAV.FORMAT_16_BITS
 	s.mix_rate = rate

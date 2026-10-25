@@ -1,7 +1,7 @@
 extends Room
 ## End of Tape. First a long gallery: two knights in armour swing on their own rhythms while a
 ## damaged stretch of tape keeps releasing diving bats. Then shelves of cassettes, a VCR and a big CRT. The exit on the right is covered by a
-## wrong frame of wall: glitch it at its cyan tear. Once the kid gets close, the tape monster
+## wrong frame of wall: glitch it at its cyan tear once the boss is beaten. Once the kid gets close, the tape monster
 ## crawls out of the VCR and its spilled tape holds the kid: a two-phase boss fight (TapeEater).
 ## The Reel: glitch the wound reel while it flashes blue to jam it. The Screen: rewind until the
 ## TV's empty frame meets the static wave, then glitch so the picture swallows it.
@@ -11,6 +11,7 @@ const WALL := preload("res://assets/rewind/cinematic/wall.png")
 const FLOOR_TEX := preload("res://assets/rewind/cinematic/floor.png")
 const BOOKCASE := preload("res://assets/rewind/cinematic/bookcase-hidden-monster.png")
 const CRT := preload("res://assets/rewind/cinematic/crt-cabinet.png")
+const PROJECTOR := preload("res://assets/rewind/cinematic/projector-body.png")
 const ARMCHAIR := preload("res://assets/noble_interior/armchair_tall.png")
 const KID := preload("res://assets/exterior/player_walk_6f.png")
 const FONT := preload("res://assets/fonts/VT323-Regular.ttf")
@@ -86,9 +87,6 @@ func build() -> void:
 	add_object(exit, EXIT_X)
 	var tina := Candy.new()
 	tina.candy_name = "Tina 2003"
-	tina.period = 5.0
-	tina.from = 0.0
-	tina.to = 0.4
 	add_object(tina, HALL + 286)
 	add_object(FalseWall.new(), WALL_X)
 
@@ -98,7 +96,8 @@ func build() -> void:
 	wall_tear.period = 5.0
 	wall_tear.from = 3.6
 	wall_tear.to = 4.6
-	wall_tear.kid_min = HALL
+	# Only after the boss, so its tear can never steal the E meant for the reel or the TV.
+	wall_tear.requires = "screen"
 	add_object(wall_tear, WALL_X)
 
 	var eater := TapeEater.new()
@@ -111,7 +110,8 @@ func build() -> void:
 
 	var reel := GlitchSpot.new()
 	reel.glitch_id = "reel"
-	reel.area = Rect2(-6, -14, 12, 10)
+	# Match the wound reel on top of the generated projector.
+	reel.area = Rect2(-6, -22, 12, 12)
 	reel.period = 4.0
 	reel.from = 2.5
 	reel.to = 3.1
@@ -171,11 +171,10 @@ func _label(d: Node2D) -> void:
 
 
 func _vcr(d: Node2D) -> void:
-	d.draw_rect(Rect2(-24, -6, 40, 6), Color(0.08, 0.08, 0.1))
-	d.draw_rect(Rect2(-20, -5, 22, 1), Color(0.02, 0.02, 0.02))
-	var blink := 1.0 if fmod(d.t, 1.0) < 0.5 else 0.3
-	d.draw_rect(Rect2(8, -4, 2, 1), Color(0.4, 1.0, 0.5, blink))
-	# Its reels are drawn by the TapeEater, they turn with the tape.
+	d.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# Alpha bounds; preserve the source proportions and put the feet on the floor.
+	d.draw_texture_rect_region(PROJECTOR, Rect2(-26, -19.246, 44, 19.246), Rect2(141, 134, 1518, 664))
+	# Its reels are drawn by TapeEater, so Pause/Rewind affect their motion.
 
 
 ## The big CRT. Mostly the kid from the foyer; after 6 failures, an empty armchair in a dark room.
