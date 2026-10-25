@@ -7,7 +7,7 @@ Enoigralska 2D grozljiva ugankarska igra za GameJam BEST × ŠS FERI 2026. Na no
 | Mapa | Vsebina |
 | --- | --- |
 | `README.md` | Ta opis |
-| `Build/` | Windows različica igre (prenos `LostInTape.exe`, glej `Build/README.md`) |
+| `Build/` | Windows različica igre: `LostInTape.exe` (Git LFS) |
 | `Source/game/` | Godot 4.7.2 projekt igre |
 | `Source/assets/` | Izvorne grafike, prompti in manifesti, iz katerih so narejeni sprajti v igri |
 | `Source/build.sh` | Skripta za izvoz Web, macOS in Windows različic |
@@ -42,7 +42,7 @@ Ukazi se odklepajo postopoma. Premor ne porablja kasete. V skrivni sobi D prekla
 
 ## Windows različica za oddajo
 
-Prenos: [LostInTape-windows.zip](https://github.com/evasim27/GameJam2026/releases/latest/download/LostInTape-windows.zip) (GitHub Release, ker `.exe` presega GitHubovo omejitev 100 MB na datoteko). ZIP razširite in zaženite `LostInTape.exe`; podatki igre so vgrajeni v `.exe`. Podrobnosti so v [`Build/README.md`](Build/README.md).
+Izvršljiva različica je v [`Build/LostInTape.exe`](Build/LostInTape.exe). Prenesite jo in zaženite; podatki igre so vgrajeni v `.exe`, druge datoteke niso potrebne. Datoteka je shranjena z Git LFS (223 MB). Rezervni prenos: [LostInTape-windows.zip](https://github.com/evasim27/GameJam2026/releases/latest/download/LostInTape-windows.zip). Podrobnosti so v [`Build/README.md`](Build/README.md).
 
 Končni paket je treba preizkusiti na drugem Windows računalniku.
 
