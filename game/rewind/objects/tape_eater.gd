@@ -42,8 +42,8 @@ enum Phase { DORMANT, REEL, SCREEN, DEFEATED }
 @export var screen_period := 3.0
 @export var monster_time := 1.6
 ## When the static wave rolls through, in room time since the jam (same period).
-@export var wave_from := 0.3
-@export var wave_to := 0.9
+@export var wave_from := 0.0
+@export var wave_to := 1.0
 
 var reel_spot: GlitchSpot
 

@@ -128,7 +128,7 @@ func _build_debug_menu() -> void:
 	layer.layer = 10
 	add_child(layer)
 	var box := VBoxContainer.new()
-	box.position = Vector2(8, 8)
+	box.position = Vector2(202, 14)
 	layer.add_child(box)
 	var toggle := _debug_button("DEBUG")
 	toggle.pressed.connect(func(): _debug_list.visible = not _debug_list.visible)
@@ -146,6 +146,8 @@ func _build_debug_menu() -> void:
 func _debug_button(text: String) -> Button:
 	var b := Button.new()
 	b.text = text
+	b.add_theme_font_size_override("font_size", 12)
+	b.modulate = Color(0.75, 0.76, 0.83, 0.8)
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	# Never take focus, or the deck keys would press it.
 	b.focus_mode = Control.FOCUS_NONE
@@ -359,7 +361,7 @@ func _tick(delta: float) -> void:
 	_last_mode = mode
 
 	if run.taken.size() > had:
-		hud.say("%s'S MEMORY SAVED  +%ds" % [run.taken.keys()[-1].split(" ")[0].to_upper(), int(RoomRun.CANDY_BONUS)], "MEMORY SAVED")
+		hud.recover_memory(run.taken.keys()[-1], int(RoomRun.CANDY_BONUS))
 		_sound("candy")
 	_show()
 	_update_warning_sounds(mode)
@@ -405,7 +407,7 @@ func _check_hints() -> void:
 		if not _echo_spoke and absf(run.kid_x - room.echo.position.x) < 28.0:
 			_echo_spoke = true
 			if room.echo.line != "":
-				hud.say(room.echo.line)
+				hud.say(room.echo.line, "ECHO", room.echo)
 
 
 ## Whether the player just did what the key prompt on screen asks for.
@@ -430,7 +432,9 @@ func _glitch() -> void:
 	if id == "reel":
 		hud.hint("The tape jammed. It fled into the TV.")
 	elif id == "screen":
-		hud.say("THE PICTURE SWALLOWED IT", "THE TAPE")
+		for object in room.objects:
+			if object is ScreenSpot:
+				hud.say("THE PICTURE SWALLOWED IT", "THE TAPE", object, Vector2(0, -52))
 	_show()
 	if run.tape <= RoomRun.EPS:
 		run.out_of_tape = true
@@ -447,6 +451,11 @@ func _show() -> void:
 	hud.tape = run.tape
 	hud.eater = run.eater
 	hud.memory_found = run.taken.has(MEMORY_IDS[room_index])
+	hud.saved_memories.assign(candies)
+	for id: String in run.taken:
+		if not hud.saved_memories.has(id):
+			hud.saved_memories.append(id)
+	hud.candies = hud.saved_memories.size()
 
 
 ## Play an audible cue only as a hazard enters its warning state.

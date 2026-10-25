@@ -56,3 +56,34 @@ static func text(canvas: CanvasItem, font: Font, value: String, pos: Vector2, fo
 	canvas.draw_set_transform(pos, 0.0, Vector2(0.5, 0.5))
 	canvas.draw_string(font, Vector2.ZERO, value, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size * 2, color)
 	canvas.draw_set_transform(Vector2.ZERO)
+
+
+## A worn VHS caption with clipped corners, faint scan lines and a pointer to the speaker.
+static func draw_speech(canvas: CanvasItem, font: Font, lines: Array, speaker: String, rect: Rect2, accent: Color, font_size: int, tip := Vector2.INF) -> void:
+	var unit := font_size / 12.0
+	var background := Color(0.025, 0.025, 0.03, 0.48)
+	var edge := Color(0.77, 0.79, 0.73, 0.38)
+	var cut := 3.0 * unit
+	var p := rect.position
+	var q := rect.end
+	var outline := PackedVector2Array([Vector2(p.x + cut, p.y), Vector2(q.x - cut, p.y), Vector2(q.x, p.y + cut), Vector2(q.x, q.y - cut), Vector2(q.x - cut, q.y), Vector2(p.x + cut, q.y), Vector2(p.x, q.y - cut), Vector2(p.x, p.y + cut)])
+	canvas.draw_colored_polygon(outline, background)
+	outline.append(outline[0])
+	canvas.draw_polyline(outline, edge, 1.0)
+	for i in range(1, int(rect.size.y / (3 * unit))):
+		var y := p.y + i * 3 * unit
+		canvas.draw_line(Vector2(p.x + cut, y), Vector2(q.x - cut, y), Color(0.8, 0.81, 0.76, 0.025))
+	if tip.is_finite():
+		var base_x := clampf(tip.x, rect.position.x + 12, rect.end.x - 12)
+		var left := Vector2(base_x - 5, rect.end.y - 1)
+		var right := Vector2(base_x + 5, rect.end.y - 1)
+		canvas.draw_colored_polygon(PackedVector2Array([left, tip, right]), background)
+		canvas.draw_polyline(PackedVector2Array([left, tip, right]), edge, 1.0)
+	var label_ink := Color(accent.lerp(Color(0.84, 0.83, 0.74), 0.8), 0.84)
+	var cassette := Rect2(p + Vector2(7, 4) * unit, Vector2(11, 6) * unit)
+	canvas.draw_rect(cassette, Color(label_ink, 0.55), false, 1.0)
+	canvas.draw_circle(cassette.position + Vector2(3, 3) * unit, unit, label_ink)
+	canvas.draw_circle(cassette.position + Vector2(8, 3) * unit, unit, label_ink)
+	text(canvas, font, speaker, rect.position + Vector2(22, 10) * unit, maxi(8, int(font_size * 0.7)), label_ink)
+	for i in lines.size():
+		text(canvas, font, lines[i], rect.position + Vector2(7, 24 + i * 13) * unit, font_size, Color(0.93, 0.97, 0.96))

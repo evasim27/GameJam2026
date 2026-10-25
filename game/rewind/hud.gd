@@ -39,6 +39,7 @@ var date := "31/10/1989"
 var candies := 0
 var memory_name := ""
 var memory_found := false
+var saved_memories: Array[String] = []
 ## Buttons the player hasn't learned yet are dark and unlabelled.
 var unlocked := {"rew": false, "ff": false, "track": false}
 ## Timeline marks: {from, to, color, row, from_x, until_x}. Shown while the kid is between the two.
@@ -52,10 +53,15 @@ var wrap := 0.0
 var prompt_done := ""
 
 var _subtitle := ""
-var _speaker := "LEA / ECHO"
+var _speaker := "ECHO"
+var _speech_source: WeakRef
+var _speech_offset := Vector2(0, -31)
 var _subtitle_t := 0.0
 var _hint := ""
 var _hint_t := 0.0
+var _pickup_id := ""
+var _pickup_t := 0.0
+var _pickup_bonus := 0
 var _blink := 0.0
 var _flash := {}
 var _prompt_button := ""
@@ -64,15 +70,26 @@ var _prompt_hold := true
 var _prompt_t := 0.0
 
 
-func say(text: String, speaker := "LEA / ECHO") -> void:
+func say(text: String, speaker := "ECHO", source: Node2D = null, offset := Vector2(0, -31)) -> void:
 	_subtitle = text
 	_speaker = speaker
 	_subtitle_t = 4.0
+	_speech_source = weakref(source) if source != null else null
+	_speech_offset = offset
+	queue_redraw()
 
 
 func hint(text: String) -> void:
 	_hint = text
 	_hint_t = 5.0
+	queue_redraw()
+
+
+func recover_memory(id: String, bonus_seconds: int) -> void:
+	_pickup_id = id
+	_pickup_t = 5.0
+	_pickup_bonus = bonus_seconds
+	queue_redraw()
 
 
 ## Briefly sinks a panel button, e.g. when PLAY/PAUSE is toggled.
@@ -99,9 +116,12 @@ func clear_prompt() -> void:
 func clear_texts() -> void:
 	clear_prompt()
 	_subtitle = ""
+	_speech_source = null
 	_subtitle_t = 0.0
 	_hint = ""
 	_hint_t = 0.0
+	_pickup_t = 0.0
+	_pickup_id = ""
 	message = ""
 	sub_message = ""
 	queue_redraw()
@@ -111,6 +131,7 @@ func _process(delta: float) -> void:
 	_blink += delta
 	_subtitle_t -= delta
 	_hint_t -= delta
+	_pickup_t = maxf(0.0, _pickup_t - delta)
 	for k in _flash.keys():
 		_flash[k] -= delta
 	if _prompt_button != "":
@@ -130,19 +151,9 @@ func _draw() -> void:
 			_draw_cinematic_caption(font, _hint, size.y - 42.0, OSD)
 		return
 
-	if mode != "PAUSE" or fmod(_blink, 1.0) < 0.6:
-		draw_string(font, Vector2(16, 30), _mode_label(), HORIZONTAL_ALIGNMENT_LEFT, -1, 28, VIOLET if mode == "REW" or mode == "SCRUB-" else OSD)
-	draw_string(font, Vector2(16, 52), "MEMORIES %d/3" % candies, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, DIM)
-	draw_string(font, Vector2(16, 72), "%s  %s" % [memory_name, "SAVED" if memory_found else "MISSING"], HORIZONTAL_ALIGNMENT_LEFT, -1, 17, CYAN if memory_found else AMBER)
-	draw_string(font, Vector2(w - 240, 30), "SP " + _timecode(room_time), HORIZONTAL_ALIGNMENT_LEFT, -1, 28, OSD)
-	draw_string(font, Vector2(w - 240, 52), date, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, OSD)
-
-	# Tape left in this room. Pause doesn't use any; everything else does.
-	var frac := clampf(tape / tape_budget, 0.0, 1.0)
-	var bar := Rect2(w - 240, 60, 160, 8)
-	draw_rect(bar, DIM, false, 1.0)
-	draw_rect(Rect2(bar.position, Vector2(bar.size.x * frac, bar.size.y)), Color(0.65, 1.0, 0.56) if frac > 0.3 else AMBER)
-	draw_string(font, Vector2(w - 72, 69), "%.1fs" % maxf(tape, 0.0), HORIZONTAL_ALIGNMENT_LEFT, -1, 18, DIM)
+	_draw_status(font)
+	if message == "":
+		_draw_memory_archive(font)
 
 	_draw_timeline()
 	if mode == "REW" or mode == "SCRUB-":
@@ -151,7 +162,7 @@ func _draw() -> void:
 	if _prompt_button != "":
 		_draw_prompt(font)
 	if _hint_t > 0.0:
-		draw_string(font, Vector2(0, 92), _hint, HORIZONTAL_ALIGNMENT_CENTER, w, 20, CYAN)
+		_draw_hint(font)
 	if _subtitle_t > 0.0:
 		_draw_subtitle(font)
 	if wrap > 0.0:
@@ -171,21 +182,116 @@ func _draw() -> void:
 		draw_string(font, Vector2(0, 182), sub_message, HORIZONTAL_ALIGNMENT_CENTER, w, 20, Color(0.78, 0.06, 0.09) if message == "SIGNAL LOST" else DIM)
 
 
+func _draw_card(rect: Rect2, accent: Color) -> void:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.035, 0.03, 0.055, 0.66)
+	style.border_color = Color(accent, 0.28)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(4)
+	draw_style_box(style, rect)
+
+
+func _label(font: Font, value: String, pos: Vector2, font_size: int, color := OSD) -> void:
+	DialogueBox.text(self, font, value, pos, font_size, color)
+
+
+func _draw_status(font: Font) -> void:
+	var ink := Color(0.91, 0.92, 0.88, 0.76)
+	var faint := Color(0.78, 0.8, 0.78, 0.55)
+	var accent := Color(VIOLET, 0.76) if mode == "REW" or mode == "SCRUB-" else ink
+	if mode == "PLAY":
+		accent = Color(0.58, 0.77, 0.62, 0.84)
+	elif mode == "PAUSE":
+		accent = Color(0.82, 0.46, 0.43, 0.84)
+	_draw_osd_field(Rect2(12, 12, 180, 62))
+	_label(font, "VHS / SP", Vector2(23, 25), 9, faint)
+	_label(font, "MEMORIES", Vector2(137, 25), 9, faint)
+	_label(font, _mode_label(), Vector2(23, 46), 19, accent)
+	_label(font, "%d/3" % candies, Vector2(158, 46), 16, ink)
+	_label(font, "%s %s" % [memory_name, "SAVED" if memory_found else "MISSING"], Vector2(23, 65), 11, faint)
+	for i in 3:
+		draw_rect(Rect2(143 + i * 12, 60, 8, 2), ink if i < candies else Color(0.7, 0.7, 0.72, 0.18))
+
+	var x := size.x - 202.0
+	_draw_osd_field(Rect2(x, 12, 190, 62))
+	_label(font, "COUNTER / SP", Vector2(x + 12, 25), 9, faint)
+	_label(font, date, Vector2(x + 117, 25), 11, faint)
+	_label(font, _timecode(room_time), Vector2(x + 12, 46), 19, ink)
+	var remaining := "%.1fs" % maxf(tape, 0.0)
+	var tw := font.get_string_size(remaining, HORIZONTAL_ALIGNMENT_LEFT, -1, 32).x / 2.0
+	_label(font, remaining, Vector2(x + 178 - tw, 46), 16, Color(AMBER, 0.75) if tape < tape_budget * 0.3 else ink)
+	var frac := clampf(tape / maxf(tape_budget, 0.01), 0.0, 1.0)
+	var bar := Rect2(x + 12, 54, 166, 2)
+	draw_rect(bar, Color(0.8, 0.8, 0.8, 0.12))
+	var tape_color := Color(0.48, 0.60, 0.50, 0.68)
+	if frac < 0.15:
+		tape_color = Color(0.65, 0.36, 0.34, 0.68)
+	elif frac < 0.3:
+		tape_color = Color(0.66, 0.53, 0.39, 0.68)
+	draw_rect(Rect2(bar.position, Vector2(bar.size.x * frac, bar.size.y)), tape_color)
+	_label(font, "TAPE REMAINING", Vector2(x + 12, 67), 9, faint)
+	_label(font, "%d%%" % int(frac * 100), Vector2(x + 157, 67), 9, faint)
+
+
+func _draw_osd_field(rect: Rect2) -> void:
+	draw_rect(rect, Color(0.025, 0.025, 0.03, 0.18))
+	# Faint right-angle marks evoke a recorder's viewfinder rather than an app panel.
+	for p: Vector2 in [rect.position, Vector2(rect.end.x, rect.position.y), rect.end, Vector2(rect.position.x, rect.end.y)]:
+		var inward := (rect.get_center() - p).sign()
+		draw_line(p, p + Vector2(inward.x * 7, 0), Color(0.85, 0.86, 0.82, 0.14))
+		draw_line(p, p + Vector2(0, inward.y * 5), Color(0.85, 0.86, 0.82, 0.14))
+
+
+func _draw_memory_archive(font: Font) -> void:
+	for i in saved_memories.size():
+		var id := saved_memories[i]
+		var recent := id == _pickup_id and _pickup_t > 0.0
+		var rect := Rect2(size.x - 190, 88 + i * 45, 178, 38)
+		_draw_card(rect, CYAN if recent else Color(0.5, 0.51, 0.61))
+		if recent:
+			draw_rect(Rect2(rect.position, Vector2(2, rect.size.y)), CYAN)
+		var caption := "MEMORY SAVED  +%ds" % _pickup_bonus if recent else "RECOVERED VHS"
+		_label(font, caption, rect.position + Vector2(10, 11), 10, CYAN if recent else DIM)
+		_label(font, id.to_upper().replace(" ", " / "), rect.position + Vector2(10, 29), 20)
+		var cassette := Rect2(rect.position + Vector2(141, 13), Candy.ICON_SIZE * 2.6)
+		draw_texture_rect_region(Candy.SPRITE, cassette, Candy.sprite_region(id))
+
+
+func _draw_hint(font: Font) -> void:
+	var lines := DialogueBox.wrap(font, _hint, minf(376, size.x - 44), 16)
+	var width := DialogueBox.width(font, lines, 16, minf(400, size.x - 24))
+	var rect := Rect2(12, 88, width, DialogueBox.height(lines.size(), 16, false))
+	if _subtitle_t > 0.0 and _speech_source != null:
+		var speech := _speech_layout(font)
+		if not speech.is_empty() and rect.intersects(speech.rect.grow(8)):
+			var left_space: float = speech.rect.position.x - 24
+			var right_edge := size.x - 202 if not saved_memories.is_empty() else size.x - 12
+			var right_space: float = right_edge - speech.rect.end.x - 12
+			if left_space >= 140 or right_space >= 140:
+				var available := left_space if left_space >= 140 else right_space
+				lines = DialogueBox.wrap(font, _hint, minf(376, available - 20), 16)
+				rect.size = Vector2(DialogueBox.width(font, lines, 16, available), DialogueBox.height(lines.size(), 16, false))
+				if left_space < 140:
+					rect.position.x = speech.rect.end.x + 12
+			else:
+				rect.position.y = size.y - PANEL_H - 32 - rect.size.y
+	DialogueBox.draw_lines(self, font, lines, "", rect, Color(0.66, 0.69, 0.83), 16)
+
+
 func _draw_cinematic_caption(font: Font, text: String, y: float, color: Color) -> void:
-	var text_width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
-	var box_width := minf(text_width + 24.0, size.x - 24.0)
-	var box_x := (size.x - box_width) / 2.0
-	draw_rect(Rect2(box_x, y - 21.0, box_width, 27.0), Color(0.01, 0.04, 0.04, 0.78))
-	draw_string(font, Vector2(12, y - 2.0), text, HORIZONTAL_ALIGNMENT_CENTER, size.x - 24.0, 20, color)
+	var lines := DialogueBox.wrap(font, text, size.x - 64, 16)
+	var width := DialogueBox.width(font, lines, 16, size.x - 40)
+	var h := DialogueBox.height(lines.size(), 16, false)
+	DialogueBox.draw_lines(self, font, lines, "", Rect2((size.x - width) / 2.0, y - h, width, h), color, 16)
 
 
 func _draw_rewind_cue(font: Font) -> void:
 	var w := size.x
 	draw_rect(Rect2(6, 6, w - 12, size.y - PANEL_H - 12), VIOLET, false, 2.0)
-	var band := Rect2(w / 2.0 - 106, 190, 212, 27)
+	var band := Rect2(w / 2.0 - 106, 212, 212, 25)
 	draw_rect(band, Color(0.08, 0.04, 0.17, 0.83))
 	draw_rect(band, VIOLET, false, 1.0)
-	draw_string(font, Vector2(0, 209), "HOUSE REWINDS  ◀◀", HORIZONTAL_ALIGNMENT_CENTER, w, 20, OSD)
+	draw_string(font, Vector2(0, 230), "HOUSE REWINDS  ◀◀", HORIZONTAL_ALIGNMENT_CENTER, w, 20, OSD)
 
 
 func _draw_timeline() -> void:
@@ -226,8 +332,8 @@ func _draw_timeline() -> void:
 func _draw_panel(font: Font) -> void:
 	var w := size.x
 	var top := size.y - PANEL_H
-	draw_rect(Rect2(0, top, w, PANEL_H), Color(0.12, 0.12, 0.14))
-	draw_rect(Rect2(0, top, w, 2), Color(0.32, 0.32, 0.36))
+	draw_rect(Rect2(0, top, w, PANEL_H), Color(0.045, 0.04, 0.065, 0.97))
+	draw_rect(Rect2(0, top, w, 1), Color(0.28, 0.27, 0.35))
 	draw_rect(Rect2(0, top + PANEL_H - 3, w, 3), Color(0.05, 0.05, 0.06))
 	draw_string(font, Vector2(14, top + 18), "LOST·IN·TAPE", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.75, 0.75, 0.8))
 	draw_string(font, Vector2(14, top + 30), "VHS  HQ  4-HEAD", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, DIM)
@@ -263,14 +369,14 @@ func _draw_button(font: Font, b: Array, simulated_down: bool) -> void:
 	# The button sinks into the panel when pressed.
 	draw_rect(Rect2(r.position + Vector2(0, 3), r.size), Color(0.04, 0.04, 0.05))
 	var face := Rect2(r.position + Vector2(0, 2.0 if down else 0.0), r.size)
-	var col := Color(0.62, 0.62, 0.66) if not down else Color(0.42, 0.42, 0.46)
+	var col := Color(0.14, 0.13, 0.19) if not down else Color(0.18, 0.32, 0.35)
 	if locked:
-		col = Color(0.24, 0.24, 0.27)
+		col = Color(0.075, 0.065, 0.10)
 	draw_rect(face, col)
-	draw_rect(Rect2(face.position, Vector2(face.size.x, 1)), Color(0.85, 0.85, 0.9) if not locked else col)
+	draw_rect(face, Color(0.33, 0.32, 0.41) if not locked else Color(0.15, 0.14, 0.19), false, 1.0)
 	var label: String = b[1]
 	var tw := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
-	draw_string(font, Vector2(face.get_center().x - tw / 2.0, face.position.y + 14), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.1, 0.1, 0.12) if not locked else Color(0.15, 0.15, 0.17))
+	draw_string(font, Vector2(face.get_center().x - tw / 2.0, face.position.y + 14), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, OSD if not locked else Color(0.28, 0.26, 0.34))
 	if not locked:
 		var key: String = b[2]
 		var kw := font.get_string_size(key, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
@@ -334,12 +440,29 @@ func _draw_key(font: Font, r: Rect2, label: String, down: bool) -> void:
 
 
 func _draw_subtitle(font: Font) -> void:
-	var max_width := minf(440.0, size.x - 40.0)
-	var lines := DialogueBox.wrap(font, _subtitle, max_width - 24.0, 20)
-	var box_width := DialogueBox.width(font, lines, 20, max_width)
-	var h := DialogueBox.height(lines.size(), 20)
-	var y := size.y - 88.0 - h if cinematic_mode else 102.0
-	DialogueBox.draw_lines(self, font, lines, _speaker, Rect2((size.x - box_width) / 2.0, y, box_width, h), CYAN, 20, [], true)
+	var layout := _speech_layout(font)
+	if layout.is_empty():
+		return
+	DialogueBox.draw_speech(self, font, layout.lines, _speaker, layout.rect, CYAN, 16, layout.tip)
+
+
+func _speech_layout(font: Font) -> Dictionary:
+	var max_width := minf(270.0, size.x - 24.0)
+	var lines := DialogueBox.wrap(font, _subtitle, max_width - 20, 16)
+	var box_width := DialogueBox.width(font, lines, 16, max_width)
+	var h := DialogueBox.height(lines.size(), 16)
+	if _speech_source != null:
+		var source := _speech_source.get_ref() as Node2D
+		if not is_instance_valid(source) or not source.is_inside_tree() or not source.is_visible_in_tree():
+			return {}
+		var anchor := get_global_transform_with_canvas().affine_inverse() * source.get_global_transform_with_canvas() * _speech_offset
+		if anchor.x < 0 or anchor.x > size.x or anchor.y < 12 or anchor.y > size.y - PANEL_H:
+			return {}
+		var x := clampf(anchor.x - box_width / 2, 8, size.x - box_width - 8)
+		var y := maxf(6, anchor.y - h - 10)
+		return {"lines": lines, "rect": Rect2(x, y, box_width, h), "tip": anchor}
+	# Unseen voices stay a caption; only an actual on-screen speaker gets a pointer.
+	return {"lines": lines, "rect": Rect2((size.x - box_width) / 2, size.y - 88 - h, box_width, h), "tip": Vector2.INF}
 
 
 func _draw_wrap() -> void:

@@ -63,5 +63,5 @@ func _draw() -> void:
 		var lines := DialogueBox.wrap(FONT, _line, 282, 13)
 		var h := DialogueBox.height(lines.size(), 13)
 		var box_width := DialogueBox.width(FONT, lines, 13, 300.0)
-		DialogueBox.draw_lines(self, FONT, lines, "JIGSAW", Rect2((320 - box_width) / 2.0, 172 - h, box_width, h), Color(0.98, 0.48, 0.40), 13)
+		DialogueBox.draw_speech(self, FONT, lines, "JIGSAW", Rect2((320 - box_width) / 2.0, 172 - h, box_width, h), Color(0.98, 0.48, 0.40), 13)
 	draw_string(FONT, Vector2(274, 16), "SPACE  >>", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.75, 0.91, 0.94))

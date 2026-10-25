@@ -96,7 +96,7 @@ func build() -> void:
 
 func trigger_hints() -> Array:
 	return [
-		{"x": 40.0, "text": "D again = PAUSE. PAUSE doesn't use tape.", "button": "pause", "keys": ["D"], "hold": false, "done": "pause"},
+		{"x": 40.0, "text": "Press D to pause. Pausing doesn't use tape.", "button": "pause", "keys": ["D"], "hold": false, "done": "pause"},
 		{"x": 140.0, "text": "This pumpkin isn't on the timeline. Watch for when it starts shaking."},
 		{"x": 196.0, "text": "Pink window = memory. Gives back 2 s of tape."},
 		{"x": 280.0, "text": "The door is only open 0:05-0:08. SHIFT + A rewinds faster.", "button": "rew", "keys": ["SHIFT", "A"], "done": "fast_rewind"},

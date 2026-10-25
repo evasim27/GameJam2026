@@ -20,6 +20,7 @@ var _pause_whispered := false
 var _door_flash := 0.0
 var _shadow_flash := 0.0
 var _tracking_flash := 0.0
+var _tape_sprite: Sprite2D
 
 
 func build() -> void:
@@ -33,6 +34,16 @@ func build() -> void:
 	add_drawing(_draw_crt, Vector2(446, FLOOR))
 	add_text("PLAY ME", Vector2(432, 74), Color(0.65, 0.96, 0.83), 12)
 	add_drawing(_overlay, Vector2.ZERO, 2)
+	_tape_sprite = Sprite2D.new()
+	_tape_sprite.texture = Candy.SPRITE
+	_tape_sprite.region_enabled = true
+	_tape_sprite.region_rect = Candy.sprite_region("")
+	_tape_sprite.scale = Candy.ICON_SIZE / _tape_sprite.region_rect.size
+	_tape_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_tape_sprite.position = Vector2(TAPE_X, FLOOR - 9)
+	_tape_sprite.modulate = Color(1.3, 1.25, 1.1)
+	_tape_sprite.z_index = 3
+	add_child(_tape_sprite)
 
 
 func _ready() -> void:
@@ -42,6 +53,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_elapsed += delta
+	_tape_sprite.position.y = FLOOR - 9 + sin(_elapsed * 6.0)
 	_shadow_flash = maxf(0.0, _shadow_flash - delta)
 	_tracking_flash = maxf(0.0, _tracking_flash - delta)
 	_door_flash = maxf(0.0, _door_flash - delta)
@@ -113,11 +125,6 @@ func _overlay(d: Node2D) -> void:
 		for i in 4:
 			var y := 34.0 + i * 24.0 + sin(_elapsed * 43.0 + i) * 5.0
 			d.draw_rect(Rect2(walk_x - 70.0, y, 130, 1), Color(0.27, 0.94, 0.98, _tracking_flash * 0.55))
-	# The unlisted VHS is on the floor, close to the television.
-	d.draw_rect(Rect2(TAPE_X - 9, FLOOR - 4, 17, 7), Color(0.04, 0.04, 0.07))
-	d.draw_rect(Rect2(TAPE_X - 6, FLOOR - 4, 11, 3), Color(0.66, 0.61, 0.77))
-	d.draw_circle(Vector2(TAPE_X - 3, FLOOR - 1.0), 1, Color(0.16, 0.14, 0.20))
-	d.draw_circle(Vector2(TAPE_X + 3, FLOOR - 1.0), 1, Color(0.16, 0.14, 0.20))
 	if at_tape:
 		d.draw_string(FONT, Vector2(TAPE_X - 23, FLOOR - 17), "UNLISTED TAPE", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.76, 0.95, 0.96))
 

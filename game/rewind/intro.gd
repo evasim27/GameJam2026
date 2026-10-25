@@ -220,7 +220,9 @@ func _draw_exterior(e: float) -> void:
 	elif e >= KNOCK_AT and e < DOOR_OPENS:
 		line = "*knock knock*"
 	if line != "":
-		DialogueBox.draw_lines(self, FONT, [line], "LEA", Rect2(204, 68, 104, DialogueBox.height(1, 11)), Color(1.0, 0.76, 0.42), 11, [], true)
+		var head := (pos + Vector2(0, -30)) * EXTERIOR_SCALE
+		var bubble := Rect2(clampf(head.x - 52, 8, 208), head.y - DialogueBox.height(1, 11) - 8, 104, DialogueBox.height(1, 11))
+		DialogueBox.draw_speech(self, FONT, [line], "LEA", bubble, Color(1.0, 0.76, 0.42), 11, head)
 
 
 func _draw_leaves(t: float) -> void:
