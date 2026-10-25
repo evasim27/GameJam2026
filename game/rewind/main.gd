@@ -7,6 +7,8 @@ const Ending := preload("res://rewind/ending.gd")
 const ForbiddenRoom := preload("res://rewind/rooms/forbidden.gd")
 const ForbiddenTape := preload("res://rewind/forbidden_tape.gd")
 const KidNode := preload("res://rewind/kid.gd")
+const GAMEPLAY_MUSIC := preload("res://assets/audio/7-Quiet Walk Through the Mist-loop.wav")
+const SECRET_MUSIC := preload("res://assets/audio/secret_room_tension.wav")
 const ROOMS := [
 	preload("res://rewind/rooms/foyer.gd"),
 	preload("res://rewind/rooms/stairs.gd"),
@@ -36,8 +38,6 @@ const SFX := {
 	"echo": preload("res://assets/audio/echo.wav"),
 	"static": preload("res://assets/audio/static.mp3"),
 	"door_creak": preload("res://assets/audio/door_creak.wav"),
-	"whisper_frame": preload("res://assets/forbidden/whisper_frame.wav"),
-	"whisper_see": preload("res://assets/forbidden/whisper_see.wav"),
 	"pumpkin_warning": preload("res://assets/audio/pumpkin_rattle.wav"),
 	"bat_warning": preload("res://assets/audio/bat_warning.ogg"),
 	"shadow_warning": preload("res://assets/audio/shadow_warning.ogg"),
@@ -92,6 +92,11 @@ var _sound_players := {}
 var _warning_state := {}
 var _jumps := 0  # bumped by the debug level picker so pending fail/leave timers don't fire
 var _debug_list: VBoxContainer
+var _ambient_music: AudioStreamPlayer
+var _ambient_hiss: AudioStreamPlayer
+var _gameplay_music_loop: AudioStreamWAV
+var _secret_music_loop: AudioStreamWAV
+var _audio_duck_t := 0.0
 
 @onready var world: Node2D = $World
 @onready var hud: Control = $HUD/OSD
@@ -100,13 +105,28 @@ var _debug_list: VBoxContainer
 
 
 func _ready() -> void:
+	_ambient_music = AudioStreamPlayer.new()
+	_gameplay_music_loop = GAMEPLAY_MUSIC.duplicate() as AudioStreamWAV
+	_secret_music_loop = SECRET_MUSIC.duplicate() as AudioStreamWAV
+	for loop in [_gameplay_music_loop, _secret_music_loop]:
+		loop.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		loop.loop_end = roundi(loop.get_length() * loop.mix_rate)
+	_ambient_music.stream = _gameplay_music_loop
+	_ambient_music.volume_db = -60.0
+	add_child(_ambient_music)
+	_ambient_hiss = AudioStreamPlayer.new()
+	var hiss_loop := SFX["static"].duplicate() as AudioStreamMP3
+	hiss_loop.loop = true
+	_ambient_hiss.stream = hiss_loop
+	_ambient_hiss.volume_db = -60.0
+	add_child(_ambient_hiss)
 	for id in SFX:
 		var player := AudioStreamPlayer.new()
 		var looping: bool = id == "rewind" or id == "tape"
 		player.stream = SFX[id].duplicate() if looping else SFX[id]
 		if looping:
 			player.stream.set("loop", true)
-		player.volume_db = -20.0 if id == "rewind" or id == "static" else (-6.0 if id.begins_with("whisper_") else -12.0)
+		player.volume_db = -20.0 if id == "rewind" or id == "static" else -12.0
 		add_child(player)
 		_sound_players[id] = player
 	var ping := AudioStreamPlayer.new()
@@ -244,6 +264,7 @@ func _enter_room(i: int, first_time: bool) -> void:
 	_secret_prompted = false
 	state = State.ROOM
 	_show()
+	_update_ambience(0.0)
 
 
 ## Lights up the VCR panel buttons the player has learned so far.
@@ -261,16 +282,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event is InputEventKey and event.pressed and not event.echo:
 			if event.physical_keycode == KEY_D and not _forbidden.at_tape:
 				_forbidden.playing = not _forbidden.playing
-				if not _forbidden.playing:
-					_forbidden.stopped()
 				hud.mode = "PLAY" if _forbidden.playing else "PAUSE"
 				_sound("click")
 			elif event.physical_keycode == KEY_E and _forbidden.at_tape:
 				_start_forbidden_video()
 			get_viewport().set_input_as_handled()
-		return
-	if state == State.ENDING and _ending.results_visible() and event.is_action_pressed("restart"):
-		get_tree().reload_current_scene()
 		return
 	if state != State.ROOM:
 		return
@@ -324,6 +340,38 @@ func _process(delta: float) -> void:
 		vhs.set_shader_parameter("rewind_amount", 0.0)
 	elif state == State.ROOM or state == State.LEAVING:
 		_update_screen_fx()
+	_update_ambience(delta)
+
+
+## A separate quiet bed keeps the loud static bursts and boss cues independent.
+func _update_ambience(delta: float) -> void:
+	_audio_duck_t = maxf(0.0, _audio_duck_t - delta)
+	var active := state in [State.ROOM, State.LEAVING, State.FAILING, State.FORBIDDEN, State.FORBIDDEN_LOST]
+	if not active:
+		_ambient_music.stop()
+		_ambient_hiss.stop()
+		_ambient_music.volume_db = -60.0
+		_ambient_hiss.volume_db = -60.0
+		return
+	var music_loop := _secret_music_loop if state in [State.FORBIDDEN, State.FORBIDDEN_LOST] else _gameplay_music_loop
+	if _ambient_music.stream != music_loop:
+		_ambient_music.stop()
+		_ambient_music.stream = music_loop
+		_ambient_music.volume_db = -60.0
+	if not _ambient_music.playing:
+		_ambient_music.play()
+	if not _ambient_hiss.playing:
+		_ambient_hiss.play()
+	var quiet: bool = _audio_duck_t > 0.0 or hud._subtitle_t > 0.0
+	var paused: bool = state == State.ROOM and hud.mode == "PAUSE"
+	var music_db := -36.0 if quiet else (-31.0 if paused else -27.0)
+	var hiss_db := -46.0 if quiet else (-42.0 if paused else -38.0)
+	if state == State.FAILING or state == State.FORBIDDEN_LOST:
+		music_db = -42.0
+		hiss_db = -48.0
+	var fade_speed := 90.0 if quiet else 32.0
+	_ambient_music.volume_db = move_toward(_ambient_music.volume_db, music_db, delta * fade_speed)
+	_ambient_hiss.volume_db = move_toward(_ambient_hiss.volume_db, hiss_db, delta * fade_speed)
 
 
 func _tick(delta: float) -> void:
@@ -558,24 +606,22 @@ func _enter_forbidden() -> void:
 	room.visible = false
 	_forbidden = ForbiddenRoom.new()
 	_forbidden.setup(0, 0)
-	_forbidden.cue.connect(_forbidden_cue)
+	_forbidden.thought.connect(_forbidden_thought)
 	_forbidden.tape_reached.connect(_forbidden_tape_reached)
 	world.add_child(_forbidden)
 	world.scale = Vector2(FORBIDDEN_ZOOM, FORBIDDEN_ZOOM)
 	_cam = Vector2.ZERO
 	state = State.FORBIDDEN
-	hud.clear_prompt()
-	hud.message = ""
-	hud.sub_message = ""
+	_update_ambience(0.0)
+	hud.clear_texts()
 	hud.cinematic_mode = true
 	hud.mode = "PAUSE"
 	hud.hint("THE FORBIDDEN ROOM  ·  D = PLAY / PAUSE")
 	_sound("door_creak")
 
 
-func _forbidden_cue(text: String, sound_id: String) -> void:
-	hud.say(text, "???")
-	_sound(sound_id)
+func _forbidden_thought(text: String) -> void:
+	hud.say(text, "LEA", _forbidden.kid)
 
 
 func _forbidden_tape_reached() -> void:
@@ -586,6 +632,7 @@ func _forbidden_tape_reached() -> void:
 
 func _start_forbidden_video() -> void:
 	state = State.FORBIDDEN_VIDEO
+	_update_ambience(0.0)
 	_secret_found = true
 	_stop_sound("static")
 	_sound("click")
@@ -606,6 +653,7 @@ func _forbidden_signal_lost() -> void:
 		return
 	state = State.FORBIDDEN_LOST
 	_secret_lost_t = 2.2
+	_forbidden_video.skip()
 	_forbidden_video.visible = false
 	hud.visible = true
 	hud.cinematic_mode = false
@@ -768,6 +816,10 @@ func _end() -> void:
 	_cleanup_forbidden()
 	vhs.set_shader_parameter("bat_tracking", 0.0)
 	state = State.ENDING
+	_update_ambience(0.0)
+	intro_music.stop()
+	_stop_sound("tape")
+	_stop_sound("rewind")
 	room.queue_free()
 	room = null
 	world.position = Vector2.ZERO
@@ -780,12 +832,15 @@ func _end() -> void:
 	var attempts := ROOMS.size() + maxi(total_fails - 1, 0)
 	_ending = Ending.new()
 	_ending.setup(candies, total_fails, attempts, tape_used, _secret_found)
+	_ending.exit_requested.connect(get_tree().quit)
 	world.add_child(_ending)
 
 
 func _sound(id: String) -> void:
 	var player: AudioStreamPlayer = _sound_players.get(id)
 	if player:
+		if id == "ping" or id == "echo" or id.ends_with("_warning"):
+			_audio_duck_t = maxf(_audio_duck_t, player.stream.get_length() + 0.25)
 		player.stop()
 		player.play()
 

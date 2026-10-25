@@ -69,7 +69,9 @@ func _check() -> void:
 			assert(ending.results_visible())
 			ending._process(120.0)
 			assert(ending.results_visible())
-			# Space advances, release/repeat are ignored, Escape skips, results remain.
+			# Only Space advances; Escape exits only on the final screen.
+			var exits := [0]
+			ending.exit_requested.connect(func(): exits[0] += 1)
 			ending._shot = 0
 			var key := InputEventKey.new()
 			key.keycode = KEY_SPACE
@@ -84,10 +86,22 @@ func _check() -> void:
 			assert(ending._shot == 1)
 			key.keycode = KEY_ESCAPE
 			ending._unhandled_input(key)
-			assert(ending.results_visible())
+			assert(ending._shot == 1 and exits[0] == 0)
+			for other_key in [KEY_A, KEY_ENTER, KEY_R]:
+				key.keycode = other_key
+				ending._unhandled_input(key)
+				assert(ending._shot == 1)
+			ending._shot = ending._shots.size() - 1
 			key.keycode = KEY_SPACE
 			ending._unhandled_input(key)
-			assert(ending.results_visible())
+			assert(ending.results_visible() and exits[0] == 0)
+			key.keycode = KEY_ESCAPE
+			key.echo = true
+			ending._unhandled_input(key)
+			assert(exits[0] == 0)
+			key.echo = false
+			ending._unhandled_input(key)
+			assert(exits[0] == 1)
 			ending.free()
 	# Repeated/unknown identifiers must not accidentally count as three rescued children.
 	var sanitized = ending_script.new()
@@ -121,19 +135,27 @@ func _check() -> void:
 		assert(not main.hud.visible)
 		await process_frame
 	main._ending._shot = main._ending._shots.size() - 1
-	var restart := InputEventKey.new()
-	restart.pressed = true
-	restart.keycode = KEY_R
-	restart.physical_keycode = KEY_R
-	assert(restart.is_action_pressed("restart"))
-	main._unhandled_input(restart)
+	# Verify the real game wires the final Escape request to quitting; intercept it in this test.
+	var quit_game: Callable = main.get_tree().quit
+	assert(main._ending.exit_requested.is_connected(quit_game))
+	main._ending.exit_requested.disconnect(quit_game)
+	var exit_seen := [false]
+	main._ending.exit_requested.connect(func(): exit_seen[0] = true)
+	var key := InputEventKey.new()
+	key.pressed = true
+	key.keycode = KEY_R
+	key.physical_keycode = KEY_R
+	main._unhandled_input(key)
+	main._ending._unhandled_input(key)
+	assert(current_scene == main and not exit_seen[0])
+	key.keycode = KEY_ESCAPE
+	key.physical_keycode = KEY_ESCAPE
+	Input.parse_input_event(key)
 	await process_frame
-	await process_frame
-	assert(current_scene != main)
-	assert(current_scene.state == current_scene.State.INTRO)
+	assert(exit_seen[0])
 	current_scene.free()
 	current_scene = null
-	# Let the audio server release the restarted intro's playback streams before exit.
+	# Let the audio server release playback streams before exit.
 	await create_timer(0.1).timeout
-	print("ENDING CHECK PASSED: all 8 rescue sets, exact cast/reunions, all textures, readable timed captions, next/skip, persistent results, real game handoff and R restart")
+	print("ENDING CHECK PASSED: all 8 rescue sets, exact cast/reunions, all textures, readable timed captions, Space-only advance, final Escape exit and real game handoff")
 	call_deferred("quit")

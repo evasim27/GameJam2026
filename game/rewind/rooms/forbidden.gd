@@ -1,7 +1,7 @@
 extends Room
 ## Optional scene behind the foyer clock door. The main tape run is kept intact.
 
-signal cue(text: String, sound: String)
+signal thought(text: String)
 signal tape_reached
 
 const CRT := preload("res://assets/rewind/cinematic/crt-cabinet.png")
@@ -16,9 +16,6 @@ var playing := false
 var at_tape := false
 var _elapsed := 0.0
 var _next_cue := 0
-var _pause_whispered := false
-var _door_flash := 0.0
-var _shadow_flash := 0.0
 var _tracking_flash := 0.0
 var _tape_sprite: Sprite2D
 
@@ -54,23 +51,16 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_elapsed += delta
 	_tape_sprite.position.y = FLOOR - 9 + sin(_elapsed * 6.0)
-	_shadow_flash = maxf(0.0, _shadow_flash - delta)
 	_tracking_flash = maxf(0.0, _tracking_flash - delta)
-	_door_flash = maxf(0.0, _door_flash - delta)
 	if playing and not at_tape:
 		walk_x = minf(walk_x + WALK_SPEED * delta, TAPE_X)
 		kid.place(walk_x, FLOOR)
-		var cue_x := [128.0, 282.0, 370.0]
+		var cue_x := [128.0, 282.0]
 		if _next_cue < cue_x.size() and walk_x >= cue_x[_next_cue]:
 			match _next_cue:
-				0: cue.emit("You missed a frame.", "whisper_frame")
+				0: thought.emit("Something doesn't feel right.")
 				1:
-					_door_flash = 0.65
 					_tracking_flash = 0.45
-					cue.emit("The steel door moved on its own.", "shadow_warning")
-				2:
-					_shadow_flash = 0.75
-					cue.emit("Something followed you through the static.", "echo")
 			_next_cue += 1
 		if walk_x >= TAPE_X:
 			playing = false
@@ -78,14 +68,6 @@ func _process(delta: float) -> void:
 			kid.look_at_camera()
 			tape_reached.emit()
 	queue_redraw()
-
-
-func stopped() -> void:
-	if not _pause_whispered and walk_x > 120.0 and walk_x < 400.0:
-		_pause_whispered = true
-		if walk_x > 270.0:
-			_shadow_flash = 0.65
-		cue.emit("I can still see you.", "whisper_see")
 
 
 func tracking_flash() -> float:
@@ -113,27 +95,12 @@ func _overlay(d: Node2D) -> void:
 		var x: float = [132.0, 452.0][i]
 		var flicker := 0.5 + 0.5 * sin(_elapsed * 17.0 + i * 1.4)
 		d.draw_rect(Rect2(x, 40, 52, 91), Color(0.53, 0.95, 0.68, 0.025 + flicker * 0.025))
-	if _door_flash > 0.0:
-		# A face appears behind the mesh of the second numbered door for one beat.
-		d.draw_rect(Rect2(348, 72, 13, 7), Color(0.36, 0.02, 0.03, _door_flash * 0.65))
-		d.draw_circle(Vector2(351, 75), 1.0, Color(1.0, 0.3, 0.28, _door_flash))
-		d.draw_circle(Vector2(357, 75), 1.0, Color(1.0, 0.3, 0.28, _door_flash))
-	if _shadow_flash > 0.0:
-		var x := walk_x - 30.0
-		_draw_ellipse_shadow(d, Vector2(x, 110), _shadow_flash)
 	if _tracking_flash > 0.0:
 		for i in 4:
 			var y := 34.0 + i * 24.0 + sin(_elapsed * 43.0 + i) * 5.0
 			d.draw_rect(Rect2(walk_x - 70.0, y, 130, 1), Color(0.27, 0.94, 0.98, _tracking_flash * 0.55))
 	if at_tape:
 		d.draw_string(FONT, Vector2(TAPE_X - 23, FLOOR - 17), "UNLISTED TAPE", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.76, 0.95, 0.96))
-
-
-func _draw_ellipse_shadow(d: Node2D, pos: Vector2, alpha: float) -> void:
-	d.draw_circle(pos, 9, Color(0.02, 0.01, 0.05, alpha))
-	d.draw_rect(Rect2(pos.x - 7, pos.y, 14, 24), Color(0.02, 0.01, 0.05, alpha))
-	d.draw_circle(pos + Vector2(-3, -1), 1, Color(0.55, 0.91, 0.98, alpha))
-	d.draw_circle(pos + Vector2(3, -1), 1, Color(0.55, 0.91, 0.98, alpha))
 
 
 func _draw_crt(d: Node2D) -> void:

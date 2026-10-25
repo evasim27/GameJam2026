@@ -176,7 +176,7 @@ func _draw() -> void:
 				draw_string(BLOOD_FONT, Vector2(2, y + 3) + shake, line, HORIZONTAL_ALIGNMENT_CENTER, w, 34, Color(0.12, 0.01, 0.02))
 				draw_string(BLOOD_FONT, Vector2(0, y) + shake, line, HORIZONTAL_ALIGNMENT_CENTER, w, 34, Color(0.78, 0.06, 0.09))
 		elif message == "SIGNAL LOST":
-			draw_string(font, Vector2(0, 148), message, HORIZONTAL_ALIGNMENT_CENTER, w, 48, Color(0.72, 0.72, 0.76))
+			draw_string(font, Vector2(0, 148), message, HORIZONTAL_ALIGNMENT_CENTER, w, 48, Color(0.22, 0.22, 0.24))
 		else:
 			draw_string(font, Vector2(0, 148), message, HORIZONTAL_ALIGNMENT_CENTER, w, 48, OSD)
 		draw_string(font, Vector2(0, 182), sub_message, HORIZONTAL_ALIGNMENT_CENTER, w, 20, Color(0.78, 0.06, 0.09) if message == "SIGNAL LOST" else DIM)

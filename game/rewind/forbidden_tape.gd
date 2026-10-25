@@ -7,6 +7,7 @@ const HOST := preload("res://assets/forbidden/billy_tv_still.jpg")
 const FONT := preload("res://assets/fonts/VT323-Regular.ttf")
 const DialogueBox := preload("res://rewind/dialogue_box.gd")
 const VOICE := preload("res://assets/audio/jigsaw_voice.mp3")
+const MUSIC := preload("res://assets/audio/secret_room_tension.wav")
 const VOICE_START := 0.7
 const END_PAUSE := 0.6
 const LINES := [
@@ -19,6 +20,8 @@ var _t := 0.0
 var _line := ""
 var _next_line := 0
 var _voice: AudioStreamPlayer
+var _music: AudioStreamPlayer
+var _done := false
 var _voice_started := false
 var _duration := 0.0
 
@@ -29,24 +32,44 @@ func _ready() -> void:
 	_voice.volume_db = 3.0
 	_duration = VOICE_START + VOICE.get_length() + END_PAUSE
 	add_child(_voice)
+	_music = AudioStreamPlayer.new()
+	_music.stream = MUSIC
+	_music.volume_db = -42.0
+	add_child(_music)
+	_music.play()
 
 
 func skip() -> void:
+	_finish()
+
+
+func _finish() -> void:
+	if _done:
+		return
+	_done = true
+	set_process(false)
 	_voice.stop()
+	_music.stop()
 	finished.emit()
 
 
 func _process(delta: float) -> void:
+	if _done:
+		return
 	_t += delta
 	if not _voice_started and _t >= VOICE_START:
 		_voice_started = true
 		_voice.play()
+	var music_db := -24.0 if _voice.playing else -18.0
+	if _t >= _duration - END_PAUSE:
+		music_db = -55.0
+	_music.volume_db = move_toward(_music.volume_db, music_db, delta * 60.0)
 	while _next_line < LINES.size() and _t >= LINES[_next_line].at:
 		var entry: Dictionary = LINES[_next_line]
 		_line = entry.text
 		_next_line += 1
 	if _t >= _duration and not _voice.playing:
-		finished.emit()
+		_finish()
 	else:
 		queue_redraw()
 
