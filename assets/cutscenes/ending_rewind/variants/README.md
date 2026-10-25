@@ -8,4 +8,4 @@ Each combination has its own manifest with rescued names, missing names, ordered
 
 The exact rescued set appears in each living-room and doorway group shot. Close-ups can show one of those rescued children; the original two-child extraction is reused only for Maja + Luka. Reunion priority: Maja, then Luka, then Tina. Existing matching close-ups and the empty-room finale are reused without regeneration.
 
-The original Rewind all-three group art is reference material only and is not selected by any variant. The game now plays these sequences through `game/rewind/ending.gd`, with runtime copies under `game/assets/ending/cutscenes/`. Regenerate runtime data and image copies with `python3 game/tools/import_ending_cutscenes.py` after changing source manifests or art.
+The original Rewind all-three group art is not selected by any incomplete-rescue variant; it opens the seven-frame Exchange ending instead. The game plays these sequences through `game/rewind/ending.gd`, with runtime copies under `game/assets/ending/cutscenes/`. Regenerate runtime data and image copies with `python3 game/tools/import_ending_cutscenes.py` after changing source manifests or art.

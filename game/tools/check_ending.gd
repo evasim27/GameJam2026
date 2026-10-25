@@ -29,7 +29,7 @@ func _check() -> void:
 			ending.set_process(false)
 			assert(ending._rescue_mask == mask)
 			assert(ending._ending_name == ("EXCHANGE" if mask == 7 else "REWIND"))
-			var story_count := 4 if mask == 0 else 5
+			var story_count := 7 if mask == 7 else (4 if mask == 0 else 5)
 			assert(ending._images.size() == story_count + 1)
 			if mask == 7:
 				assert(ending._shots.back().image == ending._shots[story_count - 1].image)
@@ -51,9 +51,19 @@ func _check() -> void:
 				assert(ending._shots[0].image.ends_with("/01_no_hands.png"))
 				assert(ending._shots[2].image.ends_with("/none/03_wrong_morning.png"))
 			if mask == 7:
-				assert(ending._shots[2].image.ends_with("/ending_exchange/03_inside_the_screen.png"))
-				assert(ending._shots[3].image.ends_with("/ending_exchange/04_hand_on_glass.png"))
-				assert(ending._shots[4].image.ends_with("/ending_exchange/05_do_not_play.png"))
+				var expected_images := [
+					"/ending_rewind/01_screen_membrane.png",
+					"/ending_rewind/02_children_returned.png",
+					"/ending_exchange/01_nobody_looks_back.png",
+					"/ending_exchange/02_empty_tape.png",
+					"/ending_exchange/03_inside_the_screen.png",
+					"/ending_exchange/04_hand_on_glass.png",
+					"/ending_exchange/05_do_not_play.png",
+				]
+				for i in expected_images.size():
+					assert(ending._shots[i].image.ends_with(expected_images[i]))
+				assert(" ".join(ending._shots[0].lines) == "The glass gives way. Lea pulls them back into the room.")
+				assert(" ".join(ending._shots[1].lines) == "Maja. Luka. Tina. All three are here. Not a day older.")
 			for shot in range(story_count):
 				var data: Dictionary = ending._shots[shot]
 				var reveal_time: float = ending.FADE_IN

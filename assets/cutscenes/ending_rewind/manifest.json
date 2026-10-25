@@ -1,8 +1,8 @@
 {
   "title": "Rewind",
   "generation": "built-in image_gen",
-  "status": "reference-only storyboard; use variants/index.json for incomplete rescues",
-  "notes": "The original all-three group shots are reference artwork, not a playable Rewind outcome. Rewind only uses rescue masks 0\u20136; mask 7 selects Menjava.",
+  "status": "storyboard reference; first two images also open Exchange; use variants/index.json for incomplete rescues",
+  "notes": "The all-three group image is used by Exchange only. Rewind uses rescue masks 0\u20136; mask 7 selects the seven-frame Exchange ending.",
   "frames": [
     {
       "file": "01_screen_membrane.png",

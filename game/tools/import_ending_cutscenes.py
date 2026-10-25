@@ -1,7 +1,7 @@
 """Copy playable ending art and regenerate GDScript data from the source manifests.
 
 Run: python3 game/tools/import_ending_cutscenes.py
-The all-three Rewind reference storyboard is deliberately excluded.
+The original all-three group is used only by Exchange, never by incomplete Rewind outcomes.
 """
 
 import json

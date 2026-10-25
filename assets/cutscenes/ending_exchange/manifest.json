@@ -5,37 +5,51 @@
   "notes": "The protagonist's name is Lea. The final cassette label reads DO NOT PLAY with Lea underneath.",
   "frames": [
     {
+      "file": "../ending_rewind/01_screen_membrane.png",
+      "caption": "The glass gives way. Lea pulls them back into the room.",
+      "width": 1672,
+      "height": 941,
+      "order": 1
+    },
+    {
+      "file": "../ending_rewind/02_children_returned.png",
+      "caption": "Maja. Luka. Tina. All three are here. Not a day older.",
+      "width": 1672,
+      "height": 941,
+      "order": 2
+    },
+    {
       "file": "01_nobody_looks_back.png",
       "caption": "They run. Nobody looks back.",
-      "order": 1,
+      "order": 3,
       "width": 1672,
       "height": 941
     },
     {
       "file": "02_empty_tape.png",
       "caption": "The tape is empty now. Tapes don't like being empty.",
-      "order": 2,
+      "order": 4,
       "width": 1672,
       "height": 941
     },
     {
       "file": "03_inside_the_screen.png",
       "caption": "From in here, the room looks so far away.",
-      "order": 3,
+      "order": 5,
       "width": 1672,
       "height": 941
     },
     {
       "file": "04_hand_on_glass.png",
       "caption": "Thanks for playing.",
-      "order": 4,
+      "order": 6,
       "width": 1672,
       "height": 941
     },
     {
       "file": "05_do_not_play.png",
       "caption": "DO NOT PLAY.",
-      "order": 5,
+      "order": 7,
       "width": 1672,
       "height": 941
     }

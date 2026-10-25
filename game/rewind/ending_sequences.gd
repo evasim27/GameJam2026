@@ -162,6 +162,14 @@ const REWIND := [
 
 const EXCHANGE := [
 	{
+		"image": "res://assets/ending/cutscenes/ending_rewind/01_screen_membrane.png",
+		"caption": "The glass gives way. Lea pulls them back into the room."
+	},
+	{
+		"image": "res://assets/ending/cutscenes/ending_rewind/02_children_returned.png",
+		"caption": "Maja. Luka. Tina. All three are here. Not a day older."
+	},
+	{
 		"image": "res://assets/ending/cutscenes/ending_exchange/01_nobody_looks_back.png",
 		"caption": "They run. Nobody looks back."
 	},

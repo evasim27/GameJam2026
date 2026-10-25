@@ -1,5 +1,5 @@
 {
-  "title": "Rewind — all incomplete rescue combinations",
+  "title": "Rewind \u2014 all incomplete rescue combinations",
   "generation": "built-in image_gen",
   "mask_bits": {
     "maja": 1,
@@ -71,5 +71,5 @@
     }
   ],
   "full_rescue_manifest": "../../ending_exchange/manifest.json",
-  "notes": "Mask 7 is excluded. Original all-three Rewind storyboard is reference art only. Shared close-ups show an actually rescued child; group frames always show the exact rescued set. Reunion follows Maja if present, otherwise Luka, otherwise Tina. No-rescue sequence has no rescue or reunion scene."
+  "notes": "Mask 7 is excluded. The original all-three group opens Exchange only. Shared close-ups show an actually rescued child; group frames always show the exact rescued set. Reunion follows Maja if present, otherwise Luka, otherwise Tina. No-rescue sequence has no rescue or reunion scene."
 }

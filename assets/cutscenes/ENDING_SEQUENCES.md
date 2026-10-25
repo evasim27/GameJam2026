@@ -1,11 +1,11 @@
 # New ending cutscenes
 
-Two five-frame source-art sequences generated with the built-in `image_gen` tool.
+Source-art ending sequences generated with the built-in `image_gen` tool. Exchange now has seven story frames; Rewind variants have four or five.
 The opening cutscenes and the three supplied costume PNGs were used as visual references.
 
 - `ending_rewind/variants/`: all seven incomplete-rescue outcomes (0, 1 or 2 rescued children), with exact cast variants and adapted narration. Start at `variants/index.json`.
-- `ending_rewind/`: the original storyboard and shared matching close-ups; the original all-three group frames are reference artwork only.
-- `ending_exchange/`: the children leave, the lone protagonist, the view from inside the CRT, a palm on the glass, the ejected cassette.
+- `ending_rewind/`: the original storyboard and shared matching close-ups; its first two frames also open Exchange.
+- `ending_exchange/`: seven-frame manifest: rescue through the CRT, all four children back in the room, the children leave, Lea alone, the view from inside the CRT, a palm on the glass, the ejected cassette. The two rescue images are shared by relative reference rather than duplicated.
 - `ending_preview.html`: interactive preview of both sequences.
 
 Each folder contains a `manifest.json` with ordered frames and the supplied English narration. Narration is deliberately separate from the image. Diegetic text (`REWIND`, `DO NOT PLAY`) is part of the artwork.
