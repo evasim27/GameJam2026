@@ -49,8 +49,9 @@ func _build_shots() -> void:
 		for line in lines:
 			duration += line.length() / CHARS_PER_SECOND + LINE_PAUSE
 		_shots.append({"image": frame.image, "lines": lines, "duration": maxf(5.0, duration)})
-	# Reuse the last new still behind the statistics, without the old visual overlays.
-	_shots.append({"image": frames.back().image, "lines": [], "duration": 0.0})
+	# Rewind ends on the warm morning results layout; Exchange keeps its ejected tape.
+	var results_image: String = frames.back().image if _rescue_mask == 7 else "res://assets/ending/07_results.png"
+	_shots.append({"image": results_image, "lines": [], "duration": 0.0})
 
 
 func _wrap_caption(caption: String) -> Array[String]:
@@ -119,18 +120,28 @@ func _draw() -> void:
 
 
 func _draw_results() -> void:
-	draw_rect(Rect2(154, 10, 158, 148), Color(0.02, 0.02, 0.04, 0.92))
-	_text("END OF TAPE", Vector2(164, 29), 23, Color(0.93, 0.95, 1.0))
-	_text(_ending_name, Vector2(164, 44), 14, Color(0.52, 1.0, 0.95))
-	_text("MEMORIES   %d/3" % _candies.size(), Vector2(164, 60), 15, Color(0.9, 0.9, 1.0))
-	_text("ATTEMPTS   %d" % _attempts, Vector2(164, 75), 15, Color(0.9, 0.9, 1.0))
-	_text("TAPE USED  %.1f s" % _tape, Vector2(164, 90), 15, Color(0.9, 0.9, 1.0))
+	var rewind := _rescue_mask != 7
+	# Keep Rewind's panel above the foreground cassette and its illuminated label.
+	var panel := Rect2(162, 12, 150, 119) if rewind else Rect2(154, 10, 158, 148)
+	var x := 172.0 if rewind else 164.0
+	var stats_y := 49.0 if rewind else 60.0
+	var names_y := 96.0 if rewind else 107.0
+	draw_rect(panel, Color(0.02, 0.02, 0.04, 0.92))
+	_text("END OF TAPE", Vector2(x, 32 if rewind else 29), 23, Color(0.93, 0.95, 1.0))
+	if not rewind:
+		_text(_ending_name, Vector2(x, 44), 14, Color(0.52, 1.0, 0.95))
+	_text("MEMORIES   %d/3" % _candies.size(), Vector2(x, stats_y), 15, Color(0.9, 0.9, 1.0))
+	_text("ATTEMPTS   %d" % _attempts, Vector2(x, stats_y + 15), 15, Color(0.9, 0.9, 1.0))
+	_text("TAPE USED  %.1f s" % _tape, Vector2(x, stats_y + 30), 15, Color(0.9, 0.9, 1.0))
 	for i in SEQUENCES.NAMES.size():
 		var name: String = SEQUENCES.NAMES[i]
 		var freed := _candies.has(name)
-		_text("%s  %s" % [name.to_upper(), "FREE" if freed else "LOST"], Vector2(164, 107 + i * 11), 13, Color(0.52, 1.0, 0.95) if freed else Color(0.74, 0.7, 0.8))
+		_text("%s  %s" % [name.to_upper(), "FREE" if freed else "LOST"], Vector2(x, names_y + i * 11), 13, Color(0.52, 1.0, 0.95) if freed else Color(0.74, 0.7, 0.8))
 	if _unlisted_tape:
-		_text("UNLISTED TAPE FOUND", Vector2(164, 147), 12, Color(0.83, 0.68, 1.0))
+		_text("UNLISTED TAPE FOUND", Vector2(x, 127 if rewind else 147), 12, Color(0.83, 0.68, 1.0))
+	if rewind:
+		var width := FONT.get_string_size(_ending_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 28).x / 2.0
+		_text(_ending_name, Vector2(160 - width / 2.0, 141), 14, Color(0.1, 0.06, 0.05))
 	draw_rect(Rect2(0, 163, 320, 17), Color(0.02, 0.02, 0.04, 0.85))
 	_text("R — rewind to start", Vector2(108, 175), 12, Color(0.75, 0.75, 0.85))
 
