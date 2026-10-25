@@ -110,7 +110,8 @@
   {
     "id": "exit_none",
     "path": "/Users/zanlah/Documents/GameJam2026/assets/cutscenes/ending_rewind/variants/none/03_wrong_morning.png",
-    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-c1cd6a3c-dc40-4c1b-a094-94737738a6ef.png",
-    "status": "generated"
+    "source": "/Users/zanlah/.codex/generated_images/01a16f43-3d53-7cd0-9028-b9d6422fa2dc/exec-27184864-1b74-49df-9e99-d047cd7752cf.png",
+    "status": "generated",
+    "revision": "Child centered within doorway"
   }
 ]
