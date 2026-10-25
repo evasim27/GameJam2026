@@ -1,7 +1,7 @@
 # Hanging costumes
 
 Four separate costume sprites with transparent backgrounds, generated with the
-built-in `image_gen` tool using `game/assets/rewind/cinematic/coat-rack-states.png`
+built-in `image_gen` tool using `Source/game/assets/rewind/cinematic/coat-rack-states.png`
 as the visual reference:
 
 - `indiana-jones.png` — Indiana Jones

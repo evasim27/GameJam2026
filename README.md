@@ -2,15 +2,25 @@
 
 Enoigralska 2D grozljiva ugankarska igra za GameJam BEST × ŠS FERI 2026. Na noč čarovnic Lea vstopi v preklet VHS-posnetek. Igralec upravlja predvajanje kasete: previjanje vrača hišo v preteklost, Lea pa ostane na mestu. Odmevi neuspehov postanejo namigi in del ugank.
 
+## Struktura repozitorija
+
+| Mapa | Vsebina |
+| --- | --- |
+| `README.md` | Ta opis |
+| `Build/` | Windows različica igre (prenos `LostInTape.exe`, glej `Build/README.md`) |
+| `Source/game/` | Godot 4.7.2 projekt igre |
+| `Source/assets/` | Izvorne grafike, prompti in manifesti, iz katerih so narejeni sprajti v igri |
+| `Source/build.sh` | Skripta za izvoz Web, macOS in Windows različic |
+
 ## Dokumentacija
 
-Dokumentacijo bo ekipa dodala naknadno. [Avtorji in viri assetov](game/CREDITS.md).
+Dokumentacijo bo ekipa dodala naknadno. [Avtorji in viri assetov](Source/game/CREDITS.md).
 
 ## Zagon iz projekta na Windows
 
 1. Prenesite oziroma klonirajte repozitorij in odprite Godot 4.7.2, standardno različico brez .NET.
-2. Uvozite `game/project.godot`. Trenutna igra je v `game/`, starejši projekt `game_v1/` ni glavna različica.
-3. Počakajte na uvoz grafik in zvokov, nato pritisnite **F5**. Glavna scena je `game/rewind/main.tscn`.
+2. Uvozite `Source/game/project.godot`.
+3. Počakajte na uvoz grafik in zvokov, nato pritisnite **F5**. Glavna scena je `Source/game/rewind/main.tscn`.
 4. Vključite zvok; piski in opozorila pomagajo pri ugankah.
 
 ## Kontrole
@@ -32,9 +42,9 @@ Ukazi se odklepajo postopoma. Premor ne porablja kasete. V skrivni sobi D prekla
 
 ## Windows različica za oddajo
 
-Samostojen Windows izvoz še ni priložen. Predvidena lokacija je `Build/LostInTape/LostInTape.exe`. Zraven morajo ostati pripadajoči `.pck`, če ni vgrajen v `.exe`, in vse druge datoteke, ki jih ustvari izvoz. Za izdelavo izvoza v Godotu namestite ustrezne izvozne predloge in uporabite Windows Desktop release izvoz.
+Prenos: [LostInTape-windows.zip](https://github.com/evasim27/GameJam2026/releases/latest/download/LostInTape-windows.zip) (GitHub Release, ker `.exe` presega GitHubovo omejitev 100 MB na datoteko). ZIP razširite in zaženite `LostInTape.exe`; podatki igre so vgrajeni v `.exe`. Podrobnosti so v [`Build/README.md`](Build/README.md).
 
-Končni paket je treba preizkusiti na drugem Windows računalniku. Zagon iz urejevalnika ne nadomešča obvezne izvršne različice.
+Končni paket je treba preizkusiti na drugem Windows računalniku.
 
 ## Video in predstavitev
 
@@ -42,4 +52,4 @@ Video in predstavitev še nista priložena. Za oddajo je zahtevan 30-sekundni MP
 
 ## Viri in AI
 
-Projekt vključuje AI-podprto kodo, besedila in grafiko ter zunanje assete. Podrobnosti, avtorji, licence in odprte postavke so v dokumentaciji ter `game/CREDITS.md`. Pri filmski sliki Billyja dovoljenje za javno distribucijo ni pridobljeno; za Jigsawov glas in dva VHS-posnetka je treba dopolniti izvor ter pogoje uporabe pred oddajo.
+Projekt vključuje AI-podprto kodo, besedila in grafiko ter zunanje assete. Podrobnosti, avtorji, licence in odprte postavke so v dokumentaciji ter `Source/game/CREDITS.md`. Pri filmski sliki Billyja dovoljenje za javno distribucijo ni pridobljeno; za Jigsawov glas in dva VHS-posnetka je treba dopolniti izvor ter pogoje uporabe pred oddajo.
