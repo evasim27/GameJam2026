@@ -247,12 +247,7 @@ func _draw_status(font: Font) -> void:
 
 
 func _draw_osd_field(rect: Rect2) -> void:
-	draw_rect(rect, Color(0.025, 0.025, 0.03, 0.18))
-	# Faint right-angle marks evoke a recorder's viewfinder rather than an app panel.
-	for p: Vector2 in [rect.position, Vector2(rect.end.x, rect.position.y), rect.end, Vector2(rect.position.x, rect.end.y)]:
-		var inward := (rect.get_center() - p).sign()
-		draw_line(p, p + Vector2(inward.x * 7, 0), Color(0.85, 0.86, 0.82, 0.14))
-		draw_line(p, p + Vector2(0, inward.y * 5), Color(0.85, 0.86, 0.82, 0.14))
+	DialogueBox.draw_osd_panel(self, rect)
 
 
 ## The memory just recovered: a card on the right for a moment, then its cassette flies into
@@ -308,14 +303,14 @@ func _draw_hint(font: Font) -> void:
 					rect.position.x = speech.rect.end.x + 12
 			else:
 				rect.position.y = size.y - PANEL_H - 32 - rect.size.y
-	DialogueBox.draw_lines(self, font, lines, "", rect, Color(0.66, 0.69, 0.83), 16)
+	DialogueBox.draw_instruction(self, font, lines, rect, 16)
 
 
 func _draw_cinematic_caption(font: Font, text: String, y: float, color: Color) -> void:
 	var lines := DialogueBox.wrap(font, text, size.x - 64, 16)
 	var width := DialogueBox.width(font, lines, 16, size.x - 40)
 	var h := DialogueBox.height(lines.size(), 16, false)
-	DialogueBox.draw_lines(self, font, lines, "", Rect2((size.x - width) / 2.0, y - h, width, h), color, 16)
+	DialogueBox.draw_instruction(self, font, lines, Rect2((size.x - width) / 2.0, y - h, width, h), 16)
 
 
 func _draw_rewind_cue(font: Font) -> void:
@@ -427,8 +422,9 @@ func _draw_prompt(font: Font) -> void:
 	var r := _button_rect(_prompt_button)
 	var push := 3.0 if down else -3.0 + sin(_prompt_t * 6.0) * 1.5
 	var tip := Vector2(r.get_center().x, r.position.y - 10.0 + push)
-	draw_colored_polygon(PackedVector2Array([tip, tip + Vector2(-7, -9), tip + Vector2(7, -9)]), CYAN)
-	draw_rect(Rect2(tip.x - 2, tip.y - 30, 4, 21), CYAN)
+	var cue_ink := Color(0.66, 0.76, 0.66, 0.85)
+	draw_colored_polygon(PackedVector2Array([tip, tip + Vector2(-7, -9), tip + Vector2(7, -9)]), cue_ink)
+	draw_rect(Rect2(tip.x - 2, tip.y - 30, 4, 21), cue_ink)
 
 	# Keycaps above the arrow, pressed in step with the button (combos one after the other).
 	const H := 22.0
@@ -444,7 +440,7 @@ func _draw_prompt(font: Font) -> void:
 	var cap_w := font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
 	var top := tip.y - 30.0 - H - 12.0
 	var x := clampf(tip.x - total / 2.0, 12.0, size.x - total - cap_w - 30.0)
-	draw_rect(Rect2(x - 8, top - 6, total + cap_w + 28, H + 16), Color(0, 0, 0, 0.6))
+	DialogueBox.draw_osd_panel(self, Rect2(x - 8, top - 6, total + cap_w + 28, H + 16))
 	for i in _prompt_keys.size():
 		_draw_key(font, Rect2(x, top, widths[i], H - 6), _prompt_keys[i], _pressed_at(cycle - i * 0.18))
 		if i < _prompt_keys.size() - 1:
@@ -464,12 +460,12 @@ func _pressed_at(c: float) -> bool:
 func _draw_key(font: Font, r: Rect2, label: String, down: bool) -> void:
 	const DEPTH := 5.0
 	var sink := DEPTH - 2.0 if down else 0.0
-	draw_rect(Rect2(r.position + Vector2(0, DEPTH), r.size), Color(0.25, 0.25, 0.32))
+	draw_rect(Rect2(r.position + Vector2(0, DEPTH), r.size), Color(0.07, 0.075, 0.075, 0.85))
 	var face := Rect2(r.position + Vector2(0, sink), r.size)
-	draw_rect(face, Color(0.55, 0.95, 1.0) if down else Color(0.9, 0.9, 0.95))
-	draw_rect(face, Color(0.1, 0.1, 0.14), false, 1.0)
+	draw_rect(face, Color(0.34, 0.41, 0.34, 0.9) if down else Color(0.16, 0.17, 0.16, 0.8))
+	draw_rect(face, Color(0.65, 0.68, 0.61, 0.65), false, 1.0)
 	var tw := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
-	draw_string(font, Vector2(face.get_center().x - tw / 2.0, face.position.y + 13), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.08, 0.08, 0.12))
+	draw_string(font, Vector2(face.get_center().x - tw / 2.0, face.position.y + 13), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.93, 0.95, 0.89))
 
 
 func _draw_subtitle(font: Font) -> void:
