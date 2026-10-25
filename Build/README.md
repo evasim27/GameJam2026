@@ -6,4 +6,4 @@
 2. Zaženite `LostInTape.exe`.
 3. Če Windows SmartScreen opozori na neznanega izdajatelja, izberite **Več informacij → Vseeno zaženi**.
 
-Datoteka ima 223 MB, zato je shranjena z Git LFS. Rezervni prenos v ZIP obliki: [LostInTape-windows.zip](https://github.com/evasim27/GameJam2026/releases/latest/download/LostInTape-windows.zip).
+Datoteka ima 233 MB, zato je shranjena z Git LFS. Rezervni prenos v ZIP obliki: [LostInTape-windows.zip](https://github.com/evasim27/GameJam2026/releases/latest/download/LostInTape-windows.zip).
