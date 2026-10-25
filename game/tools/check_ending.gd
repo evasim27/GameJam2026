@@ -31,6 +31,10 @@ func _check() -> void:
 			assert(ending._ending_name == ("EXCHANGE" if mask == 7 else "REWIND"))
 			var story_count := 4 if mask == 0 else 5
 			assert(ending._images.size() == story_count + 1)
+			if mask == 7:
+				assert(ending._shots.back().image == ending._shots[story_count - 1].image)
+			else:
+				assert(ending._shots.back().image == "res://assets/ending/07_results.png")
 			for texture in ending._images:
 				assert(texture != null and texture.get_width() > 0)
 			if mask > 0 and mask < 7:

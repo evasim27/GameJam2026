@@ -24,6 +24,8 @@ The Rewind variants cover masks 0–6 (Maja=1, Luka=2, Tina=4). Each variant man
 
 Narration wraps to the 320×180 cutscene view and each shot allows enough time to finish typing. Any key advances, Escape opens the persistent result screen, and R on that screen restarts the game. The previous bedroom scenes, candy overlays and failure ghosts are no longer part of the ending.
 
+Rewind's result screen uses the original `game/assets/ending/07_results.png`, preserving its warm morning light and foreground cassette. Its compact statistics panel leaves the cassette label visible; the game writes `REWIND` on that label. Menjava retains its ejected-tape background and existing result layout.
+
 Nineteen additional PNGs provide individual rescues, exact living-room and doorway casts, Luka and Tina reunion alternatives, and the no-rescue variant. Shared close-ups and the empty-room finale are reused. Reunion priority is Maja if rescued, otherwise Luka, otherwise Tina. With nobody rescued there is no extraction or reunion; that sequence has four shots.
 
 The new name on the final cassette is provisionally `ALEX`; no canonical protagonist name was supplied.
