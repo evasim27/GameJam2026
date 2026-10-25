@@ -60,7 +60,7 @@ func _process(delta: float) -> void:
 	if not _voice_started and _t >= VOICE_START:
 		_voice_started = true
 		_voice.play()
-	var music_db := -24.0 if _voice.playing else -18.0
+	var music_db := -20.0 if _voice.playing else -14.0
 	if _t >= _duration - END_PAUSE:
 		music_db = -55.0
 	_music.volume_db = move_toward(_music.volume_db, music_db, delta * 60.0)

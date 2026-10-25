@@ -58,8 +58,8 @@ static func text(canvas: CanvasItem, font: Font, value: String, pos: Vector2, fo
 	canvas.draw_set_transform(Vector2.ZERO)
 
 
-## A worn VHS caption with clipped corners, faint scan lines and a pointer to the speaker.
-static func draw_speech(canvas: CanvasItem, font: Font, lines: Array, speaker: String, rect: Rect2, accent: Color, font_size: int, tip := Vector2.INF) -> void:
+## Shared tape-overlay frame: smoked glass, clipped corners and worn scan lines.
+static func draw_tape_panel(canvas: CanvasItem, rect: Rect2, font_size := 12) -> void:
 	var unit := font_size / 12.0
 	var background := Color(0.025, 0.025, 0.03, 0.48)
 	var edge := Color(0.77, 0.79, 0.73, 0.38)
@@ -73,6 +73,32 @@ static func draw_speech(canvas: CanvasItem, font: Font, lines: Array, speaker: S
 	for i in range(1, int(rect.size.y / (3 * unit))):
 		var y := p.y + i * 3 * unit
 		canvas.draw_line(Vector2(p.x + cut, y), Vector2(q.x - cut, y), Color(0.8, 0.81, 0.76, 0.025))
+
+
+## The recorder's faint overlay, shared by status fields and instructions.
+static func draw_osd_panel(canvas: CanvasItem, rect: Rect2) -> void:
+	canvas.draw_rect(rect, Color(0.025, 0.025, 0.03, 0.18))
+	for p: Vector2 in [rect.position, Vector2(rect.end.x, rect.position.y), rect.end, Vector2(rect.position.x, rect.end.y)]:
+		var inward := (rect.get_center() - p).sign()
+		canvas.draw_line(p, p + Vector2(inward.x * 7, 0), Color(0.85, 0.86, 0.82, 0.14))
+		canvas.draw_line(p, p + Vector2(0, inward.y * 5), Color(0.85, 0.86, 0.82, 0.14))
+
+
+## Instructions look like recorder OSD text rather than a dialogue card.
+static func draw_instruction(canvas: CanvasItem, font: Font, lines: Array, rect: Rect2, font_size := 12) -> void:
+	var unit := font_size / 12.0
+	draw_osd_panel(canvas, rect)
+	for i in lines.size():
+		text(canvas, font, lines[i], rect.position + Vector2(7, 14 + i * 13) * unit, font_size, Color(0.91, 0.92, 0.88, 0.86))
+
+
+## A worn VHS caption with clipped corners, faint scan lines and a pointer to the speaker.
+static func draw_speech(canvas: CanvasItem, font: Font, lines: Array, speaker: String, rect: Rect2, accent: Color, font_size: int, tip := Vector2.INF) -> void:
+	var unit := font_size / 12.0
+	var background := Color(0.025, 0.025, 0.03, 0.48)
+	var edge := Color(0.77, 0.79, 0.73, 0.38)
+	var p := rect.position
+	draw_tape_panel(canvas, rect, font_size)
 	if tip.is_finite():
 		var base_x := clampf(tip.x, rect.position.x + 12, rect.end.x - 12)
 		var left := Vector2(base_x - 5, rect.end.y - 1)

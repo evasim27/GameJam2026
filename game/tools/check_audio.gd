@@ -47,7 +47,7 @@ func _check() -> void:
 	assert(game._forbidden_video.MUSIC == game.SECRET_MUSIC)
 	game._forbidden_video._process(1.0)
 	assert(game._forbidden_video._voice.playing)
-	assert(game._forbidden_video._music.volume_db <= -24.0)
+	assert(is_equal_approx(game._forbidden_video._music.volume_db, -20.0))
 	game._forbidden_video.skip()
 	assert(not game._forbidden_video._voice.playing and not game._forbidden_video._music.playing)
 	game._return_from_forbidden()
