@@ -7,6 +7,7 @@ Enoigralska 2D grozljiva ugankarska igra za GameJam BEST × ŠS FERI 2026. Na no
 | Mapa | Vsebina |
 | --- | --- |
 | `README.md` | Ta opis |
+| `Documentation/` | Dokumentacija igre (PDF) |
 | `Build/` | Windows različica igre: `LostInTape.exe` (Git LFS) |
 | `Source/game/` | Godot 4.7.2 projekt igre |
 | `Source/assets/` | Izvorne grafike, prompti in manifesti, iz katerih so narejeni sprajti v igri |
@@ -14,7 +15,7 @@ Enoigralska 2D grozljiva ugankarska igra za GameJam BEST × ŠS FERI 2026. Na no
 
 ## Dokumentacija
 
-Dokumentacijo bo ekipa dodala naknadno. [Avtorji in viri assetov](Source/game/CREDITS.md).
+[Dokumentacija (PDF)](Documentation/Ženeva_LostInTape_Dokumentacija.pdf). [Avtorji in viri assetov](Source/game/CREDITS.md).
 
 ## Zagon iz projekta na Windows
 
