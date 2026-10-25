@@ -11,6 +11,7 @@ const WALL := preload("res://assets/rewind/cinematic/wall.png")
 const WAINSCOT := preload("res://assets/rewind/cinematic/wainscot.png")
 const FLOOR_TEX := preload("res://assets/rewind/cinematic/floor.png")
 const STAIRS_ART := preload("res://assets/rewind/cinematic/stairs.png")
+const FRONT_STAIRS_ART := preload("res://assets/rewind/cinematic/front-stairs.png")
 const TV_ART := preload("res://assets/rewind/cinematic/crt-unplugged.png")
 const COSTUME_GHOST := preload("res://assets/rewind/costumes_level2/ghost.png")
 const COSTUME_WIZARD := preload("res://assets/rewind/costumes_level2/wizard.png")
@@ -25,9 +26,9 @@ const HALL := 480.0
 const HOLE_X := 120.0
 const SKELETON_X := 200.0
 const SECOND_SKELETON_X := 360.0
-const STAIRS_FROM := HALL + 276.0
+const STAIRS_FROM := HALL + 292.0
 const TV_X := HALL + 150.0
-const DOOR_X := HALL + 230.0
+const DOOR_X := HALL + 238.0
 
 var _tv_noise := 0.0
 
@@ -42,7 +43,6 @@ func build() -> void:
 	add_tiled(WAINSCOT, Rect2(0, 104, width, 32), Color(0.58, 0.6, 0.72), 32.0)
 	add_tiled(FLOOR_TEX, Rect2(0, FLOOR, width, 44), Color(0.68, 0.7, 0.8))
 	add_drawing(_photos, Vector2(14, 84))
-	add_drawing(_back_stairs, Vector2(HALL, 0))
 	# The hallway: a couple of sconces and a crooked portrait looking down at the hole.
 	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(64, 96))
 	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(208, 96))
@@ -50,15 +50,17 @@ func build() -> void:
 	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(452, 96))
 	add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(280, 86), 2)
 	add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(414, 86), 1)
-	add_wall_decor(WallDecor.Kind.WEB, Vector2(384, 73))
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(384, 73), 6)
 	var watcher := add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(244, 86), 1)
 	watcher.rotation = 0.05
 	add_wall_decor(WallDecor.Kind.SCRATCHES, Vector2(188, 100))
 	var portrait := add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(HALL + 112, 88), 2)
 	portrait.rotation = -0.09
+	# The portrait hangs on the back wall, behind the banister and stair shadow.
+	var back_stairs := add_drawing(_back_stairs, Vector2(HALL, 0))
 	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(HALL + 70, 96))
-	add_wall_decor(WallDecor.Kind.WEB, Vector2(2, 73), 1)
-	add_wall_decor(WallDecor.Kind.WEB, Vector2(width - 2, 48), 0, true)
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(2, 73), 3)
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(width - 2, 48), 4, true)
 	add_wall_decor(WallDecor.Kind.SCRATCHES, Vector2(HALL + 178, 98))
 	add_drawing(_crates, Vector2(HALL + 96, FLOOR))
 	add_drawing(_cobwebs, Vector2(HALL, 0))
@@ -108,6 +110,7 @@ func build() -> void:
 
 	var tear := GlitchSpot.new()
 	tear.glitch_id = "door"
+	tear.show_idle_outline = false
 	tear.area = Rect2(-6, -38, 32, 38)
 	tear.period = 3.0
 	tear.from = 1.6
@@ -134,10 +137,14 @@ func build() -> void:
 	door.visual_size = Vector2(30, 54)
 	door.needs_glitch = "door"
 	door.cover = WARDROBE
+	door.cover_scale = 0.75
 	# Clear of the door frame, still on the flat floor before the front stairs.
 	door.cover_slide = Vector2(26, 0)
 	door.light = Color(0.4, 1.0, 1.0)
 	add_object(door, DOOR_X)
+	# Keep the exit in the room rules, but draw its frame on the wall behind the stairs.
+	door.reparent(_deco)
+	_deco.move_child(door, back_stairs.get_index())
 
 	add_drawing(_front_stairs)
 	var top := Shadow.new()
@@ -145,7 +152,7 @@ func build() -> void:
 	top.width = 30.0
 	top.height = 60.0
 	top.hint_x = TV_X
-	add_object(top, HALL + 290, floor_y(HALL + 290))
+	add_object(top, STAIRS_FROM + 14.0, floor_y(STAIRS_FROM + 14.0))
 	add_drawing(_tv, Vector2(TV_X, FLOOR))
 
 
@@ -204,13 +211,15 @@ func _back_stairs(d: Node2D) -> void:
 
 ## The flight the kid climbs if nothing opens the door.
 func _front_stairs(d: Node2D) -> void:
-	var x := STAIRS_FROM
-	var wood := Color(0.42, 0.26, 0.18)
-	while x < width:
-		var y := floor_y(x + 6.0)
-		d.draw_rect(Rect2(x, y, 6, FLOOR + 44 - y), Color(0.22, 0.13, 0.1))
-		d.draw_rect(Rect2(x, y, 6, 2), wood)
-		x += 6.0
+	d.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# The fifth tread continues past the edge of the room; keep its 6-unit run.
+	var stair_width := ceilf((width - STAIRS_FROM) / 6.0) * 6.0
+	var stair_height := stair_width * 0.45
+	var visible_width := width - STAIRS_FROM
+	var source := Rect2(0, 0, FRONT_STAIRS_ART.get_width() * visible_width / stair_width, FRONT_STAIRS_ART.get_height())
+	var destination := Rect2(STAIRS_FROM, FLOOR - stair_height, visible_width, stair_height)
+	# The timber ends at floor level, letting the room's floorboards continue below it.
+	d.draw_texture_rect_region(FRONT_STAIRS_ART, destination, source, Color(0.8, 0.75, 0.72))
 
 
 func _crates(d: Node2D) -> void:
@@ -219,13 +228,13 @@ func _crates(d: Node2D) -> void:
 
 
 func _cobwebs(d: Node2D) -> void:
-	var c := Color(0.8, 0.8, 0.9, 0.25)
-	for p in [Vector2(250, 60), Vector2(186, 84)]:
-		for i in 5:
-			var a := PI * 0.5 + i * PI / 8.0
-			d.draw_line(p, p + Vector2(cos(a), sin(a)) * 14.0, c, 1.0)
-		d.draw_arc(p, 6.0, PI * 0.5, PI * 1.0, 6, c, 1.0)
-		d.draw_arc(p, 11.0, PI * 0.5, PI * 1.0, 8, c, 1.0)
+	d.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var anchors := [Vector2(250, 60), Vector2(186, 84)]
+	for i in anchors.size():
+		var p: Vector2 = anchors[i]
+		d.draw_set_transform(p, 0.0, Vector2(-1, 1))
+		WallDecor.COBWEB.draw_web(d, Vector2.ZERO, true, WallDecor.COBWEB.Shape.ORB + i)
+	d.draw_set_transform(Vector2.ZERO)
 
 
 ## The warm light from the foyer ends here.

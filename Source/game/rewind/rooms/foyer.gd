@@ -44,8 +44,8 @@ func build() -> void:
 	for x in [136, 362, 510]:
 		add_wall_decor(WallDecor.Kind.SCONCE, Vector2(x, 96))
 	add_wall_decor(WallDecor.Kind.WEB, Vector2(2, 73), 1)
-	add_wall_decor(WallDecor.Kind.WEB, Vector2(638, 73), 1, true)
-	add_wall_decor(WallDecor.Kind.WEB, Vector2(282, 73))
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(638, 73), 5, true)
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(282, 73), 2)
 	add_wall_decor(WallDecor.Kind.SCRATCHES, Vector2(436, 94))
 	add_drawing(_entrance_door, Vector2(0, FLOOR))
 	add_drawing(_coat_rack, Vector2(54, FLOOR + 3.0))

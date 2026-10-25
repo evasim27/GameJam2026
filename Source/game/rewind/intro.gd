@@ -60,7 +60,7 @@ const SHOTS := [
 	{
 		"duration": 5.5,
 		"image": "res://assets/intro/house_04_inserting_vhs.png",
-		"lines": ["Lea puts it in the VCR anyway."],
+		"lines": ["Curious, Lea puts it in the VCR anyway."],
 	},
 	{
 		"duration": 8.5,

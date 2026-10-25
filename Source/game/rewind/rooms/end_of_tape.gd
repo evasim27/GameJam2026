@@ -41,7 +41,7 @@ func build() -> void:
 	add_tiled(WALL, Rect2(0, 0, width, FLOOR), Color(0.1, 0.09, 0.14))
 	add_tiled(FLOOR_TEX, Rect2(0, FLOOR, width, 44), Color(0.3, 0.27, 0.34))
 	# The gallery: sconces between the knights, portraits watching them.
-	add_wall_decor(WallDecor.Kind.WEB, Vector2(2, 73))
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(2, 73), 6)
 	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(60, 98))
 	add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(KNIGHT_X + 13, 86), 1)
 	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(172, 98))
@@ -52,8 +52,8 @@ func build() -> void:
 	portrait.rotation = 0.12
 	add_wall_decor(WallDecor.Kind.PORTRAIT, Vector2(HALL + 270, 88), 1)
 	add_wall_decor(WallDecor.Kind.SCONCE, Vector2(HALL + 237, 99))
-	add_wall_decor(WallDecor.Kind.WEB, Vector2(width - 2, 73), 1, true)
-	add_wall_decor(WallDecor.Kind.WEB, Vector2(HALL + 86, 75), 1)
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(width - 2, 73), 3, true)
+	add_wall_decor(WallDecor.Kind.WEB, Vector2(HALL + 86, 75), 5)
 	add_wall_decor(WallDecor.Kind.SCRATCHES, Vector2(HALL + 251, 112))
 	add_drawing(_shelves, Vector2(HALL + 14, FLOOR))
 	add_drawing(_label, Vector2(HALL + 206, 76))

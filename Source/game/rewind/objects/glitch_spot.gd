@@ -16,6 +16,8 @@ extends TapeObject
 @export var tint := Color(0.4, 1.0, 1.0)
 ## Boss windows: the tear only shows while the kid is in reach, so it never flashes in vain.
 @export var cue := false
+## Hide the idle area marker where the damaged picture itself supplies the cue.
+@export var show_idle_outline := true
 
 ## Raised by the room after repeated failures, so the tear gets more obvious.
 var strength := 0.0
@@ -73,7 +75,7 @@ func _draw() -> void:
 			draw_rect(Rect2(area.position.x + shift, y, area.size.x, minf(h, area.end.y - y)), c)
 			y += h + 1.0
 			i += 1
-	else:
+	elif show_idle_outline:
 		var pulse := 0.5 + 0.5 * sin(_t * 5.0)
 		var c := cyan
 		c.a = 0.12 + 0.1 * pulse + 0.15 * strength

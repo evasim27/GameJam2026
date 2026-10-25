@@ -7,6 +7,7 @@ const ART := preload("res://rewind/door_art.gd")
 
 @export var needs_glitch := ""
 @export var cover: Texture2D
+@export var cover_scale := 0.5
 @export var cover_slide := Vector2(24, 0)
 @export var light := Color(1.0, 0.75, 0.4)
 @export var visual_size := Vector2(36, 64)
@@ -20,7 +21,7 @@ func _ready() -> void:
 	if cover:
 		_cover = Sprite2D.new()
 		_cover.texture = cover
-		_cover.scale = Vector2(0.5, 0.5)
+		_cover.scale = Vector2.ONE * cover_scale
 		_cover.offset = Vector2(0, -32)
 		_cover.position = Vector2(8, 0)
 		_cover.z_index = 1

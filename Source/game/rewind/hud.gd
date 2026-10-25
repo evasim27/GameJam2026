@@ -184,11 +184,14 @@ func _draw() -> void:
 				var y := 137.0 + i * 39.0
 				draw_string(BLOOD_FONT, Vector2(2, y + 3) + shake, line, HORIZONTAL_ALIGNMENT_CENTER, w, 34, Color(0.12, 0.01, 0.02))
 				draw_string(BLOOD_FONT, Vector2(0, y) + shake, line, HORIZONTAL_ALIGNMENT_CENTER, w, 34, Color(0.78, 0.06, 0.09))
-		elif message == "SIGNAL LOST":
-			draw_string(font, Vector2(0, 148), message, HORIZONTAL_ALIGNMENT_CENTER, w, 48, Color(0.22, 0.22, 0.24))
 		else:
-			draw_string(font, Vector2(0, 148), message, HORIZONTAL_ALIGNMENT_CENTER, w, 48, OSD)
-		draw_string(font, Vector2(0, 182), sub_message, HORIZONTAL_ALIGNMENT_CENTER, w, 20, Color(0.78, 0.06, 0.09) if message == "SIGNAL LOST" else DIM)
+			# A dark band behind the message keeps it readable over any room.
+			draw_rect(Rect2(0, 104, w, 90), Color(0, 0, 0, 0.6))
+			draw_string_outline(font, Vector2(0, 148), message, HORIZONTAL_ALIGNMENT_CENTER, w, 48, 6, Color.BLACK)
+			draw_string(font, Vector2(0, 148), message, HORIZONTAL_ALIGNMENT_CENTER, w, 48, Color(0.62, 0.62, 0.66) if message == "SIGNAL LOST" else OSD)
+		var sub_color := Color(1.0, 0.3, 0.3) if message == "SIGNAL LOST" else DIM
+		draw_string_outline(font, Vector2(0, 182), sub_message, HORIZONTAL_ALIGNMENT_CENTER, w, 20, 5, Color.BLACK)
+		draw_string(font, Vector2(0, 182), sub_message, HORIZONTAL_ALIGNMENT_CENTER, w, 20, sub_color)
 
 
 func _draw_card(rect: Rect2, accent: Color) -> void:
@@ -265,7 +268,12 @@ func _draw_memory_pickup(font: Font) -> void:
 		rect.position.x += slide
 		cassette.position.x += slide
 		_draw_card(rect, CYAN)
-		draw_rect(Rect2(rect.position, Vector2(2, rect.size.y)), CYAN)
+		var accent := StyleBoxFlat.new()
+		accent.draw_center = false
+		accent.border_color = CYAN
+		accent.border_width_left = 2
+		accent.set_corner_radius_all(4)
+		draw_style_box(accent, rect)
 		_label(font, "MEMORY SAVED  +%ds" % _pickup_bonus, rect.position + Vector2(10, 11), 10, CYAN)
 		_label(font, _pickup_id.to_upper().replace(" ", " / "), rect.position + Vector2(10, 29), 20)
 		draw_texture_rect_region(Candy.SPRITE, cassette, region)

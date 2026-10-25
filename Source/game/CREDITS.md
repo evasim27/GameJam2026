@@ -5,6 +5,8 @@
 - **Horri-Fi** shader by Gizmo199 (https://github.com/Gizmo199/horri-fi) — MIT License, Copyright (c) 2021 Gizmo199. Bloom, CRT curve, vignette, scanlines, noise and VHS smear ported to Godot in `rewind/vhs.gdshader` (licence text in `rewind/HORRI-FI_LICENSE.txt`).
 - **VT323** font by Peter Hull — SIL Open Font License. `assets/fonts/`
 - Pumpkin, kid (Shrek costume), echo and candy sprites drawn for this project (`tools/make_rewind_sprites.py`).
+- Wall sconce `assets/rewind/cinematic/wall-sconce.png` is original AI-assisted pixel art created with the built-in imagegen tool and prepared at the furniture's pixel density. Source image and prompt: `Source/assets/wall_sconce/`.
+- Foreground staircase `assets/rewind/cinematic/front-stairs.png` is original AI-assisted pixel art created with the built-in imagegen tool to match the grand staircase. Source image and prompt: `Source/assets/front_stairs/`; export: `tools/export_front_stairs.gd`.
 - **Interface Sounds** by Kenney (https://opengameart.org/content/interface-sounds) — CC0. `assets/audio/play.ogg`, `pause.ogg`, and `glitch.ogg` are `toggle_001`, `toggle_002`, and `glitch_003` from the pack.
 - **Reversing Time / Stuck in Time** by isaiah658 (https://opengameart.org/content/reversing-time-stuck-in-time) — CC0. `assets/audio/rewind.ogg` is the original looping sound.
 - **Level up, power up, Coin get (13 Sounds)** by WobbleBoxx Workshop (https://opengameart.org/content/level-up-power-up-coin-get-13-sounds) — CC0. `assets/audio/candy.wav` is a shortened, faded, 16-bit conversion of `Coin01.aif`.

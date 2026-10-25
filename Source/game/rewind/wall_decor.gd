@@ -2,18 +2,20 @@ extends Node2D
 ## Painterly wall props and fine atmospheric details. These never participate in tape rules or collisions.
 
 const PORTRAITS := preload("res://assets/rewind/cinematic/portraits-oil-atlas.png")
-const CANDLE := preload("res://assets/rewind/cinematic/candle.png")
+const COBWEB := preload("res://rewind/cobweb_art.gd")
+const SCONCE := preload("res://assets/rewind/cinematic/wall-sconce.png")
 
 enum Kind { PORTRAIT, WEB, SCONCE, SCRATCHES }
 
 var kind := Kind.PORTRAIT
+# Web variants: shape * 2 + hanging spider (0 or 1).
 var variant := 0
 var elapsed := 0.0
 
 
 func _ready() -> void:
-	# Keep the oil painting readable under the room's 3x camera magnification.
-	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	# Sconces and silk share the furniture's half-room-pixel texels; portraits keep their painted detail.
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST if kind in [Kind.SCONCE, Kind.WEB] else CanvasItem.TEXTURE_FILTER_LINEAR
 
 
 func _process(delta: float) -> void:
@@ -45,42 +47,30 @@ func _portrait() -> void:
 
 
 func _web() -> void:
-	var silk := Color(0.68, 0.64, 0.57, 0.32)
-	var radius := 28.0
-	for ray in 6:
-		var angle := ray * PI / 10.0
-		draw_line(Vector2.ZERO, Vector2(cos(angle), sin(angle)) * radius, silk, 0.45, true)
-	for ring in [0.25, 0.5, 0.75, 1.0]:
-		var points := PackedVector2Array()
-		for step in 21:
-			var angle := step * PI / 40.0
-			var sag := 1.0 - 0.12 * sin((step % 4) * PI / 4.0)
-			points.append(Vector2(cos(angle), sin(angle)) * radius * ring * sag)
-		draw_polyline(points, silk, 0.45, true)
+	var shape := variant >> 1
+	COBWEB.draw_web(self, Vector2.ZERO, false, shape)
 	if variant % 2 == 1:
-		var p := Vector2(17, 33 + roundf(sin(elapsed * 1.4 + position.x) * 3))
-		draw_line(Vector2(17, 14), p, Color(0.76, 0.75, 0.8, 0.3))
+		var anchor := COBWEB.spider_anchor(shape)
+		var p := anchor + Vector2(0, 7 + snappedf(sin(elapsed * 1.4 + position.x) * 2, 0.5))
+		COBWEB.draw_thread(self, anchor, p, Color(0.58, 0.54, 0.45, 0.35))
 		for side in [-1, 1]:
-			for leg in 3:
-				draw_polyline(PackedVector2Array([p, p + Vector2(side * 3, leg - 2), p + Vector2(side * 4, leg * 2 - 2)]), Color(0.12, 0.09, 0.14))
-		draw_circle(p, 2, Color(0.08, 0.06, 0.1))
+			for leg in 4:
+				var knee := p + Vector2(side * 2, leg - 1.5)
+				var foot := p + Vector2(side * 3, leg * 1.5 - 2)
+				COBWEB.draw_thread(self, p, knee, Color(0.16, 0.12, 0.1))
+				COBWEB.draw_thread(self, knee, foot, Color(0.16, 0.12, 0.1))
+		draw_rect(Rect2(p + Vector2(-1, -1), Vector2(2, 2.5)), Color(0.1, 0.075, 0.065))
+		draw_rect(Rect2(p + Vector2(-0.5, -1), Vector2(0.5, 1)), Color(0.29, 0.22, 0.16))
 
 
 func _sconce() -> void:
 	var flicker := 0.88 + 0.12 * sin(elapsed * 8.3 + position.x) * sin(elapsed * 13.1)
-	for i in 5:
-		draw_circle(Vector2(0, -10), 19 - i * 3, Color(1, 0.48, 0.14, 0.015 * flicker))
-	# Aged metal wall plate and the same wax candle used on the foyer furniture.
-	draw_ellipse_plate()
-	draw_arc(Vector2(0, 1), 4, 0, PI, 12, Color(0.32, 0.23, 0.14), 1.5, true)
-	draw_texture_rect(CANDLE, Rect2(-4, -16, 8, 16), false, Color(0.87, 0.8, 0.68))
-
-
-func draw_ellipse_plate() -> void:
-	draw_set_transform(Vector2(0, 4), 0.0, Vector2(0.6, 1.0))
-	draw_circle(Vector2.ZERO, 6, Color(0.15, 0.11, 0.08))
-	draw_arc(Vector2.ZERO, 5, 0, TAU, 20, Color(0.43, 0.31, 0.17), 0.8, true)
-	draw_set_transform(Vector2.ZERO)
+	# Light stays at the wick, above the integrated brass bracket and wall plate.
+	var flame := Vector2(-1, -12)
+	for i in 8:
+		draw_circle(flame, (14.0 - i * 1.5) * flicker, Color(1.0, 0.57, 0.16, (0.008 + i * 0.002) * flicker))
+	# Native 24x48 canvas at half scale matches the Noble Interior sprites.
+	draw_texture_rect(SCONCE, Rect2(-6, -17, 12, 24), false, Color(0.87, 0.8, 0.68))
 
 
 func _scratches() -> void:
