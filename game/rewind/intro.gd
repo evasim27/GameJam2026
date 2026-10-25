@@ -9,6 +9,7 @@ extends Node2D
 signal finished
 
 const FONT := preload("res://assets/fonts/VT323-Regular.ttf")
+const DialogueBox := preload("res://rewind/dialogue_box.gd")
 const EXTERIOR := preload("res://assets/exterior/exterior_background.png")
 const EXTERIOR_OPEN := preload("res://assets/exterior/exterior_background_open.png")
 const WALK_SHEET := preload("res://assets/exterior/player_walk_6f.png")
@@ -34,12 +35,12 @@ const SHOTS := [
 	{
 		"duration": AT_DOOR,
 		"image": "",
-		"lines": ["October 31st, late at night. Every house is dark", "except the last one. A kid in a homemade costume", "wants just one more candy."],
+		"lines": ["October 31st, late at night. Every house is dark", "except the last one. Lea, in a homemade costume,", "wants just one more candy."],
 	},
 	{
 		"duration": 5.0,
 		"image": "",
-		"lines": ["The kid knocks and the door swings open.", "There is no one on the threshold."],
+		"lines": ["Lea knocks and the door swings open.", "There is no one on the threshold."],
 	},
 	{
 		"duration": 6.0,
@@ -59,12 +60,12 @@ const SHOTS := [
 	{
 		"duration": 5.5,
 		"image": "res://assets/intro/house_04_inserting_vhs.png",
-		"lines": ["The kid puts it in the VCR anyway."],
+		"lines": ["Lea puts it in the VCR anyway."],
 	},
 	{
 		"duration": 8.5,
 		"image": "res://assets/intro/house_05_pulled_into_tv.png",
-		"lines": ["The screen pulls the kid in. Caught on tape.", "You can't control the kid. Control the tape.", "Find three memories. Free the voices."],
+		"lines": ["The screen pulls Lea in. Caught on tape.", "You can't control Lea. Control the tape.", "Find three memories. Free the voices."],
 	},
 ]
 
@@ -170,17 +171,17 @@ func _draw() -> void:
 	_text("SPACE: next   ESC: skip", Vector2(4, 176), 12, Color(0.5, 0.5, 0.6, 0.6))
 
 
-## The narration, typed out line by line in a band at the top.
+## The narration, typed out in a framed card above the scene.
 func _draw_story(lines: Array, s: float) -> void:
-	draw_rect(Rect2(0, 4, 320, 10 + lines.size() * 11), Color(0, 0, 0, 0.6))
+	var wrapped := DialogueBox.wrap(FONT, "\n".join(lines), 282.0, 12)
+	var shown_lines: Array[String] = []
 	var start := 0.4
-	for i in lines.size():
-		var line: String = lines[i]
+	for line in wrapped:
 		var shown := clampi(int((s - start) * CHARS_PER_SECOND), 0, line.length())
-		if shown > 0:
-			var w := FONT.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x / 2.0
-			_text(line.left(shown), Vector2((320.0 - w) / 2.0, 16 + i * 11), 12, Color(0.93, 0.95, 1.0))
+		shown_lines.append(line.left(shown))
 		start += line.length() / CHARS_PER_SECOND + LINE_PAUSE
+	var box_width := DialogueBox.width(FONT, wrapped, 12, 300.0)
+	DialogueBox.draw_lines(self, FONT, wrapped, "", Rect2((320 - box_width) / 2.0, 6, box_width, DialogueBox.height(wrapped.size(), 12, false)), Color(0.77, 0.64, 1.0), 12, shown_lines)
 
 
 ## The kid walks up to the last lit house, says the line, knocks, the door opens and it goes in.
@@ -219,7 +220,7 @@ func _draw_exterior(e: float) -> void:
 	elif e >= KNOCK_AT and e < DOOR_OPENS:
 		line = "*knock knock*"
 	if line != "":
-		_text(line, Vector2(325, 127) * EXTERIOR_SCALE, 10, Color(1.0, 0.92, 0.72))
+		DialogueBox.draw_lines(self, FONT, [line], "LEA", Rect2(204, 68, 104, DialogueBox.height(1, 11)), Color(1.0, 0.76, 0.42), 11, [], true)
 
 
 func _draw_leaves(t: float) -> void:

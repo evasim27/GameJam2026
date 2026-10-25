@@ -15,7 +15,7 @@ const REWIND := [
 		},
 		{
 			"image": "res://assets/ending/cutscenes/ending_exchange/02_empty_tape.png",
-			"caption": "The kid is alone. Three names remain on the tape."
+			"caption": "Lea is alone. Three names remain on the tape."
 		},
 		{
 			"image": "res://assets/ending/cutscenes/ending_rewind/variants/none/03_wrong_morning.png",

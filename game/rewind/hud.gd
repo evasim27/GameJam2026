@@ -11,6 +11,7 @@ const AMBER := Color(1.0, 0.75, 0.3)
 const RED := Color(0.75, 0.12, 0.12)
 const LED := Color(0.45, 1.0, 0.45)
 const BLOOD_FONT := preload("res://assets/fonts/Nosifer-Regular.ttf")
+const DialogueBox := preload("res://rewind/dialogue_box.gd")
 
 const PANEL_H := 54.0
 const BUTTON := Vector2(70, 18)
@@ -51,6 +52,7 @@ var wrap := 0.0
 var prompt_done := ""
 
 var _subtitle := ""
+var _speaker := "LEA / ECHO"
 var _subtitle_t := 0.0
 var _hint := ""
 var _hint_t := 0.0
@@ -62,8 +64,9 @@ var _prompt_hold := true
 var _prompt_t := 0.0
 
 
-func say(text: String) -> void:
+func say(text: String, speaker := "LEA / ECHO") -> void:
 	_subtitle = text
+	_speaker = speaker
 	_subtitle_t = 4.0
 
 
@@ -95,10 +98,13 @@ func clear_prompt() -> void:
 
 func clear_texts() -> void:
 	clear_prompt()
+	_subtitle = ""
 	_subtitle_t = 0.0
+	_hint = ""
 	_hint_t = 0.0
 	message = ""
 	sub_message = ""
+	queue_redraw()
 
 
 func _process(delta: float) -> void:
@@ -119,7 +125,7 @@ func _draw() -> void:
 	var w := size.x
 	if cinematic_mode:
 		if _subtitle_t > 0.0:
-			_draw_cinematic_caption(font, _subtitle, size.y - 74.0, CYAN)
+			_draw_subtitle(font)
 		if _hint_t > 0.0:
 			_draw_cinematic_caption(font, _hint, size.y - 42.0, OSD)
 		return
@@ -159,12 +165,10 @@ func _draw() -> void:
 				draw_string(BLOOD_FONT, Vector2(2, y + 3) + shake, line, HORIZONTAL_ALIGNMENT_CENTER, w, 34, Color(0.12, 0.01, 0.02))
 				draw_string(BLOOD_FONT, Vector2(0, y) + shake, line, HORIZONTAL_ALIGNMENT_CENTER, w, 34, Color(0.78, 0.06, 0.09))
 		elif message == "SIGNAL LOST":
-			var shake := Vector2(sin(_blink * 29.0) * 1.5, cos(_blink * 23.0) * 0.5)
-			draw_string(BLOOD_FONT, Vector2(2, 153) + shake, message, HORIZONTAL_ALIGNMENT_CENTER, w, 42, Color(0.12, 0.01, 0.02))
-			draw_string(BLOOD_FONT, Vector2(0, 150) + shake, message, HORIZONTAL_ALIGNMENT_CENTER, w, 42, Color(0.78, 0.06, 0.09))
+			draw_string(font, Vector2(0, 148), message, HORIZONTAL_ALIGNMENT_CENTER, w, 48, Color(0.72, 0.72, 0.76))
 		else:
 			draw_string(font, Vector2(0, 148), message, HORIZONTAL_ALIGNMENT_CENTER, w, 48, OSD)
-		draw_string(font, Vector2(0, 182), sub_message, HORIZONTAL_ALIGNMENT_CENTER, w, 20, DIM)
+		draw_string(font, Vector2(0, 182), sub_message, HORIZONTAL_ALIGNMENT_CENTER, w, 20, Color(0.78, 0.06, 0.09) if message == "SIGNAL LOST" else DIM)
 
 
 func _draw_cinematic_caption(font: Font, text: String, y: float, color: Color) -> void:
@@ -178,10 +182,10 @@ func _draw_cinematic_caption(font: Font, text: String, y: float, color: Color) -
 func _draw_rewind_cue(font: Font) -> void:
 	var w := size.x
 	draw_rect(Rect2(6, 6, w - 12, size.y - PANEL_H - 12), VIOLET, false, 2.0)
-	var band := Rect2(w / 2.0 - 154, 190, 308, 27)
+	var band := Rect2(w / 2.0 - 106, 190, 212, 27)
 	draw_rect(band, Color(0.08, 0.04, 0.17, 0.83))
 	draw_rect(band, VIOLET, false, 1.0)
-	draw_string(font, Vector2(0, 209), "HOUSE REWINDS  ◀◀   KID STAYS", HORIZONTAL_ALIGNMENT_CENTER, w, 20, OSD)
+	draw_string(font, Vector2(0, 209), "HOUSE REWINDS  ◀◀", HORIZONTAL_ALIGNMENT_CENTER, w, 20, OSD)
 
 
 func _draw_timeline() -> void:
@@ -330,12 +334,12 @@ func _draw_key(font: Font, r: Rect2, label: String, down: bool) -> void:
 
 
 func _draw_subtitle(font: Font) -> void:
-	var w := size.x
-	var text_w := font.get_string_size(_subtitle, HORIZONTAL_ALIGNMENT_LEFT, -1, 22).x
-	var r := Rect2((w - text_w) / 2.0 - 8, 100, text_w + 16, 24)
-	draw_rect(r, Color(0, 0, 0, 0.75))
-	var jitter := 1.0 if fmod(_blink, 0.9) < 0.05 else 0.0
-	draw_string(font, Vector2(r.position.x + 8 + jitter, 118), _subtitle, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(0.9, 1.0, 1.0))
+	var max_width := minf(440.0, size.x - 40.0)
+	var lines := DialogueBox.wrap(font, _subtitle, max_width - 24.0, 20)
+	var box_width := DialogueBox.width(font, lines, 20, max_width)
+	var h := DialogueBox.height(lines.size(), 20)
+	var y := size.y - 88.0 - h if cinematic_mode else 102.0
+	DialogueBox.draw_lines(self, font, lines, _speaker, Rect2((size.x - box_width) / 2.0, y, box_width, h), CYAN, 20, [], true)
 
 
 func _draw_wrap() -> void:

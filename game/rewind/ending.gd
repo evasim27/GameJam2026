@@ -3,11 +3,12 @@ extends Node2D
 ## Narration is wrapped and timed for this viewport. Results persist until R restarts.
 
 const FONT := preload("res://assets/fonts/VT323-Regular.ttf")
+const DialogueBox := preload("res://rewind/dialogue_box.gd")
 const SEQUENCES := preload("res://rewind/ending_sequences.gd")
 const FADE_IN := 0.4
 const CHARS_PER_SECOND := 28.0
 const LINE_PAUSE := 0.7
-const TEXT_WIDTH := 308.0
+const TEXT_WIDTH := 282.0
 
 var _candies: Array[String] = []
 var _fails := 0
@@ -136,15 +137,15 @@ func _draw_results() -> void:
 
 
 func _draw_story(lines: Array) -> void:
-	draw_rect(Rect2(0, 4, 320, 10 + lines.size() * 11), Color(0, 0, 0, 0.65))
+	var shown_lines: Array[String] = []
 	var start := FADE_IN
 	for i in lines.size():
 		var line: String = lines[i]
 		var shown := clampi(int((_t - start) * CHARS_PER_SECOND), 0, line.length())
-		if shown > 0:
-			var width := FONT.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x / 2.0
-			_text(line.left(shown), Vector2((320.0 - width) / 2.0, 16 + i * 11), 12, Color(0.93, 0.95, 1.0))
+		shown_lines.append(line.left(shown))
 		start += line.length() / CHARS_PER_SECOND + LINE_PAUSE
+	var box_width := DialogueBox.width(FONT, lines, 12, 300.0)
+	DialogueBox.draw_lines(self, FONT, lines, _ending_name, Rect2((320 - box_width) / 2.0, 6, box_width, DialogueBox.height(lines.size(), 12)), Color(0.77, 0.64, 1.0), 12, shown_lines)
 
 
 func _text(text: String, pos: Vector2, size: int, color: Color) -> void:

@@ -359,7 +359,7 @@ func _tick(delta: float) -> void:
 	_last_mode = mode
 
 	if run.taken.size() > had:
-		hud.say("%s'S MEMORY SAVED  +%ds" % [run.taken.keys()[-1].split(" ")[0].to_upper(), int(RoomRun.CANDY_BONUS)])
+		hud.say("%s'S MEMORY SAVED  +%ds" % [run.taken.keys()[-1].split(" ")[0].to_upper(), int(RoomRun.CANDY_BONUS)], "MEMORY SAVED")
 		_sound("candy")
 	_show()
 	_update_warning_sounds(mode)
@@ -387,7 +387,7 @@ func _on_pause() -> void:
 
 func _unlock_rewind() -> void:
 	_rewind_unlocked = true
-	hud.hint("Rewind the house. The kid stays put.")
+	hud.hint("House rewinds.")
 	hud.prompt("rew", ["A"], true, "rewind")
 	_update_controls()
 
@@ -430,7 +430,7 @@ func _glitch() -> void:
 	if id == "reel":
 		hud.hint("The tape jammed. It fled into the TV.")
 	elif id == "screen":
-		hud.say("THE PICTURE SWALLOWED IT")
+		hud.say("THE PICTURE SWALLOWED IT", "THE TAPE")
 	_show()
 	if run.tape <= RoomRun.EPS:
 		run.out_of_tape = true
@@ -565,7 +565,7 @@ func _enter_forbidden() -> void:
 
 
 func _forbidden_cue(text: String, sound_id: String) -> void:
-	hud.say(text)
+	hud.say(text, "???")
 	_sound(sound_id)
 
 
@@ -676,6 +676,7 @@ func _fail() -> void:
 	tape_used += run.tape_used
 	if not _rewind_unlocked and total_fails >= 2:
 		_unlock_rewind()
+	hud.clear_texts()
 
 	var reset: bool = room_index > 0 and room_fails[room_index] >= MAX_ROOM_FAILS
 	var line := ""
