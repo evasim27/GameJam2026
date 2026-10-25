@@ -1,0 +1,5 @@
+# Lea cassette name correction
+
+Built-in `image_gen` edit, opaque background. Edit target: the previous `05_do_not_play.png` from commit `ce4b1fa`.
+
+Use case: text-localization / precise-object-edit. Edit the provided pixel-art ending still. Make ONE tiny text replacement only: on the cream VHS cassette label, replace the small handwritten name 'ALEX' underneath 'DO NOT PLAY' with exactly 'Lea' (capital L, lowercase e, lowercase a). Keep the small name in the same lower-right area of that label, with the same uneven childish BLACK handwriting, natural ink texture, perspective and approximate letter height. Erase every trace of ALEX. Keep the main warning 'DO NOT PLAY' EXACTLY as it is. Preserve all remaining pixels and composition as closely as possible: cassette shape and half-ejected position, paper label wear, black VCR, green indicators, cabinet, blue CRT static glow, warm amber highlights, chair and room background, richly textured crisp pixel art. Same 1672x941 landscape canvas, same framing and lighting. No other new words, no borders, no captions, no additional objects.

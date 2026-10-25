@@ -28,4 +28,4 @@ Rewind's result screen uses the original `game/assets/ending/07_results.png`, pr
 
 Nineteen additional PNGs provide individual rescues, exact living-room and doorway casts, Luka and Tina reunion alternatives, and the no-rescue variant. Shared close-ups and the empty-room finale are reused. Reunion priority is Maja if rescued, otherwise Luka, otherwise Tina. With nobody rescued there is no extraction or reunion; that sequence has four shots.
 
-The new name on the final cassette is provisionally `ALEX`; no canonical protagonist name was supplied.
+The protagonist is named Lea. The final cassette label reads `DO NOT PLAY` with `Lea` underneath.
