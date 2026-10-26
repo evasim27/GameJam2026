@@ -47,7 +47,7 @@ Izvršljiva različica je v [`Build/LostInTape.exe`](Build/LostInTape.exe). Pren
 
 ## Video in predstavitev
 
-[Predstavitev (PPTX)](Ženeva_LostInTape_Predstavitev.pptx) · [Gameplay video (MP4)](lostintape_30s_gameplay.mp4)
+[Predstavitev (PPTX)](Ženeva_LostInTape_Predstavitev.pptx) · [Gameplay video (MP4)](Ženeva_LostInTape_Video.mp4)
 
 ## Viri in AI
 
