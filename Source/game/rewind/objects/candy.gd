@@ -8,7 +8,7 @@ const ICON_SIZE := Vector2(10, 5.25)
 ## Remove the sheet's transparent margins so all three cassettes have the same visible size.
 const REGIONS := [Rect2(103, 201, 580, 303), Rect2(796, 201, 579, 303), Rect2(1490, 201, 579, 303)]
 
-@export var candy_name := "Maja 1989"
+@export var candy_name := "Maja 1994"
 ## Room-time window when it can be picked up. period 0 means a single window [from, to).
 @export var period := 0.0
 @export var from := 0.0
@@ -36,7 +36,7 @@ func _ready() -> void:
 ## Use the same cassette for each memory in the rooms and the collected-memory display.
 static func sprite_region(memory_name: String) -> Rect2:
 	var index := 0
-	if memory_name == "Luka 1994":
+	if memory_name == "Luka 1989":
 		index = 1
 	elif memory_name == "Tina 2003":
 		index = 2

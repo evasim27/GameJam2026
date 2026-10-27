@@ -28,7 +28,7 @@ const LINE_EATER := "The tape is hungry."
 ## Said after every failure in the boss's second phase, so it is never used up.
 const LINE_SCREEN := "Rewind feeds it. The empty frame doesn't."
 const MEMORY_NAMES := ["MAJA", "LUKA", "TINA"]
-const MEMORY_IDS := ["Maja 1989", "Luka 1994", "Tina 2003"]
+const MEMORY_IDS := ["Maja 1994", "Luka 1989", "Tina 2003"]
 const SFX := {
 	"click": preload("res://assets/audio/vhs_button_click.mp3"),
 	"tape": preload("res://assets/audio/vhs_play.mp3"),
@@ -161,13 +161,25 @@ func _build_debug_menu() -> void:
 		var b := _debug_button(levels[i])
 		b.pressed.connect(_debug_jump.bind(i - 1))
 		_debug_list.add_child(b)
-	for kid_name in Ending.SEQUENCES.NAMES:
-		var one := _debug_button("Ending · Only %s" % kid_name)
-		one.pressed.connect(_debug_jump_rescued.bind([kid_name]))
-		_debug_list.add_child(one)
-	var all_saved := _debug_button("Ending · All Rescued")
-	all_saved.pressed.connect(_debug_jump_rescued.bind(Ending.SEQUENCES.NAMES))
-	_debug_list.add_child(all_saved)
+	# One button per rescue combination, ordered like the ending masks.
+	var names: Array = Ending.SEQUENCES.NAMES
+	for mask in 1 << names.size():
+		var kids := []
+		var labels := []
+		for i in names.size():
+			if mask & (1 << i):
+				kids.append(names[i])
+				labels.append(names[i].get_slice(" ", 0))
+		var label := "None Rescued"
+		if kids.size() == names.size():
+			label = "All Rescued"
+		elif kids.size() == 1:
+			label = "Only %s" % labels[0]
+		elif not kids.is_empty():
+			label = " + ".join(PackedStringArray(labels))
+		var b := _debug_button("Ending · %s" % label)
+		b.pressed.connect(_debug_jump_rescued.bind(kids))
+		_debug_list.add_child(b)
 
 
 func _debug_button(text: String) -> Button:

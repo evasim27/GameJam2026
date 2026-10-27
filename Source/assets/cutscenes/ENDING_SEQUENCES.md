@@ -12,7 +12,7 @@ Each folder contains a `manifest.json` with ordered frames and the supplied Engl
 
 ## Continuity
 
-The protagonist retains the opening's green Shrek hood, cream tunic, brown vest and trousers. Luka wears Indiana Jones, Maja wears Simba, and Tina wears Jack Sparrow, following `assets/costumes/`. The children remain young; the garments have worn and faded surfaces. Dates follow the supplied caption and existing game data: Maja 1989, Luka 1994, Tina 2003.
+The protagonist retains the opening's green Shrek hood, cream tunic, brown vest and trousers. Luka wears Indiana Jones, Maja wears Simba, and Tina wears Jack Sparrow, following `assets/costumes/`. The children remain young; the garments have worn and faded surfaces. Dates follow the supplied caption and existing game data: Maja 1994, Luka 1989, Tina 2003.
 
 The living room retains the floral wallpaper, wooden wainscot, wingback chair with lace cloth, coffee table, rug, CRT cabinet and VHS shelf. The two perspective-reversal frames look outward from inside the CRT through a blue glass rim and scanlines.
 

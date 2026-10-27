@@ -150,8 +150,11 @@ func _draw_results() -> void:
 	_text("MEMORIES   %d/3" % _candies.size(), Vector2(x, stats_y), 15, Color(0.9, 0.9, 1.0))
 	_text("ATTEMPTS   %d" % _attempts, Vector2(x, stats_y + 15), 15, Color(0.9, 0.9, 1.0))
 	_text("TAPE USED  %.1f s" % _tape, Vector2(x, stats_y + 30), 15, Color(0.9, 0.9, 1.0))
-	for i in SEQUENCES.NAMES.size():
-		var name: String = SEQUENCES.NAMES[i]
+	# Oldest first; NAMES keeps its order because the rescue masks depend on it.
+	var by_year: Array = SEQUENCES.NAMES.duplicate()
+	by_year.sort_custom(func(a: String, b: String): return a.get_slice(" ", 1).to_int() < b.get_slice(" ", 1).to_int())
+	for i in by_year.size():
+		var name: String = by_year[i]
 		var freed := _candies.has(name)
 		_text("%s  %s" % [name.to_upper(), "FREE" if freed else "LOST"], Vector2(x, names_y + i * 11), 13, Color(0.52, 1.0, 0.95) if freed else Color(0.74, 0.7, 0.8))
 	if _unlisted_tape:

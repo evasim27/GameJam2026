@@ -1,7 +1,7 @@
 extends SceneTree
 ## Run: godot --headless --path game --script res://tools/check_ending.gd
 
-const NAMES := ["Maja 1989", "Luka 1994", "Tina 2003"]
+const NAMES := ["Maja 1994", "Luka 1989", "Tina 2003"]
 const VARIANTS := ["none", "maja", "luka", "maja_luka", "tina", "maja_tina", "luka_tina"]
 
 

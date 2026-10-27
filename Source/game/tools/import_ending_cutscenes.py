@@ -12,7 +12,7 @@ PROJECT = Path(__file__).resolve().parents[2]
 SOURCE = PROJECT / "assets/cutscenes"
 GAME = PROJECT / "game"
 DESTINATION = GAME / "assets/ending/cutscenes"
-NAMES = ["Maja 1989", "Luka 1994", "Tina 2003"]
+NAMES = ["Maja 1994", "Luka 1989", "Tina 2003"]
 
 
 def main():

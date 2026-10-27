@@ -5,7 +5,7 @@ extends Room
 ## short safe stretch by a small TV full of static. Glitching while the kid is at the TV and the
 ## frame tears shifts the wardrobe and shows a hidden door under the stairs. Ignore it and the kid
 ## goes up the stairs into the long shadow. Opening the door releases diving bats, just like
-## the foyer wall. Luka 1994 waits behind the door if it opened early.
+## the foyer wall. Luka 1989 waits behind the door if it opened early.
 
 const WALL := preload("res://assets/rewind/cinematic/wall.png")
 const WAINSCOT := preload("res://assets/rewind/cinematic/wainscot.png")
@@ -127,7 +127,7 @@ func build() -> void:
 	add_object(bats, DOOR_X)
 
 	var luka := Candy.new()
-	luka.candy_name = "Luka 1994"
+	luka.candy_name = "Luka 1989"
 	luka.needs_glitch = "door"
 	luka.glitch_before_x = HALL + 160.0
 	luka.lift = 8.0

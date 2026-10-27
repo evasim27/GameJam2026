@@ -2,7 +2,7 @@ extends Room
 ## The Last House: the foyer, and the whole tutorial. Two screens long, one lesson each:
 ## Play/Pause; the first pumpkin always catches the kid on the first play (a planned lesson) and
 ## teaches Rewind (the first one is free); the second pumpkin has no marked window and holds the
-## Maja 1989 candy; the clock door only opened early in the recording, and winding the house back
+## Maja 1994 candy; the clock door only opened early in the recording, and winding the house back
 ## a long way (SHIFT is faster) opens the optional secret room behind it; the damaged wall teaches Glitch, and can't kill,
 ## but the glitch damages the film and lets out bats that fly at the kid and have to pass over it.
 
@@ -69,7 +69,7 @@ func build() -> void:
 	# Reading a hazard without timeline marks, and a candy.
 	add_object(_pumpkin(2.2, 0.0, 1.0, false, 1.5, Color(1.0, 0.82, 0.62)), 210)
 	var maja := Candy.new()
-	maja.candy_name = "Maja 1989"
+	maja.candy_name = "Maja 1994"
 	maja.lift = 9.0
 	add_object(maja, 218)
 	# Optional: winding the house back a long way opens the secret room, and scrubbing.
