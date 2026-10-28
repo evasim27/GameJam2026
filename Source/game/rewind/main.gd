@@ -1,7 +1,8 @@
 extends Node2D
 ## Lost in Tape: you don't control the kid, you control the tape.
-## Intro -> The Last House (foyer tutorial) -> Static below the stairs -> End of Tape -> ending.
+## Menu -> Intro -> The Last House (foyer tutorial) -> Static below the stairs -> End of Tape -> ending.
 
+const StartMenu := preload("res://rewind/start_menu.gd")
 const Intro := preload("res://rewind/intro.gd")
 const Ending := preload("res://rewind/ending.gd")
 const ForbiddenRoom := preload("res://rewind/rooms/forbidden.gd")
@@ -58,9 +59,9 @@ const MAX_ROOM_FAILS := 6
 const REWIND_SPEED := 1.0
 const SCRUB_SPEED := 4.0
 
-enum State { INTRO, ROOM, FAILING, LEAVING, ENDING, FORBIDDEN, FORBIDDEN_VIDEO, FORBIDDEN_LOST }
+enum State { MENU, INTRO, ROOM, FAILING, LEAVING, ENDING, FORBIDDEN, FORBIDDEN_VIDEO, FORBIDDEN_LOST }
 
-var state := State.INTRO
+var state := State.MENU
 var room_index := 0
 var room: Room
 var run: RoomRun
@@ -80,6 +81,7 @@ var _echo_spoke := false
 var _last_mode := ""
 var _fx_burst := 0.0
 var _intro: Node2D
+var _start_menu: Control
 var _ending: Node2D
 var _forbidden: Room
 var _forbidden_video: Node2D
@@ -135,11 +137,32 @@ func _ready() -> void:
 	add_child(ping)
 	_sound_players["ping"] = ping
 	hud.visible = false
+	var menu_layer := CanvasLayer.new()
+	menu_layer.layer = 3
+	add_child(menu_layer)
+	_start_menu = StartMenu.new()
+	_start_menu.play_requested.connect(_start_intro)
+	menu_layer.add_child(_start_menu)
+	if OS.is_debug_build():
+		_build_debug_menu()
+
+
+func _dismiss_start_menu() -> void:
+	if is_instance_valid(_start_menu):
+		_start_menu.hide()
+		_start_menu.get_parent().queue_free()
+		_start_menu = null
+
+
+func _start_intro() -> void:
+	if state != State.MENU:
+		return
+	_dismiss_start_menu()
+	state = State.INTRO
+	intro_music.play()
 	_intro = Intro.new()
 	_intro.finished.connect(_on_intro_finished)
 	world.add_child(_intro)
-	if OS.is_debug_build():
-		_build_debug_menu()
 
 
 ## Debug builds only: a corner button that opens a list of levels to jump straight into.
@@ -156,7 +179,7 @@ func _build_debug_menu() -> void:
 	_debug_list = VBoxContainer.new()
 	_debug_list.visible = false
 	box.add_child(_debug_list)
-	var levels := ["Intro", "1 · The Last House", "2 · Static Below the Stairs", "3 · End of Tape", "Ending"]
+	var levels := ["Start Menu", "1 · The Last House", "2 · Static Below the Stairs", "3 · End of Tape", "Ending"]
 	for i in levels.size():
 		var b := _debug_button(levels[i])
 		b.pressed.connect(_debug_jump.bind(i - 1))
@@ -201,12 +224,13 @@ func _debug_jump_rescued(kid_names: Array) -> void:
 	_debug_jump(ROOMS.size())
 
 
-## -1 restarts from the intro, 0.. enters that room, ROOMS.size() plays the ending.
+## -1 returns to the start menu, 0.. enters that room, ROOMS.size() plays the ending.
 func _debug_jump(target: int) -> void:
 	_debug_list.visible = false
 	if target < 0:
 		get_tree().reload_current_scene()
 		return
+	_dismiss_start_menu()
 	_jumps += 1
 	_cleanup_forbidden()
 	if is_instance_valid(_intro):
