@@ -19,7 +19,6 @@ scale = Vector2(2, 2)
 
 [node name="IntroMusic" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("4_intro_music")
-autoplay = true
 
 [node name="VHS" type="CanvasLayer" parent="."]
 

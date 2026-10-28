@@ -24,6 +24,8 @@ Enoigralska 2D grozljiva ugankarska igra za GameJam BEST × ŠS FERI 2026. Na no
 3. Počakajte na uvoz grafik in zvokov, nato pritisnite **F5**. Glavna scena je `Source/game/rewind/main.tscn`.
 4. Vključite zvok; piski in opozorila pomagajo pri ugankah.
 
+Igra se odpre v začetnem meniju. **PLAY** zažene uvod, **MUTE / UNMUTE** pa izklopi oziroma vklopi vso glasbo in zvočne učinke tudi med igro. Gumba lahko izberete z miško ali puščicama gor/dol in potrdite z Enter oziroma preslednico.
+
 ## Kontrole
 
 | Tipka | Dejanje |
