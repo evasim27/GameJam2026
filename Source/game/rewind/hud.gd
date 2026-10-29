@@ -2,6 +2,7 @@ extends Control
 ## VCR on-screen display (mode, timecode and date stamp, tape left, the room-time timeline,
 ## ghost subtitles, hints, big messages) and the VCR's front panel along the bottom, whose
 ## buttons sink when their keys are pressed. Tutorial prompts press those buttons for you.
+## Clicking or touching a panel button presses its key, so the deck also plays on phones.
 
 const OSD := Color(0.93, 0.95, 1.0)
 const DIM := Color(0.6, 0.6, 0.72)
@@ -29,6 +30,10 @@ const BUTTONS := [
 	["track", "TRACKING", "E", "tape_glitch"],
 	["eject", "EJECT", "R", "restart"],
 ]
+## Pointer index used for the (real, not touch-emulated) mouse.
+const MOUSE_POINTER := -100
+## Holding REW by touch this long also holds SHIFT, since phones have no SHIFT key.
+const FAST_REWIND_HOLD := 0.8
 
 var mode := "STOP"
 var room_time := 0.0
@@ -73,6 +78,10 @@ var _prompt_button := ""
 var _prompt_keys: Array = []
 var _prompt_hold := true
 var _prompt_t := 0.0
+## Pointer index (finger or mouse) -> id of the panel button it holds down.
+var _pointers := {}
+var _rew_held_t := 0.0
+var _fast_by_touch := false
 
 
 func say(text: String, speaker := "ECHO", source: Node2D = null, offset := Vector2(0, -31)) -> void:
@@ -147,7 +156,70 @@ func _process(delta: float) -> void:
 		_prompt_t += delta
 		if _prompt_t > 12.0:
 			clear_prompt()
+	_rew_held_t = _rew_held_t + delta if _pointers.values().has("rew") else 0.0
+	if _rew_held_t >= FAST_REWIND_HOLD and not _fast_by_touch:
+		_fast_by_touch = true
+		_send_key(KEY_SHIFT, true)
+	elif _rew_held_t == 0.0 and _fast_by_touch:
+		_fast_by_touch = false
+		_send_key(KEY_SHIFT, false)
 	queue_redraw()
+
+
+func _input(event: InputEvent) -> void:
+	var pointer: int
+	if event is InputEventScreenTouch:
+		pointer = event.index
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT \
+			and event.device != InputEvent.DEVICE_ID_EMULATION:
+		pointer = MOUSE_POINTER
+	else:
+		return
+	if not event.pressed:
+		if _pointers.has(pointer):
+			var id: String = _pointers[pointer]
+			_pointers.erase(pointer)
+			if not _pointers.values().has(id):
+				_send_key(_button_key(id), false)
+			get_viewport().set_input_as_handled()
+		return
+	if not is_visible_in_tree() or cinematic_mode:
+		return
+	var id := _button_at(make_input_local(event).position)
+	if id == "":
+		return
+	get_viewport().set_input_as_handled()
+	# PLAY and PAUSE share one key that toggles, so only press the one that changes something.
+	if (id == "play" and mode == "PLAY") or (id == "pause" and mode != "PLAY"):
+		return
+	if not _pointers.values().has(id):
+		_send_key(_button_key(id), true)
+	_pointers[pointer] = id
+
+
+## The panel button under `pos`, counting its light and key label and the gaps around it.
+func _button_at(pos: Vector2) -> String:
+	for b in BUTTONS:
+		var r := _button_rect(b[0])
+		var area := Rect2(r.position.x - BUTTON_GAP / 2.0, size.y - PANEL_H, r.size.x + BUTTON_GAP, PANEL_H)
+		if area.has_point(pos):
+			return b[0]
+	return ""
+
+
+func _button_key(id: String) -> Key:
+	for b in BUTTONS:
+		if b[0] == id:
+			return OS.find_keycode_from_string(b[2])
+	return KEY_NONE
+
+
+func _send_key(keycode: Key, pressed: bool) -> void:
+	var event := InputEventKey.new()
+	event.keycode = keycode
+	event.physical_keycode = keycode
+	event.pressed = pressed
+	Input.parse_input_event(event)
 
 
 func _draw() -> void:

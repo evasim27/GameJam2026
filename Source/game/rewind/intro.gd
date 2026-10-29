@@ -168,7 +168,7 @@ func _draw() -> void:
 	if shot == SHOTS.size() - 1 and s > 6.0:
 		_text("PLAY ▶", Vector2(8, 166), 24, Color(0.93, 0.95, 1.0))
 	_draw_story(SHOTS[shot].lines, s)
-	_text("SPACE: next   ESC: skip", Vector2(4, 176), 12, Color(0.5, 0.5, 0.6, 0.6))
+	_text("SPACE / TAP: next   ESC: skip", Vector2(4, 176), 12, Color(0.5, 0.5, 0.6, 0.6))
 
 
 ## The narration, typed out in a framed card above the scene.

@@ -130,7 +130,7 @@ func _draw() -> void:
 	else:
 		_draw_story(_shots[_shot].lines)
 		draw_rect(Rect2(0, 164, 320, 16), Color(0.02, 0.02, 0.04, 0.8))
-		_text("SPACE: next", Vector2(4, 176), 12, Color(0.7, 0.7, 0.8))
+		_text("SPACE / TAP: next", Vector2(4, 176), 12, Color(0.7, 0.7, 0.8))
 		_text("%d / %d" % [_shot + 1, _shots.size() - 1], Vector2(290, 176), 12, Color(0.7, 0.7, 0.8))
 	if _t < FADE_IN:
 		draw_rect(Rect2(0, 0, 320, 180), Color(0, 0, 0, 1.0 - _t / FADE_IN))
