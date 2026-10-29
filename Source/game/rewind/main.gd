@@ -319,12 +319,42 @@ func _enter_room(i: int, first_time: bool) -> void:
 	_update_ambience(0.0)
 
 
+## A finger or real mouse click that no button took (touch also emulates a mouse; skip that copy).
+static func _is_tap(event: InputEvent) -> bool:
+	if event is InputEventScreenTouch:
+		return event.pressed
+	return event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT \
+		and event.device != InputEvent.DEVICE_ID_EMULATION
+
+
+## Screens without the VCR panel take a tap anywhere as their main key: SPACE moves the cutscenes
+## on, and in the secret room it's D (PLAY / PAUSE) or E at the tape.
+func _tap_as_key() -> void:
+	var keycode := KEY_NONE
+	if state in [State.INTRO, State.ENDING, State.FORBIDDEN_VIDEO]:
+		keycode = KEY_SPACE
+	elif state == State.FORBIDDEN and _forbidden:
+		keycode = KEY_E if _forbidden.at_tape else KEY_D
+	if keycode == KEY_NONE:
+		return
+	get_viewport().set_input_as_handled()
+	for pressed in [true, false]:
+		var key := InputEventKey.new()
+		key.keycode = keycode
+		key.physical_keycode = keycode
+		key.pressed = pressed
+		Input.parse_input_event(key)
+
+
 ## Lights up the VCR panel buttons the player has learned so far.
 func _update_controls() -> void:
 	hud.unlocked = {"rew": _rewind_unlocked, "ff": _rewind_unlocked, "track": _glitch_unlocked}
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _is_tap(event):
+		_tap_as_key()
+		return
 	if state == State.FORBIDDEN_VIDEO:
 		if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_SPACE:
 			_forbidden_video.skip()
